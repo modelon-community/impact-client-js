@@ -1,19 +1,19 @@
 {
-  "name": "impact-js-sdk",
+  "name": "impact-client-js",
   "version": "0.0.1",
-  "description": "Modelon Impact Web API SDK for Javascript",
+  "description": "Modelon Impact Client for Javascript",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/modelon/impact-js-sdk.git"
+    "url": "git+https://github.com/modelon-community/impact-client-js.git"
   },
   "author": "Modelon AB",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/modelon/impact-js-sdk/issues"
+    "url": "https://github.com/modelon/impact-client-js/issues"
   },
-  "homepage": "https://github.com/modelon/impact-js-sdk#readme"
+  "homepage": "https://github.com/modelon/impact-client-js#readme"
 }

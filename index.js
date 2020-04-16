@@ -1,5 +1,5 @@
 /*
- * Modelon Impact SDK for Javascript
+ * Modelon Impact Client for Javascript
  *
  * Copyright 2020 Modelon AB
  *

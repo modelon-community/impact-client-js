@@ -1,1 +1,1 @@
-# Modelon Impact SDK for Javascript
+# Modelon Impact Client for Javascript
