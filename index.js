@@ -8,6 +8,10 @@
 
 // Utilities /////////////////////////////////////////////////////////////////
 
+function _params() {
+  return new URLSearchParams(window.location.search);
+}
+
 function _request(path, method, init) {
   return fetch(path, {
     headers: {
@@ -51,7 +55,8 @@ function _ensureLoggedIn(callback) {
 // API wrapper class /////////////////////////////////////////////////////////
 
 function API(workspaceId) {
-  this._workspaceId = workspaceId;
+  let params = new URLSearchParams(window.location.search);
+  this._workspaceId = workspaceId || params.get("workspace_id");
 }
 
 // Private methods ///////////////////////////////////////////////////////////
@@ -199,8 +204,7 @@ API.prototype.compile = function(className) {
  */
 API.prototype.simulate = function(
   fmuId,
-  startTime,
-  endTime,
+  parameters,
   variables,
   analysisFunction
 ) {
@@ -209,10 +213,7 @@ API.prototype.simulate = function(
       experiment: {
         analysis: {
           analysis_function: analysisFunction || "dynamic",
-          parameters: {
-            start_time: startTime,
-            final_time: endTime
-          }
+          parameters: parameters || {}
         },
         fmu_id: fmuId,
         modifiers: { variables: variables || {} }
@@ -277,6 +278,18 @@ API.prototype.getVariables = function(experimentId, variableNames) {
   });
 };
 
+/**
+ * Get the simulation log of a simulation
+ *
+ * @param {string} experimentId - The id of the experiment
+ * @returns {Promise<string>} The log
+ */
+API.prototype.getLog = function(experimentId) {
+  return _ensureLoggedIn(() => {
+    return this._doGet(`/simulation/${experimentId}/log`);
+  });
+};
+
 // Exports ///////////////////////////////////////////////////////////////////
 
 /**
@@ -285,14 +298,24 @@ API.prototype.getVariables = function(experimentId, variableNames) {
  * @param {string} workspaceId - The id of the workspace
  * @param {number} bumpInterval - Bumps the expiration of the clone with the interval given in seconds
  * @returns {Promise<object>} An object containing the workspaceId of the cloned workspace and the intervalId of the bumper
+ * @throws {Error} If no workspace id is present
  */
 function cloneWorkspace(workspaceId, bumpInterval) {
+  let params = _params();
+
+  workspaceId = workspaceId || params.get("workspaceId");
+  bumpInterval = bumpInterval || parseInt(params.get("bumpInterval")) || 10;
+
+  if (!workspaceId) {
+    throw new Error("Need to supply workspace id in parameter or querystring");
+  }
+
   return _ensureLoggedIn(() => {
     return _request(`/api/workspace/${workspaceId}/clone`, "POST").then(
       data => {
         let intervalId = setInterval(() => {
           _request(`/api/workspace/${data.workspace_id}/clone/bump`, "POST");
-        }, (bumpInterval || 10) * 1000);
+        }, bumpInterval * 1000);
         return {
           workspaceId: data.workspace_id,
           intervalId
@@ -307,8 +330,14 @@ function cloneWorkspace(workspaceId, bumpInterval) {
  *
  * @param {string} workspaceId - The id of the workspace
  * @returns {API} An API-object for the given workspace
+ * @throws {Error} If no workspace id is present
  */
 function createClient(workspaceId) {
+  let params = _params();
+  workspaceId = workspaceId || params.get("workspaceId");
+  if (!workspaceId) {
+    throw new Error("Need to supply workspace id in parameter or querystring");
+  }
   return new API(workspaceId);
 }
 
