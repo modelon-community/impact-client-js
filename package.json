@@ -4,8 +4,8 @@
   "description": "Modelon Impact Client for Javascript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No tests specified\"",
-    "build": "echo \"No builds specified\""
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo \"No builds specified\" && exit 0"
   },
   "repository": {
     "type": "git",
