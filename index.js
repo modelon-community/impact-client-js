@@ -8,8 +8,24 @@
 
 // Utilities /////////////////////////////////////////////////////////////////
 
-function _params() {
-  return new URLSearchParams(window.location.search);
+function _isRunAsCustomization(components) {
+  return components[1] === "workspaces" && components[3] === "customization";
+}
+
+function _getParams() {
+  let params = new URLSearchParams(window.location.search);
+  let workpaceId = params.get("workspace_id") || params.get("workspaceId");
+  let bumpInterval = params.get("bump_interval") || params.get("bumpInterval");
+
+  let components = window.location.pathname.split("/");
+  let customizedWorkspaceId = _isRunAsCustomization(components)
+    ? components[2]
+    : null;
+
+  return {
+    workspaceId: customizedWorkspaceId || workspaceId,
+    bumpInterval
+  };
 }
 
 function _request(path, method, init) {
@@ -37,11 +53,7 @@ function _request(path, method, init) {
 function _isLoggedIn() {
   return document.cookie
     .split(";")
-    .some(item =>
-      item
-        .trim()
-        .startsWith(`${window.WAMS_AUTH_JWT_COOKIE_NAME || "jwt_cookie"}=`)
-    );
+    .some(item => item.trim().startsWith(`jwt_cookie=`));
 }
 
 function _ensureLoggedIn(callback) {
@@ -55,8 +67,8 @@ function _ensureLoggedIn(callback) {
 // API wrapper class /////////////////////////////////////////////////////////
 
 function API(workspaceId) {
-  let params = new URLSearchParams(window.location.search);
-  this._workspaceId = workspaceId || params.get("workspace_id");
+  let params = _getParams();
+  this._workspaceId = params.workspaceId || workspaceId;
 }
 
 // Private methods ///////////////////////////////////////////////////////////
@@ -278,18 +290,6 @@ API.prototype.getVariables = function(experimentId, variableNames) {
   });
 };
 
-/**
- * Get the simulation log of a simulation
- *
- * @param {string} experimentId - The id of the experiment
- * @returns {Promise<string>} The log
- */
-API.prototype.getLog = function(experimentId) {
-  return _ensureLoggedIn(() => {
-    return this._doGet(`/simulation/${experimentId}/log`);
-  });
-};
-
 // Exports ///////////////////////////////////////////////////////////////////
 
 /**
@@ -301,10 +301,10 @@ API.prototype.getLog = function(experimentId) {
  * @throws {Error} If no workspace id is present
  */
 function cloneWorkspace(workspaceId, bumpInterval) {
-  let params = _params();
+  let params = _getParams();
 
-  workspaceId = workspaceId || params.get("workspaceId");
-  bumpInterval = bumpInterval || parseInt(params.get("bumpInterval")) || 10;
+  workspaceId = params.workspaceId || workspaceId;
+  bumpInterval = params.bumpInterval || bumpInterval || 10;
 
   if (!workspaceId) {
     throw new Error("Need to supply workspace id in parameter or querystring");
@@ -333,10 +333,12 @@ function cloneWorkspace(workspaceId, bumpInterval) {
  * @throws {Error} If no workspace id is present
  */
 function createClient(workspaceId) {
-  let params = _params();
-  workspaceId = workspaceId || params.get("workspaceId");
+  let params = _getParams();
+  workspaceId = params.workspaceId || workspaceId;
   if (!workspaceId) {
-    throw new Error("Need to supply workspace id in parameter or querystring");
+    throw new Error(
+      "Need to supply workspace id in parameter or querystring, or by running the webapp as a customization."
+    );
   }
   return new API(workspaceId);
 }
