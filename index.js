@@ -14,7 +14,7 @@ function _isRunAsCustomization(components) {
 
 function _getParams() {
   let params = new URLSearchParams(window.location.search);
-  let workpaceId = params.get("workspace_id") || params.get("workspaceId");
+  let workspaceId = params.get("workspace_id") || params.get("workspaceId");
   let bumpInterval = params.get("bump_interval") || params.get("bumpInterval");
 
   let components = window.location.pathname.split("/");
@@ -68,7 +68,7 @@ function _ensureLoggedIn(callback) {
 
 function API(workspaceId) {
   let params = _getParams();
-  this._workspaceId = params.workspaceId || workspaceId;
+  this._workspaceId = workspaceId || params.workspaceId;
 }
 
 // Private methods ///////////////////////////////////////////////////////////
@@ -303,8 +303,8 @@ API.prototype.getVariables = function(experimentId, variableNames) {
 function cloneWorkspace(workspaceId, bumpInterval) {
   let params = _getParams();
 
-  workspaceId = params.workspaceId || workspaceId;
-  bumpInterval = params.bumpInterval || bumpInterval || 10;
+  workspaceId = workspaceId || params.workspaceId;
+  bumpInterval = bumpInterval || params.bumpInterval || 10;
 
   if (!workspaceId) {
     throw new Error("Need to supply workspace id in parameter or querystring");
@@ -334,7 +334,7 @@ function cloneWorkspace(workspaceId, bumpInterval) {
  */
 function createClient(workspaceId) {
   let params = _getParams();
-  workspaceId = params.workspaceId || workspaceId;
+  workspaceId = workspaceId || params.workspaceId;
   if (!workspaceId) {
     throw new Error(
       "Need to supply workspace id in parameter or querystring, or by running the webapp as a customization."
