@@ -1,5 +1,3 @@
-library 'ModelonCommon@trunk'
-
 def npm = 'docker run --rm -e NPM_TOKEN -v \$(pwd):/src -w /src node:12-alpine npm'
 
 node('docker') {
@@ -24,6 +22,9 @@ node('docker') {
     // Since we're catching the exception in order to report on it,
     // we need to re-throw it, to ensure that the build is marked as failed
     throw e
+  }
+  finally {
+    sh "docker run -v \$(pwd):/opt/data busybox sh -c \"chmod -R 777 /opt/data && chown -R \$(id -u):\$(id -g) /opt/data\""
   }
 }
 
