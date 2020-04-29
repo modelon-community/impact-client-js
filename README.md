@@ -37,7 +37,7 @@ Via NPM:
 
 ## Reference
 
-FIXME
+See `index.js`.
 
 ## Copyright and Terms
 
