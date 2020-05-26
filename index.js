@@ -53,7 +53,7 @@ function _request(path, method, init) {
 function _isLoggedIn() {
   return document.cookie
     .split(";")
-    .some(item => item.trim().startsWith(`jwt_cookie=`));
+    .some(item => item.trim().startsWith(`access_token=`));
 }
 
 function _ensureLoggedIn(callback) {
@@ -74,7 +74,7 @@ function API(workspaceId) {
 // Private methods ///////////////////////////////////////////////////////////
 
 API.prototype._addApiPrefix = function(url) {
-  return `/api/workspace/${this._workspaceId}/${url.replace(/^\//, "")}`;
+  return `/api/workspaces/${this._workspaceId}/${url.replace(/^\//, "")}`;
 };
 
 API.prototype._buildQueryString = function(query) {
@@ -117,9 +117,9 @@ API.prototype._setTimeoutPromise = function(fn, timeout) {
   });
 };
 
-API.prototype._waitForCompilationToFinish = function(fmuId) {
+API.prototype._waitForCompilationToFinish = function(fmu) {
   const wait = () =>
-    this._doGet(`/model_executables/${fmuId}/compile`).then(status =>
+    this._doGet(`/model-executables/${fmu.id}/compilation`).then(status =>
       status.status === "running"
         ? this._setTimeoutPromise(wait, 500)
         : Promise.resolve(status)
@@ -128,9 +128,11 @@ API.prototype._waitForCompilationToFinish = function(fmuId) {
   return wait();
 };
 
-API.prototype._waitForExperimentToFinish = function(experimentId) {
+API.prototype._waitForExperimentToFinish = function(experiment) {
   const wait = () =>
-    this._doGet(`/experiments/${experimentId}/execute`).then(status =>
+    this._doGet(
+      `/experiments/${experiment.experiment_id}/execution`
+    ).then(status =>
       status.status === "running"
         ? this._setTimeoutPromise(wait, 500)
         : Promise.resolve(status)
@@ -139,42 +141,48 @@ API.prototype._waitForExperimentToFinish = function(experimentId) {
   return wait();
 };
 
-API.prototype._getCompilationInfo = function(fmuId) {
-  return this._doGet(`/model_executables/${fmuId}`);
+API.prototype._getCompilationInfo = function(fmu) {
+  return this._doGet(`/model-executables/${fmu.id}`);
 };
 
-API.prototype._getExperimentInfo = function(experimentId) {
-  return this._doGet(`/experiments/${experimentId}`);
+API.prototype._getExperimentInfo = function(experiment) {
+  return this._doGet(`/experiments/${experiment.experiment_id}`);
 };
 
-API.prototype._compileAndWait = function(fmuId) {
-  return this._doPost(`/model_executables/${fmuId}/compile`)
-    .then(() => this._waitForCompilationToFinish(fmuId))
-    .then(() => fmuId);
+API.prototype._compileAndWait = function(fmu) {
+  return this._doPost(`/model-executables/${fmu.id}/compilation`)
+    .then(() => this._waitForCompilationToFinish(fmu))
+    .then(() => fmu);
 };
 
-API.prototype._checkCompilationResult = function(fmuId) {
-  return this._getCompilationInfo(fmuId).then(({ run_info }) => {
+API.prototype._checkCompilationResult = function(fmu) {
+  return this._getCompilationInfo(fmu).then(({ run_info }) => {
     if (run_info.status === "successful") {
-      return fmuId;
+      return fmu;
     }
     throw new Error(run_info.errors);
   });
 };
 
-API.prototype._runExperimentAndWait = function(experimentId) {
-  return this._doPost(`/experiments/${experimentId}/execute`)
-    .then(() => this._waitForExperimentToFinish(experimentId))
-    .then(() => experimentId);
+API.prototype._runExperimentAndWait = function(experiment) {
+  return this._doPost(`/experiments/${experiment.experiment_id}/execution`)
+    .then(() => this._waitForExperimentToFinish(experiment))
+    .then(() => experiment);
 };
 
-API.prototype._checkExperimentResult = function(experimentId) {
-  return this._getExperimentInfo(experimentId).then(({ run_info }) => {
+API.prototype._checkExperimentResult = function(experiment) {
+  return this._getExperimentInfo(experiment).then(({ run_info }) => {
     if (run_info.failed === 0) {
-      return experimentId;
+      return experiment;
     }
     throw new Error();
   });
+};
+
+API.prototype._getTrajectories = function(experiment, variableName) {
+  return this._doPost(`/experiments/${experiment.experiment_id}/trajectories`, {
+    variable_names: [variableName]
+  }).then(res => res[0]);
 };
 
 // Public methods ////////////////////////////////////////////////////////////
@@ -182,11 +190,11 @@ API.prototype._checkExperimentResult = function(experimentId) {
  * Compile a model
  *
  * @param {string} className - The model to compile
- * @returns {Promise<string>} The id of the compiled FMU
+ * @returns {Promise<string>} The object representing a compiled FMU
  */
 API.prototype.compile = function(className) {
   return _ensureLoggedIn(() => {
-    return this._doPost("/model_executables", {
+    return this._doPost("/model-executables", {
       input: {
         class_name: className,
         compiler_log_level: "warning",
@@ -207,7 +215,7 @@ API.prototype.compile = function(className) {
 /**
  * Run a simulation using a given FMU
  *
- * @param fmuId {string} - The id of the FMU
+ * @param fmu {object} - The object corresponding a compiled FMU
  * @param startTime {number} - The start time
  * @param endTime {number} - The end time
  * @param variables {Object} - A set of variables
@@ -215,7 +223,7 @@ API.prototype.compile = function(className) {
  * @returns {Promise<string>} An experiment id
  */
 API.prototype.simulate = function(
-  fmuId,
+  fmu,
   parameters,
   variables,
   analysisFunction
@@ -227,7 +235,7 @@ API.prototype.simulate = function(
           analysis_function: analysisFunction || "dynamic",
           parameters: parameters || {}
         },
-        fmu_id: fmuId,
+        fmu_id: fmu.id,
         modifiers: { variables: variables || {} }
       }
     })
@@ -239,47 +247,41 @@ API.prototype.simulate = function(
 /**
  * Get a list of all variable names in the result of an experiment
  *
- * @param {string} experimentId - The id of the experiment
+ * @param {object} experiment - The object corresponding an experiment
  * @returns {Promise<string[]>} The variable names
  */
-API.prototype.getVariableNames = function(experimentId) {
+API.prototype.getVariables = function(experiment) {
   return _ensureLoggedIn(() => {
-    return this._doGet(`/experiments/${experimentId}/result/info`).then(names =>
-      names.sort()
-    );
+    return this._doGet(
+      `/experiments/${experiment.experiment_id}/variables`
+    ).then(names => names.sort());
   });
 };
 
 /**
  * Get the result values for a variable in an experiment
  *
- * @param {string} experimentId - The id of the experiment
+ * @param {object} experiment - The object corresponding an experiment
  * @param {string} variableName - The name of the variable
  * @returns {Promise<number[]>} The result values
  */
-API.prototype._getVariable = function(experimentId, variableName) {
-  return this._doPost(`/experiments/${experimentId}/result/getVariables`, {
-    variable_names: [variableName]
-  }).then(res => res[0]);
-};
-
-API.prototype.getVariable = function(experimentId, variableName) {
+API.prototype.getTrajectories = function(experiment, variableName) {
   return _ensureLoggedIn(() => {
-    return this._getVariable(experimentId, variableName);
+    return this._getTrajectories(experiment, variableName);
   });
 };
 
 /**
  * Get the result values for a multiple variables
  *
- * @param {string} experimentId - The id of the experiment
+ * @param {object} experiment - The object corresponding an experiment
  * @param {string[]} variableNames - A list of variable names
  * @returns {Promise<object>} An object where the keys are the variable names and the values the result values
  */
-API.prototype.getVariables = function(experimentId, variableNames) {
+API.prototype.getVariableValues = function(experiment, variableNames) {
   return _ensureLoggedIn(() => {
     return Promise.all(
-      variableNames.map(v => this._getVariable(experimentId, v))
+      variableNames.map(v => this._getTrajectories(experiment, v))
     ).then(results =>
       variableNames.reduce((acc, name, i) => {
         acc[name] = results[i];
@@ -311,10 +313,10 @@ function cloneWorkspace(workspaceId, bumpInterval) {
   }
 
   return _ensureLoggedIn(() => {
-    return _request(`/api/workspace/${workspaceId}/clone`, "POST").then(
+    return _request(`/api/workspaces/${workspaceId}/clone`, "POST").then(
       data => {
         let intervalId = setInterval(() => {
-          _request(`/api/workspace/${data.workspace_id}/clone/bump`, "POST");
+          _request(`/api/workspaces/${data.workspace_id}`, "PUT");
         }, bumpInterval * 1000);
         return {
           workspaceId: data.workspace_id,
