@@ -6,7 +6,15 @@
  * See LICENSE for terms
  */
 
+// Constants /////////////////////////////////////////////////////////////////
+const API_VERSION = "1.0.0";
+
 // Utilities /////////////////////////////////////////////////////////////////
+
+function _panic(msg, data) {
+  alert(msg);
+  return new Error(data || msg);
+}
 
 function _isRunAsCustomization(components) {
   return components[1] === "workspaces" && components[3] === "customization";
@@ -39,7 +47,7 @@ function _request(path, method, init) {
   }).then(response =>
     response.text().then(body => {
       if (!response.ok) {
-        throw new Error(body);
+        throw _panic("Request failed", body);
       }
       try {
         return JSON.parse(body);
@@ -160,7 +168,7 @@ API.prototype._checkCompilationResult = function(fmu) {
     if (run_info.status === "successful") {
       return fmu;
     }
-    throw new Error(run_info.errors);
+    throw _panic("Compilation failed", run_info.errors);
   });
 };
 
@@ -175,7 +183,7 @@ API.prototype._checkExperimentResult = function(experiment) {
     if (run_info.failed === 0) {
       return experiment;
     }
-    throw new Error();
+    throw _panic("Failed to check experiment result", run_info);
   });
 };
 
@@ -309,7 +317,7 @@ function cloneWorkspace(workspaceId, bumpInterval) {
   bumpInterval = bumpInterval || params.bumpInterval || 10;
 
   if (!workspaceId) {
-    throw new Error("Need to supply workspace id in parameter or querystring");
+    throw _panic("Need to supply workspace id in parameter or querystring");
   }
 
   return _ensureLoggedIn(() => {
@@ -331,18 +339,27 @@ function cloneWorkspace(workspaceId, bumpInterval) {
  * Creates a client object
  *
  * @param {string} workspaceId - The id of the workspace
- * @returns {API} An API-object for the given workspace
+ * @returns {Promise<API>} An API-object for the given workspace
  * @throws {Error} If no workspace id is present
  */
 function createClient(workspaceId) {
   let params = _getParams();
   workspaceId = workspaceId || params.workspaceId;
   if (!workspaceId) {
-    throw new Error(
+    throw _panic(
       "Need to supply workspace id in parameter or querystring, or by running the webapp as a customization."
     );
   }
-  return new API(workspaceId);
+
+  return _request(`/api`, "GET").then(apiInfo => {
+    if (apiInfo.version !== API_VERSION) {
+      throw _panic(
+        `Incompatible API version (expected ${API_VERSION}, got ${apiInfo.version})`
+      );
+    } else {
+      return new API(workspaceId);
+    }
+  });
 }
 
 module.exports = {
