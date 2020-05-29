@@ -33,7 +33,7 @@ system, and will always be guaranteed to be able to call into the API.
 
 Via NPM:
 
-    npm install @modelon/impact-client
+    npm install @modelon/impact-client-js
 
 ## Reference
 
