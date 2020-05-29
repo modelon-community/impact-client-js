@@ -36,6 +36,11 @@ function _getParams() {
   };
 }
 
+const _responses = {
+  402: "No license available",
+  500: "Unexpected error"
+};
+
 function _request(path, method, init) {
   return fetch(path, {
     headers: {
@@ -47,8 +52,9 @@ function _request(path, method, init) {
   }).then(response =>
     response.text().then(body => {
       if (!response.ok) {
-        throw _panic("Request failed", body);
+        throw _panic(_responses[response.status] || "Request failed", body);
       }
+
       try {
         return JSON.parse(body);
       } catch (err) {
