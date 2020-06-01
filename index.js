@@ -134,9 +134,9 @@ API.prototype._setTimeoutPromise = function(fn, timeout) {
 API.prototype._waitForCompilationToFinish = function(fmu) {
   const wait = () =>
     this._doGet(`/model-executables/${fmu.id}/compilation`).then(status =>
-      status.status !== "cancelled" || status.status !== "done"
-        ? this._setTimeoutPromise(wait, 500)
-        : Promise.resolve(status)
+      status.status === "cancelled" || status.status === "done"
+        ? Promise.resolve(status)
+        : this._setTimeoutPromise(wait, 500)
     );
 
   return wait();
@@ -147,9 +147,9 @@ API.prototype._waitForExperimentToFinish = function(experiment) {
     this._doGet(
       `/experiments/${experiment.experiment_id}/execution`
     ).then(status =>
-      status.status !== "cancelled" || status.status !== "done"
-        ? this._setTimeoutPromise(wait, 500)
-        : Promise.resolve(status)
+      status.status === "cancelled" || status.status === "done"
+        ? Promise.resolve(status)
+        : this._setTimeoutPromise(wait, 500)
     );
 
   return wait();
