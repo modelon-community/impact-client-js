@@ -208,7 +208,7 @@ API.prototype._getTrajectories = function(experiment, variableName) {
  * @returns {Promise<string>} The object representing a compiled FMU
  */
 API.prototype.compile = function(className, fmiTarget = "me") {
-  return this.compile({
+  return this.compileWithInput({
     class_name: className,
     compiler_log_level: "warning",
     compiler_options: {
