@@ -201,26 +201,35 @@ API.prototype._getTrajectories = function(experiment, variableName) {
 
 // Public methods ////////////////////////////////////////////////////////////
 /**
- * Compile a model
+ * Compile a model with sensible default values
  *
  * @param {string} className - The model to compile
+ * @param {string} fmiTarget - The FMI target (default: "me")
  * @returns {Promise<string>} The object representing a compiled FMU
  */
 API.prototype.compile = function(className, fmiTarget = "me") {
+  return this.compile({
+    class_name: className,
+    compiler_log_level: "warning",
+    compiler_options: {
+      c_compiler: "gcc"
+    },
+    runtime_options: {},
+    fmi_target: fmiTarget,
+    fmi_version: "2.0",
+    platform: "auto"
+  });
+};
+
+/**
+ * Compile a model with specified input
+ *
+ * @param {object} input - an input object with detailed options
+ * @returns {Promise<string>} The object representing a compiled FMU
+ */
+API.prototype.compileWithInput = function(input) {
   return _ensureLoggedIn(() => {
-    return this._doPost("/model-executables", {
-      input: {
-        class_name: className,
-        compiler_log_level: "warning",
-        compiler_options: {
-          c_compiler: "gcc"
-        },
-        runtime_options: {},
-        fmi_target: fmiTarget,
-        fmi_version: "2.0",
-        platform: "auto"
-      }
-    })
+    return this._doPost("/model-executables", { input })
       .then(this._compileAndWait.bind(this))
       .then(this._checkCompilationResult.bind(this));
   });
@@ -229,11 +238,11 @@ API.prototype.compile = function(className, fmiTarget = "me") {
 /**
  * Run a simulation using a given FMU
  *
- * @param fmu {object} - The object corresponding a compiled FMU
- * @param startTime {number} - The start time
- * @param endTime {number} - The end time
- * @param variables {Object} - A set of variables
- * @param analysisFunction {string} - The analysis function to use (default: "dynamic")
+ * @param {object} fmu - The object corresponding a compiled FMU
+ * @param {number} startTime - The start time
+ * @param {number} endTime - The end time
+ * @param {object} variables - A set of variables
+ * @param {string} analysisFunction - The analysis function to use (default: "dynamic")
  * @returns {Promise<string>} An experiment id
  */
 API.prototype.simulate = function(
