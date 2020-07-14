@@ -206,7 +206,7 @@ API.prototype._getTrajectories = function(experiment, variableName) {
  * @param {string} className - The model to compile
  * @returns {Promise<string>} The object representing a compiled FMU
  */
-API.prototype.compile = function(className) {
+API.prototype.compile = function(className, fmiTarget = "me") {
   return _ensureLoggedIn(() => {
     return this._doPost("/model-executables", {
       input: {
@@ -216,7 +216,7 @@ API.prototype.compile = function(className) {
           c_compiler: "gcc"
         },
         runtime_options: {},
-        fmi_target: "me",
+        fmi_target: fmiTarget,
         fmi_version: "2.0",
         platform: "auto"
       }
