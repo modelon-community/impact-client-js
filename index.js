@@ -6,8 +6,10 @@
  * See LICENSE for terms
  */
 
+const semverSatisfies = require('semver/functions/satisfies');
+
 // Constants /////////////////////////////////////////////////////////////////
-const API_VERSION = "1.0.0";
+const API_VERSION = "^1.0.0";
 
 // Utilities /////////////////////////////////////////////////////////////////
 
@@ -367,9 +369,9 @@ function createClient(workspaceId) {
   }
 
   return _request(`/api`, "GET").then(apiInfo => {
-    if (apiInfo.version !== API_VERSION) {
+    if (!semverSatisfies(apiInfo.version, API_VERSION)) {
       throw _panic(
-        `Incompatible API version (expected ${API_VERSION}, got ${apiInfo.version})`
+        `Incompatible API version (must satisfy ${API_VERSION}, got ${apiInfo.version})`
       );
     } else {
       return new API(workspaceId);
