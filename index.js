@@ -6,7 +6,7 @@
  * See LICENSE for terms
  */
 
-const semverSatisfies = require('semver/functions/satisfies');
+const semverSatisfies = require("semver/functions/satisfies");
 
 // Constants /////////////////////////////////////////////////////////////////
 const API_VERSION = "^1.0.0";
@@ -64,6 +64,15 @@ function _request(path, method, init) {
       }
     })
   );
+}
+
+function _downloadFile(path, filename) {
+  const a = document.createElement("a");
+  a.href = path;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function _isLoggedIn() {
@@ -315,6 +324,30 @@ API.prototype.getVariableValues = function(experiment, variableNames) {
       }, {})
     );
   });
+};
+
+/**
+ * Downloads a specified FMU
+ *
+ * @param {object} fmu - The FMU in question
+ * @returns {void}
+ */
+API.prototype.downloadFMU = function(fmu) {
+  return _ensureLoggedIn(() => {
+    _downloadFile(
+      this._addApiPrefix(`/model-executables/${fmu.id}/binary`),
+      `${this.workspaceId}_${fmu.id}.fmu`
+    );
+  });
+};
+
+/**
+ * Get the current model name
+ *
+ * @returns {string} The current model name
+ */
+API.prototype.getCurrentModel = function() {
+  return new URL(window.location.href).searchParams.get("model");
 };
 
 // Exports ///////////////////////////////////////////////////////////////////
