@@ -1,6 +1,6 @@
 {
   "name": "@modelon/impact-client-js",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Modelon Impact Client for Javascript",
   "main": "dist/index.js",
   "scripts": {
