@@ -360,7 +360,7 @@ API.prototype.getCurrentModel = function() {
  * @returns {Promise<object>} An object containing the workspaceId of the cloned workspace and the intervalId of the bumper
  * @throws {Error} If no workspace id is present
  */
-function cloneWorkspace(workspaceId, bumpInterval) {
+export function cloneWorkspace(workspaceId, bumpInterval) {
   let params = _getParams();
 
   workspaceId = workspaceId || params.workspaceId;
@@ -392,7 +392,7 @@ function cloneWorkspace(workspaceId, bumpInterval) {
  * @returns {Promise<API>} An API-object for the given workspace
  * @throws {Error} If no workspace id is present
  */
-function createClient(workspaceId) {
+export function createClient(workspaceId) {
   let params = _getParams();
   workspaceId = workspaceId || params.workspaceId;
   if (!workspaceId) {
@@ -411,8 +411,3 @@ function createClient(workspaceId) {
     }
   });
 }
-
-module.exports = {
-  createClient,
-  cloneWorkspace
-};
