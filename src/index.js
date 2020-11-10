@@ -214,13 +214,13 @@ API.prototype._getCustomFunctionOptions = function(functionName) {
     return this._doGet(`/custom-functions/${functionName}/options`);
 };
 
-API.prototype.compileWithInput = function(input) {
+API.prototype._compileWithInput = function(input) {
     return this._doPost("/model-executables", { input })
         .then(this._compileAndWait.bind(this))
         .then(this._checkCompilationResult.bind(this));
 };
 
-API.prototype.simulateWithInput = function(input) {
+API.prototype._simulateWithInput = function(input) {
     return this._doPost("/experiments", { experiment: input })
         .then(this._runExperimentAndWait.bind(this))
         .then(this._checkExperimentResult.bind(this));
