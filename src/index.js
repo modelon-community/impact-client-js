@@ -214,6 +214,10 @@ API.prototype._getCustomFunctionOptions = function(functionName) {
     return this._doGet(`/custom-functions/${functionName}/options`);
 };
 
+API.prototype._getCachedFMU = function(input) {
+    return this._doPost(`/model-executables?getCached=true`, {input});
+};
+
 API.prototype._compileWithInput = function(input) {
     return this._doPost("/model-executables", { input })
         .then(this._compileAndWait.bind(this))
@@ -226,15 +230,58 @@ API.prototype._simulateWithInput = function(input) {
         .then(this._checkExperimentResult.bind(this));
 };
 
+API.prototype._compile = function(input = {}, withOptionsFrom = "dynamic", useCached = true) {
+    return _ensureLoggedIn(() => {
+        const defaultInput = {
+            compiler_log_level: "warning",
+            compiler_options: {
+                c_compiler: "gcc"
+            },
+            runtime_options: {},
+            fmi_target: "me",
+            fmi_version: "2.0",
+            platform: "auto"
+        };
+
+        let chain = Promise.resolve();
+
+        if (withOptionsFrom) {
+            chain = chain
+                .then(this._getCustomFunctionOptions(withOptionsFrom))
+                .then((options) => {
+                    let inputWithOptions = defaultInput;
+                    inputWithOptions.compiler_options = Object.assign(inputWithOptions.compiler_options, options.compiler);
+
+                    inputWithOptions.runtime_options = Object.assign(inputWithOptions.runtime_options, options.runtime);
+                    return inputWithOptions;
+                });
+        }
+        else {
+            chain = chain.then(() => defaultInput);
+        }
+
+        return chain.then((inputWithOptions) => {
+            let mergedInput = Object.assign(inputWithOptions, input);
+            if (useCached) {
+                return this._getCachedFMU(mergedInput)
+                    .then((fmu) => (fmu.id === null) ? this._compileWithInput(mergedInput) : fmu);
+            }
+            else {
+                return this._compileWithInput(mergedInput);
+            }
+        });
+    });
+};
+
 // Public methods ////////////////////////////////////////////////////////////
 /**
- * Compile a model with sensible default values
+ * [DEPRECATED] Compile a model with sensible default values
  *
  * @param {string} className - The model to compile
  * @param {string} fmiTarget - The FMI target (default: "me")
- * @returns {Promise<string>} The object representing a compiled FMU
+ * @returns {Promise<object>} The object representing a compiled FMU
  */
-API.prototype.compile = function(className, fmiTarget = "me") {
+API.prototype.deprecated_compile = function(className, fmiTarget = "me") {
     return _ensureLoggedIn(() =>
         this._compileWithInput({
             class_name: className,
@@ -250,24 +297,24 @@ API.prototype.compile = function(className, fmiTarget = "me") {
 };
 
 /**
- * Compile a model with specified input
+ * [DEPRECATED] Compile a model with specified input
  *
  * @param {object} input - an input object with detailed options
- * @returns {Promise<string>} The object representing a compiled FMU
+ * @returns {Promise<object>} The object representing a compiled FMU
  */
-API.prototype.compileWithInput = function(input) {
+API.prototype.deprecated_compileWithInput = function(input) {
     return _ensureLoggedIn(() => this._compileWithInput(input));
 };
 
 /**
- * Compile a model with default options from the given analysis function
+ * [DEPRECATED] Compile a model with default options from the given analysis function
  *
  * @param {string} className - The model to compile
  * @param {string} fmiTarget - The FMI target (default: "me")
  * @params {string} analysisFunction - The custom function to take compile/runtime-options from (default: "dynamic")
- * @returns {Promise<string>} The object representing a compiled FMU
+ * @returns {Promise<object>} The object representing a compiled FMU
  */
-API.prototype.compileWithDefaults = function(className, fmiTarget = "me", analysisFunction = "dynamic") {
+API.prototype.deprecated_compileWithDefaults = function(className, fmiTarget = "me", analysisFunction = "dynamic") {
     return _ensureLoggedIn(() =>
         this._getCustomFunctionOptions(analysisFunction)
             .then((options) =>
@@ -280,10 +327,22 @@ API.prototype.compileWithDefaults = function(className, fmiTarget = "me", analys
                     fmi_version: "2.0",
                     platform: "auto"
                 })));
-}
+};
 
 /**
- * Run a simulation using a given FMU
+ * Compile a model with the given input.
+ *
+ * @param {object} input - The input that overrides defaults and options. (Requires attribute "class_name" to be specified.) [See more in the POST body of the compilation endpoint in the API Reference.]
+ * @param {string} withOptionsFrom - Use the options taken from the specified analysis function. (Default: "dynamic")
+ * @oaram {boolean} useCached - Try to find a cached FMU before attempting to compile. (Default: true)
+ * @returns {Promise<object>} The object representing a compiled FMU
+ */
+API.prototype.compile = function(input = {}, withOptionsFrom = "dynamic", useCached = true) {
+    return _ensureLoggedIn(() => this._compile(input, withOptionsFrom, useCached));
+};
+
+/**
+ * [DEPRECATED] Run a simulation using a given FMU
  *
  * @param {object} fmu - The object corresponding a compiled FMU
  * @param {object} parameters - A set of parameters for the analysisFunction (default: {})
@@ -291,7 +350,7 @@ API.prototype.compileWithDefaults = function(className, fmiTarget = "me", analys
  * @param {string} analysisFunction - The analysis function to use (default: "dynamic")
  * @returns {Promise<string>} An experiment id
  */
-API.prototype.simulate = function(
+API.prototype.depreacted_simulate = function(
     fmu,
     parameters = {},
     variables = {},
@@ -309,14 +368,14 @@ API.prototype.simulate = function(
 };
 
 /**
- * Run a simulation using a given FMU and use default parameters from the analysis function
+ * [DEPRECATED] Run a simulation using a given FMU and use default parameters from the analysis function
  *
  * @param {object} fmu - The object corresponding a compiled FMU
  * @param {object} variables - A set of variables (default: {})
  * @param {string} analysisFunction - The analysis function to use (default: "dynamic")
  * @returns {Promise<string>} An experiment id
  */
-API.prototype.simulateWithDefaults = function(fmu, variables = {}, analysisFunction = "dynamic") {
+API.prototype.deprecated_simulateWithDefaults = function(fmu, variables = {}, analysisFunction = "dynamic") {
     return _ensureLoggedIn(() =>
         this._getCustomFunctionOptions(analysisFunction)
             .then((options) =>
@@ -328,6 +387,41 @@ API.prototype.simulateWithDefaults = function(fmu, variables = {}, analysisFunct
                     fmu_id: fmu.id,
                     modifiers: { variables }
                 })));
+};
+
+/**
+ * Run a simulation on a given FMU or model.
+ *
+ * @param {object|string} fmuOrModel - The object corresponding a compiled FMU or the model name.
+ * @param {object} variables - A set of variables (default: {})
+ * @param {object} parameters - A set of parameters for the analysisFunction (default: {})
+ * @param {string} analysisFunction - The analysis function to use (default: "dynamic")
+ * @param {boolean} useCached - Use cached FMU if available when a model name is specified (default: true)
+ * @returns {Promise<string>} An experiment id
+ */
+API.prototype.simulate = function(fmuOrModel, variables = {}, parameters = {}, analysisFunction = "dynamic", useCached = true) {
+    return _ensureLoggedIn(() => {
+        let chain = Promise.resolve();
+
+        if (typeof fmuOrModel === 'string') {
+            chain = chain.then(() => this._compile({class_name: fmuOrModel}, analysisFunction, useCached));
+        }
+        else {
+            chain = chain.then(() => fmuOrModel);
+        }
+
+        return chain.then((fmu) =>
+            this._getCustomFunctionOptions(analysisFunction)
+                .then((options) =>
+                    this._simulateWithInput({
+                        analysis: {
+                            analysis_function: analysisFunction,
+                            parameters: Object.assign(options.simulation, parameters),
+                        },
+                        fmu_id: fmu.id,
+                        modifiers: { variables }
+                    })));
+    });
 };
 
 /**
