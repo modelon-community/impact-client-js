@@ -248,7 +248,7 @@ API.prototype._compile = function(input = {}, withOptionsFrom = "dynamic", useCa
 
         if (withOptionsFrom) {
             chain = chain
-                .then(this._getCustomFunctionOptions(withOptionsFrom))
+                .then(() => this._getCustomFunctionOptions(withOptionsFrom))
                 .then((options) => {
                     let inputWithOptions = defaultInput;
                     inputWithOptions.compiler_options = Object.assign(inputWithOptions.compiler_options, options.compiler);
