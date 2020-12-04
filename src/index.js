@@ -9,7 +9,7 @@
 const semverSatisfies = require("semver/functions/satisfies");
 
 // Constants /////////////////////////////////////////////////////////////////
-const API_VERSION = "^1.6.0";
+const API_VERSION = "^1.8.0";
 
 // Utilities /////////////////////////////////////////////////////////////////
 
@@ -46,7 +46,8 @@ const _responses = {
 function _request(path, method, init) {
     return fetch(path, {
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.impact.experiment.v2+json"
         },
         credentials: "include",
         method,
@@ -350,7 +351,7 @@ API.prototype.compile = function(input = {}, withOptionsFrom = "dynamic", useCac
  * @param {string} analysisFunction - The analysis function to use (default: "dynamic")
  * @returns {Promise<string>} An experiment id
  */
-API.prototype.depreacted_simulate = function(
+API.prototype.deprecated_simulate = function(
     fmu,
     parameters = {},
     variables = {},
