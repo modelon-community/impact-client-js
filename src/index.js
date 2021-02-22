@@ -234,7 +234,7 @@ API.prototype._simulateWithInput = function(input) {
 API.prototype._compile = function(input = {}, withOptionsFrom = "dynamic", useCached = true) {
     return _ensureLoggedIn(() => {
         const defaultInput = {
-            compiler_log_level: "warning",
+            compiler_log_level: "w",
             compiler_options: {
                 c_compiler: "gcc"
             },
@@ -286,7 +286,7 @@ API.prototype.deprecated_compile = function(className, fmiTarget = "me") {
     return _ensureLoggedIn(() =>
         this._compileWithInput({
             class_name: className,
-            compiler_log_level: "warning",
+            compiler_log_level: "w",
             compiler_options: {
                 c_compiler: "gcc"
             },
@@ -321,7 +321,7 @@ API.prototype.deprecated_compileWithDefaults = function(className, fmiTarget = "
             .then((options) =>
                 this._compileWithInput({
                     class_name: className,
-                    compiler_log_level: "warning",
+                    compiler_log_level: "w",
                     compiler_options: options.compiler,
                     runtime_options: options.runtime,
                     fmi_target: fmiTarget,
