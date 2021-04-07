@@ -18,19 +18,27 @@ function _panic(msg, data) {
     return new Error(data || msg);
 }
 
-function _isRunAsCustomization(components) {
-    return components[1] === "workspaces" && components[3] === "customization";
+function _getCustomizedWorkspaceId(impactUrl) {
+    let basePath = impactUrl ? new URL(impactUrl).pathname : '';
+    let path = window.location.pathname.replace(basePath, '');
+    let components = path.split('/');
+    let workspaceIndex = components.indexOf('workspaces');
+
+    if (workspaceIndex == -1) {
+        return null;
+    }
+
+    return components[workspaceIndex + 2] === "customization"
+        ? components[workspaceIndex + 1]
+        : null;
 }
 
-function _getParams() {
+
+function _getParams(impactUrl) {
     let params = new URLSearchParams(window.location.search);
     let workspaceId = params.get("workspace_id") || params.get("workspaceId");
     let bumpInterval = params.get("bump_interval") || params.get("bumpInterval");
-
-    let components = window.location.pathname.split("/");
-    let customizedWorkspaceId = _isRunAsCustomization(components)
-        ? components[2]
-        : null;
+    let customizedWorkspaceId = _getCustomizedWorkspaceId(impactUrl);
 
     return {
         workspaceId: customizedWorkspaceId || workspaceId,
@@ -82,25 +90,26 @@ function _isLoggedIn() {
         .some(item => item.trim().startsWith(`access_token=`));
 }
 
-function _ensureLoggedIn(callback) {
+function _ensureLoggedIn(callback, impactUrl='') {
     if (_isLoggedIn()) {
         return callback();
     } else {
-        return _request("/api/login", "POST").then(() => callback());
+        return _request(`${impactUrl}/api/login`, "POST").then(() => callback());
     }
 }
 
 // API wrapper class /////////////////////////////////////////////////////////
 
-function API(workspaceId) {
-    let params = _getParams();
+function API(workspaceId, impactUrl='') {
+    let params = _getParams(impactUrl);
     this._workspaceId = workspaceId || params.workspaceId;
+    this._impactUrl = impactUrl.endsWith('/') ? impactUrl.slice(0, -1) : impactUrl;
 }
 
 // Private methods ///////////////////////////////////////////////////////////
 
 API.prototype._addApiPrefix = function(url) {
-    return `/api/workspaces/${this._workspaceId}/${url.replace(/^\//, "")}`;
+    return `${this._impactUrl}/api/workspaces/${this._workspaceId}/${url.replace(/^\//, "")}`;
 };
 
 API.prototype._buildQueryString = function(query) {
@@ -503,8 +512,8 @@ API.prototype.getCurrentModel = function() {
  * @returns {Promise<object>} An object containing the workspaceId of the cloned workspace and the intervalId of the bumper
  * @throws {Error} If no workspace id is present
  */
-export function cloneWorkspace(workspaceId, bumpInterval) {
-    let params = _getParams();
+export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
+    let params = _getParams(impactUrl);
 
     workspaceId = workspaceId || params.workspaceId;
     bumpInterval = bumpInterval || params.bumpInterval || 10;
@@ -514,10 +523,10 @@ export function cloneWorkspace(workspaceId, bumpInterval) {
     }
 
     return _ensureLoggedIn(() => {
-        return _request(`/api/workspaces/${workspaceId}/clone`, "POST").then(
+        return _request(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST").then(
             data => {
                 let intervalId = setInterval(() => {
-                    _request(`/api/workspaces/${data.workspace_id}`, "PUT");
+                    _request(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT");
                 }, bumpInterval * 1000);
                 return {
                     workspaceId: data.workspace_id,
@@ -535,7 +544,7 @@ export function cloneWorkspace(workspaceId, bumpInterval) {
  * @returns {Promise<API>} An API-object for the given workspace
  * @throws {Error} If no workspace id is present
  */
-export function createClient(workspaceId) {
+export function createClient(workspaceId, impactUrl='') {
     let params = _getParams();
     workspaceId = workspaceId || params.workspaceId;
     if (!workspaceId) {
@@ -544,13 +553,13 @@ export function createClient(workspaceId) {
         );
     }
 
-    return _request(`/api`, "GET").then(apiInfo => {
+    return _request(`${impactUrl}/api`, "GET").then(apiInfo => {
         if (!semverSatisfies(apiInfo.version, API_VERSION)) {
             throw _panic(
                 `Incompatible API version (must satisfy ${API_VERSION}, got ${apiInfo.version})`
             );
         } else {
-            return new API(workspaceId);
+            return new API(workspaceId, impactUrl);
         }
     });
 }
