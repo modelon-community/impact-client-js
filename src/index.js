@@ -509,8 +509,10 @@ API.prototype.getCurrentModel = function() {
  *
  * @param {string} workspaceId - The id of the workspace
  * @param {number} bumpInterval - Bumps the expiration of the clone with the interval given in seconds
+ * @param {string} impactUrl - URL to the Impact instance to use. Required if Impact is not running at the root, i.e. if it is located on some path like http://example.com/some/path
  * @returns {Promise<object>} An object containing the workspaceId of the cloned workspace and the intervalId of the bumper
  * @throws {Error} If no workspace id is present
+ * @throws {TypeError} If impactURL is not a valid URL
  */
 export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
     let params = _getParams(impactUrl);
@@ -541,8 +543,10 @@ export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
  * Creates a client object
  *
  * @param {string} workspaceId - The id of the workspace
+ * @param {string} impactUrl - URL to the Impact instance to use. Required if Impact is not running at the root, i.e. if it is located on some path like http://example.com/some/path
  * @returns {Promise<API>} An API-object for the given workspace
  * @throws {Error} If no workspace id is present
+ * @throws {TypeError} If impactUrl is not a valid URL
  */
 export function createClient(workspaceId, impactUrl='') {
     let params = _getParams();
