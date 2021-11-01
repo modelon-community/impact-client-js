@@ -528,7 +528,7 @@ export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
         return _request(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST").then(
             data => {
                 let intervalId = setInterval(() => {
-                    _request(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT");
+                    _request(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT", {body: JSON.stringify({})});
                 }, bumpInterval * 1000);
                 return {
                     workspaceId: data.workspace_id,
