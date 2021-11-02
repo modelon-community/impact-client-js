@@ -14,7 +14,7 @@ node('docker') {
     }
     stage ('publish') {
       withCredentials([string(credentialsId: 'npm-modelon-community', variable: 'NPM_TOKEN')]) {
-        sh "NPM_TOKEN=$NPM_TOKEN $npm publish --access public --dry-run"
+        sh "NPM_TOKEN=$NPM_TOKEN $npm publish --access public"
       }
     }
   }
