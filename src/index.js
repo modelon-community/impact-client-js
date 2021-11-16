@@ -51,7 +51,7 @@ const _responses = {
     500: "Unexpected error"
 };
 
-function _request(path, method, init) {
+function _request(path, method, init=undefined, credentialResolver=undefined, retry=true) {
     return fetch(path, {
         headers: {
             "Content-Type": "application/json",
@@ -62,7 +62,9 @@ function _request(path, method, init) {
         ...init
     }).then(response =>
         response.text().then(body => {
-            if (!response.ok) {
+            if (response.status === 401 && retry && credentialResolver) {
+                return credentialResolver(() => _request(path, method, init, credentialResolver, false))
+            } else if (!response.ok) {
                 throw _panic(_responses[response.status] || "Request failed", body);
             }
 
@@ -84,18 +86,8 @@ function _downloadFile(path, filename) {
     document.body.removeChild(a);
 }
 
-function _isLoggedIn() {
-    return document.cookie
-        .split(";")
-        .some(item => item.trim().startsWith(`access_token=`));
-}
-
-function _ensureLoggedIn(callback, impactUrl='') {
-    if (_isLoggedIn()) {
-        return callback();
-    } else {
-        return _request(`${impactUrl}/api/login`, "POST").then(() => callback());
-    }
+function _login(callback, impactUrl) {
+    return _request(`${impactUrl}/api/login`, "POST", undefined, undefined, false).then(() => callback());
 }
 
 // API wrapper class /////////////////////////////////////////////////////////
@@ -107,6 +99,11 @@ function API(workspaceId, impactUrl='') {
 }
 
 // Private methods ///////////////////////////////////////////////////////////
+API.prototype._request = function(path, method, init) {
+    const impactUrl = this._impactUrl; // Cannot reference 'this' in callback!
+    const credentialResolver = (callback) => _login(callback, impactUrl);
+    return _request(path, method, init, credentialResolver, true);
+};
 
 API.prototype._addApiPrefix = function(url) {
     return `${this._impactUrl}/api/workspaces/${this._workspaceId}/${url.replace(/^\//, "")}`;
@@ -121,13 +118,13 @@ API.prototype._buildQueryString = function(query) {
 };
 
 API.prototype._doPost = function(path, body) {
-    return _request(this._addApiPrefix(path), "POST", {
+    return this._request(this._addApiPrefix(path), "POST", {
         body: JSON.stringify(body || {})
     });
 };
 
 API.prototype._doGet = function(path, query) {
-    return _request(
+    return this._request(
         this._addApiPrefix(path) + this._buildQueryString(query || {}),
         "GET",
         {}
@@ -135,7 +132,7 @@ API.prototype._doGet = function(path, query) {
 };
 
 API.prototype._doPut = function(path, body) {
-    return _request(this._addApiPrefix(path), "PUT", {
+    return this._request(this._addApiPrefix(path), "PUT", {
         body: JSON.stringify(body || {})
     });
 };
@@ -241,45 +238,43 @@ API.prototype._simulateWithInput = function(input) {
 };
 
 API.prototype._compile = function(input = {}, withOptionsFrom = "dynamic", useCached = true) {
-    return _ensureLoggedIn(() => {
-        const defaultInput = {
-            compiler_log_level: "w",
-            compiler_options: {
-                c_compiler: "gcc"
-            },
-            runtime_options: {},
-            fmi_target: "me",
-            fmi_version: "2.0",
-            platform: "auto"
-        };
+    const defaultInput = {
+        compiler_log_level: "w",
+        compiler_options: {
+            c_compiler: "gcc"
+        },
+        runtime_options: {},
+        fmi_target: "me",
+        fmi_version: "2.0",
+        platform: "auto"
+    };
 
-        let chain = Promise.resolve();
+    let chain = Promise.resolve();
 
-        if (withOptionsFrom) {
-            chain = chain
-                .then(() => this._getCustomFunctionOptions(withOptionsFrom))
-                .then((options) => {
-                    let inputWithOptions = defaultInput;
-                    inputWithOptions.compiler_options = Object.assign(inputWithOptions.compiler_options, options.compiler);
+    if (withOptionsFrom) {
+        chain = chain
+            .then(() => this._getCustomFunctionOptions(withOptionsFrom))
+            .then((options) => {
+                let inputWithOptions = defaultInput;
+                inputWithOptions.compiler_options = Object.assign(inputWithOptions.compiler_options, options.compiler);
 
-                    inputWithOptions.runtime_options = Object.assign(inputWithOptions.runtime_options, options.runtime);
-                    return inputWithOptions;
-                });
+                inputWithOptions.runtime_options = Object.assign(inputWithOptions.runtime_options, options.runtime);
+                return inputWithOptions;
+            });
+    }
+    else {
+        chain = chain.then(() => defaultInput);
+    }
+
+    return chain.then((inputWithOptions) => {
+        let mergedInput = Object.assign(inputWithOptions, input);
+        if (useCached) {
+            return this._getCachedFMU(mergedInput)
+                .then((fmu) => (fmu.id === null) ? this._compileWithInput(mergedInput) : fmu);
         }
         else {
-            chain = chain.then(() => defaultInput);
+            return this._compileWithInput(mergedInput);
         }
-
-        return chain.then((inputWithOptions) => {
-            let mergedInput = Object.assign(inputWithOptions, input);
-            if (useCached) {
-                return this._getCachedFMU(mergedInput)
-                    .then((fmu) => (fmu.id === null) ? this._compileWithInput(mergedInput) : fmu);
-            }
-            else {
-                return this._compileWithInput(mergedInput);
-            }
-        });
     });
 };
 
@@ -292,18 +287,17 @@ API.prototype._compile = function(input = {}, withOptionsFrom = "dynamic", useCa
  * @returns {Promise<object>} The object representing a compiled FMU
  */
 API.prototype.deprecated_compile = function(className, fmiTarget = "me") {
-    return _ensureLoggedIn(() =>
-        this._compileWithInput({
-            class_name: className,
-            compiler_log_level: "w",
-            compiler_options: {
-                c_compiler: "gcc"
-            },
-            runtime_options: {},
-            fmi_target: fmiTarget,
-            fmi_version: "2.0",
-            platform: "auto"
-        }));
+    return this._compileWithInput({
+        class_name: className,
+        compiler_log_level: "w",
+        compiler_options: {
+            c_compiler: "gcc"
+        },
+        runtime_options: {},
+        fmi_target: fmiTarget,
+        fmi_version: "2.0",
+        platform: "auto"
+    });
 };
 
 /**
@@ -313,7 +307,7 @@ API.prototype.deprecated_compile = function(className, fmiTarget = "me") {
  * @returns {Promise<object>} The object representing a compiled FMU
  */
 API.prototype.deprecated_compileWithInput = function(input) {
-    return _ensureLoggedIn(() => this._compileWithInput(input));
+    return this._compileWithInput(input);
 };
 
 /**
@@ -325,18 +319,17 @@ API.prototype.deprecated_compileWithInput = function(input) {
  * @returns {Promise<object>} The object representing a compiled FMU
  */
 API.prototype.deprecated_compileWithDefaults = function(className, fmiTarget = "me", analysisFunction = "dynamic") {
-    return _ensureLoggedIn(() =>
-        this._getCustomFunctionOptions(analysisFunction)
-            .then((options) =>
-                this._compileWithInput({
-                    class_name: className,
-                    compiler_log_level: "w",
-                    compiler_options: options.compiler,
-                    runtime_options: options.runtime,
-                    fmi_target: fmiTarget,
-                    fmi_version: "2.0",
-                    platform: "auto"
-                })));
+    return this._getCustomFunctionOptions(analysisFunction)
+        .then((options) =>
+            this._compileWithInput({
+                class_name: className,
+                compiler_log_level: "w",
+                compiler_options: options.compiler,
+                runtime_options: options.runtime,
+                fmi_target: fmiTarget,
+                fmi_version: "2.0",
+                platform: "auto"
+            }));
 };
 
 /**
@@ -348,7 +341,7 @@ API.prototype.deprecated_compileWithDefaults = function(className, fmiTarget = "
  * @returns {Promise<object>} The object representing a compiled FMU
  */
 API.prototype.compile = function(input = {}, withOptionsFrom = "dynamic", useCached = true) {
-    return _ensureLoggedIn(() => this._compile(input, withOptionsFrom, useCached));
+    return this._compile(input, withOptionsFrom, useCached);
 };
 
 /**
@@ -366,15 +359,14 @@ API.prototype.deprecated_simulate = function(
     variables = {},
     analysisFunction = "dynamic"
 ) {
-    return _ensureLoggedIn(() =>
-        this._simulateWithInput({
-            analysis: {
-                analysis_function: analysisFunction,
-                parameters,
-            },
-            fmu_id: fmu.id,
-            modifiers: { variables }
-        }));
+    return this._simulateWithInput({
+        analysis: {
+            analysis_function: analysisFunction,
+            parameters,
+        },
+        fmu_id: fmu.id,
+        modifiers: { variables }
+    });
 };
 
 /**
@@ -386,17 +378,16 @@ API.prototype.deprecated_simulate = function(
  * @returns {Promise<string>} An experiment id
  */
 API.prototype.deprecated_simulateWithDefaults = function(fmu, variables = {}, analysisFunction = "dynamic") {
-    return _ensureLoggedIn(() =>
-        this._getCustomFunctionOptions(analysisFunction)
-            .then((options) =>
-                this._simulateWithInput({
-                    analysis: {
-                        analysis_function: analysisFunction,
-                        parameters: options.simulation,
-                    },
-                    fmu_id: fmu.id,
-                    modifiers: { variables }
-                })));
+    return this._getCustomFunctionOptions(analysisFunction)
+        .then((options) =>
+            this._simulateWithInput({
+                analysis: {
+                    analysis_function: analysisFunction,
+                    parameters: options.simulation,
+                },
+                fmu_id: fmu.id,
+                modifiers: { variables }
+            }));
 };
 
 /**
@@ -410,28 +401,26 @@ API.prototype.deprecated_simulateWithDefaults = function(fmu, variables = {}, an
  * @returns {Promise<string>} An experiment id
  */
 API.prototype.simulate = function(fmuOrModel, variables = {}, parameters = {}, analysisFunction = "dynamic", useCached = true) {
-    return _ensureLoggedIn(() => {
-        let chain = Promise.resolve();
+    let chain = Promise.resolve();
 
-        if (typeof fmuOrModel === 'string') {
-            chain = chain.then(() => this._compile({class_name: fmuOrModel}, analysisFunction, useCached));
-        }
-        else {
-            chain = chain.then(() => fmuOrModel);
-        }
+    if (typeof fmuOrModel === 'string') {
+        chain = chain.then(() => this._compile({class_name: fmuOrModel}, analysisFunction, useCached));
+    }
+    else {
+        chain = chain.then(() => fmuOrModel);
+    }
 
-        return chain.then((fmu) =>
-            this._getCustomFunctionOptions(analysisFunction)
-                .then((options) =>
-                    this._simulateWithInput({
-                        analysis: {
-                            analysis_function: analysisFunction,
-                            parameters: Object.assign(options.simulation, parameters),
-                        },
-                        fmu_id: fmu.id,
-                        modifiers: { variables }
-                    })));
-    });
+    return chain.then((fmu) =>
+        this._getCustomFunctionOptions(analysisFunction)
+            .then((options) =>
+                this._simulateWithInput({
+                    analysis: {
+                        analysis_function: analysisFunction,
+                        parameters: Object.assign(options.simulation, parameters),
+                    },
+                    fmu_id: fmu.id,
+                    modifiers: { variables }
+                })));
 };
 
 /**
@@ -441,10 +430,9 @@ API.prototype.simulate = function(fmuOrModel, variables = {}, parameters = {}, a
  * @returns {Promise<string[]>} The variable names
  */
 API.prototype.getVariables = function(experiment) {
-    return _ensureLoggedIn(() =>
-        this._doGet(
-            `/experiments/${experiment.experiment_id}/variables`
-        ).then(names => names.sort()));
+    return this._doGet(
+        `/experiments/${experiment.experiment_id}/variables`
+    ).then(names => names.sort());
 };
 
 /**
@@ -455,7 +443,7 @@ API.prototype.getVariables = function(experiment) {
  * @returns {Promise<number[]>} The result values
  */
 API.prototype.getTrajectories = function(experiment, variableName) {
-    return _ensureLoggedIn(() => this._getTrajectories(experiment, variableName));
+    return this._getTrajectories(experiment, variableName);
 };
 
 /**
@@ -466,16 +454,15 @@ API.prototype.getTrajectories = function(experiment, variableName) {
  * @returns {Promise<object>} An object where the keys are the variable names and the values the result values
  */
 API.prototype.getVariableValues = function(experiment, variableNames) {
-    return _ensureLoggedIn(() =>
-        Promise.all(
-            variableNames.map(v => this._getTrajectories(experiment, v))
-        ).then(results =>
-            variableNames.reduce((acc, name, i) => {
-                acc[name] = results[i];
+    return Promise.all(
+        variableNames.map(v => this._getTrajectories(experiment, v))
+    ).then(results =>
+        variableNames.reduce((acc, name, i) => {
+            acc[name] = results[i];
 
-                return acc;
-            }, {})
-        ));
+            return acc;
+        }, {})
+    );
 };
 
 /**
@@ -485,12 +472,10 @@ API.prototype.getVariableValues = function(experiment, variableNames) {
  * @returns {void}
  */
 API.prototype.downloadFMU = function(fmu) {
-    return _ensureLoggedIn(() => {
-        _downloadFile(
-            this._addApiPrefix(`/model-executables/${fmu.id}/binary`),
-            `${this.workspaceId}_${fmu.id}.fmu`
-        );
-    });
+    return _downloadFile(
+        this._addApiPrefix(`/model-executables/${fmu.id}/binary`),
+        `${this.workspaceId}_${fmu.id}.fmu`
+    );
 };
 
 /**
@@ -524,19 +509,18 @@ export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
         throw _panic("Need to supply workspace id in parameter or querystring");
     }
 
-    return _ensureLoggedIn(() => {
-        return _request(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST").then(
-            data => {
-                let intervalId = setInterval(() => {
-                    _request(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT", {body: JSON.stringify({})});
-                }, bumpInterval * 1000);
-                return {
-                    workspaceId: data.workspace_id,
-                    intervalId
-                };
-            }
-        );
-    });
+    const credentialResolver = (callback) => _login(callback, impactUrl);
+    return _request(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST", undefined, credentialResolver).then(
+        data => {
+            let intervalId = setInterval(() => {
+                _request(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT", {body: JSON.stringify({})}, credentialResolver);
+            }, bumpInterval * 1000);
+            return {
+                workspaceId: data.workspace_id,
+                intervalId
+            };
+        }
+    );
 }
 
 /**
@@ -557,7 +541,7 @@ export function createClient(workspaceId, impactUrl='') {
         );
     }
 
-    return _request(`${impactUrl}/api`, "GET").then(apiInfo => {
+    return _request(`${impactUrl}/api`, "GET",  undefined, undefined, false).then(apiInfo => {
         if (!semverSatisfies(apiInfo.version, API_VERSION)) {
             throw _panic(
                 `Incompatible API version (must satisfy ${API_VERSION}, got ${apiInfo.version})`
