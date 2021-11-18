@@ -14,8 +14,8 @@ const API_VERSION = "^1.8.0";
 // Utilities /////////////////////////////////////////////////////////////////
 
 function _panic(msg, data) {
-    alert(msg);
-    return new Error(data || msg);
+    const extraInfo = data ? `: ${JSON.stringify(data)}` : ''
+    return new Error(`${msg}${extraInfo}`);
 }
 
 function _getCustomizedWorkspaceId(impactUrl) {
