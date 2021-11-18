@@ -51,7 +51,7 @@ const _responses = {
     500: "Unexpected error"
 };
 
-function _request(path, method, init=undefined, credentialResolver=undefined, retry=true) {
+function _request(path, method, init=undefined) {
     return fetch(path, {
         headers: {
             "Content-Type": "application/json",
@@ -62,10 +62,8 @@ function _request(path, method, init=undefined, credentialResolver=undefined, re
         ...init
     }).then(response =>
         response.text().then(body => {
-            if (response.status === 401 && retry && credentialResolver) {
-                return credentialResolver(() => _request(path, method, init, credentialResolver, false))
-            } else if (!response.ok) {
-                throw _panic(_responses[response.status] || "Request failed", body);
+            if (!response.ok) {
+                return Promise.reject({response, body})
             }
 
             try {
@@ -86,8 +84,30 @@ function _downloadFile(path, filename) {
     document.body.removeChild(a);
 }
 
+function _addLoginAndRetryIfAuthFails(request, credentialResolver) {
+    return function(...args) {
+        const result = request.apply(this, args);
+        return result.catch(({response, body}) => {
+            if (response.status === 401) {
+                return credentialResolver(() => request.apply(this, args))
+            } else {
+                throw _panic(_responses[response.status] || "Request failed", body);
+            }
+        })
+    }
+}
+
 function _login(callback, impactUrl) {
-    return _request(`${impactUrl}/api/login`, "POST", undefined, undefined, false).then(() => callback());
+    return _request(`${impactUrl}/api/login`, "POST").then(() => callback());
+}
+
+function _credentialResolver(impactUrl) {
+    return (callback) => _login(callback, impactUrl)
+}
+
+function _requestWithLoginRetry(impactUrl) {
+    const credentialResolver = _credentialResolver(impactUrl);
+    return _addLoginAndRetryIfAuthFails(_request, credentialResolver)
 }
 
 // API wrapper class /////////////////////////////////////////////////////////
@@ -99,10 +119,9 @@ function API(workspaceId, impactUrl='') {
 }
 
 // Private methods ///////////////////////////////////////////////////////////
-API.prototype._request = function(path, method, init) {
-    const impactUrl = this._impactUrl; // Cannot reference 'this' in callback!
-    const credentialResolver = (callback) => _login(callback, impactUrl);
-    return _request(path, method, init, credentialResolver, true);
+API.prototype._requestWithLoginRetry = function(path, method, init) {
+    const requestWithRetry = _requestWithLoginRetry(this._impactUrl);
+    return requestWithRetry(path, method, init);
 };
 
 API.prototype._addApiPrefix = function(url) {
@@ -118,13 +137,13 @@ API.prototype._buildQueryString = function(query) {
 };
 
 API.prototype._doPost = function(path, body) {
-    return this._request(this._addApiPrefix(path), "POST", {
+    return this._requestWithLoginRetry(this._addApiPrefix(path), "POST", {
         body: JSON.stringify(body || {})
     });
 };
 
 API.prototype._doGet = function(path, query) {
-    return this._request(
+    return this._requestWithLoginRetry(
         this._addApiPrefix(path) + this._buildQueryString(query || {}),
         "GET",
         {}
@@ -132,7 +151,7 @@ API.prototype._doGet = function(path, query) {
 };
 
 API.prototype._doPut = function(path, body) {
-    return this._request(this._addApiPrefix(path), "PUT", {
+    return this._requestWithLoginRetry(this._addApiPrefix(path), "PUT", {
         body: JSON.stringify(body || {})
     });
 };
@@ -509,11 +528,11 @@ export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
         throw _panic("Need to supply workspace id in parameter or querystring");
     }
 
-    const credentialResolver = (callback) => _login(callback, impactUrl);
-    return _request(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST", undefined, credentialResolver).then(
+    const requestWithRetry = _requestWithLoginRetry(impactUrl);
+    return requestWithRetry(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST").then(
         data => {
             let intervalId = setInterval(() => {
-                _request(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT", {body: JSON.stringify({})}, credentialResolver);
+                requestWithRetry(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT", {body: JSON.stringify({})});
             }, bumpInterval * 1000);
             return {
                 workspaceId: data.workspace_id,
@@ -541,7 +560,7 @@ export function createClient(workspaceId, impactUrl='') {
         );
     }
 
-    return _request(`${impactUrl}/api`, "GET",  undefined, undefined, false).then(apiInfo => {
+    return _request(`${impactUrl}/api`, "GET").then(apiInfo => {
         if (!semverSatisfies(apiInfo.version, API_VERSION)) {
             throw _panic(
                 `Incompatible API version (must satisfy ${API_VERSION}, got ${apiInfo.version})`
