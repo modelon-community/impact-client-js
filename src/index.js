@@ -51,7 +51,7 @@ const _responses = {
     500: "Unexpected error"
 };
 
-function _request(path, method, init=undefined) {
+function _request(path, method, init) {
     return fetch(path, {
         headers: {
             "Content-Type": "application/json",
