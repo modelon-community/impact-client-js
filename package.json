@@ -1,21 +1,23 @@
 {
     "name": "@modelon/impact-client-js",
-    "version": "1.6.5",
+    "version": "2.0.0-alpha.1",
     "description": "Modelon Impact Client for Javascript",
     "scripts": {
         "build": "tsup --dts",
         "test": "echo \"No tests specified\" && exit 0"
     },
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/modelon-community/impact-client-js.git"
+        "type": "git",
+        "url": "git+https://github.com/modelon-community/impact-client-js.git"
     },
     "author": "Modelon AB",
     "license": "BSD-3-Clause",
     "main": "dist/index.js",
-    "files": ["/dist"],
+    "files": [
+        "/dist"
+    ],
     "bugs": {
-      "url": "https://github.com/modelon-community/impact-client-js/issues"
+        "url": "https://github.com/modelon-community/impact-client-js/issues"
     },
     "homepage": "https://github.com/modelon-community/impact-client-js#readme",
     "dependencies": {
