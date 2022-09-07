@@ -1,9 +1,12 @@
 import Axios, { AxiosInstance } from 'axios'
 import { Cookie, CookieJar } from 'tough-cookie'
+import { getExperimentDefinition } from './experiment'
 
 async function importModule(moduleName: string): Promise<any> {
     return await import(moduleName)
 }
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 interface AxiosConfig {
     headers: Record<string, string>
@@ -15,9 +18,7 @@ const isNode = () => typeof window === 'undefined'
 const getCookieValue = (key: string) => {
     const parts = `; ${document.cookie}`.split(`; ${key}=`)
 
-    return parts.length === 2
-        ? parts.pop()?.split(';').shift()
-        : 'value not found'
+    return parts.length === 2 ? parts.pop()?.split(';').shift() : undefined
 }
 
 const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
@@ -27,6 +28,40 @@ const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
         throw new Error('Access token cookie not found')
     }
     return cookie.value
+}
+
+export interface Progress {
+    message: string
+    percentage: number
+    done: boolean
+    stage: string
+}
+
+export interface CompilationStatus {
+    finished_executions: number
+    total_executions: number
+    status: string
+    progresses: Progress[]
+}
+
+export interface Workspace {
+    id: string
+    definition: { name: string }
+}
+
+export interface CustomFunctionParameter {
+    name: string
+    type: string
+    description: string
+    defaultValue: string | boolean | number
+}
+
+export interface CustomFunction {
+    version: string
+    name: string
+    description: string
+    parameters: CustomFunctionParameter[]
+    can_initialize_from: boolean
 }
 
 export class Client {
@@ -213,7 +248,7 @@ export class Client {
         }
     }
 
-    getWorkspaces() {
+    getWorkspaces(): Promise<Workspace[]> {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.ensureImpactToken()
@@ -222,6 +257,149 @@ export class Client {
                     `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`
                 )
                 resolve(response.data.data.items)
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
+    private createExperiment({
+        modelName,
+        workspaceId,
+    }: {
+        modelName: string
+        workspaceId: string
+    }): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.ensureImpactToken()
+
+                const response = await this.axios.post(
+                    `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
+                    getExperimentDefinition(modelName)
+                )
+                resolve(response.data.experiment_id)
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
+    private runExperiment({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: string
+        workspaceId: string
+    }): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.ensureImpactToken()
+
+                await this.axios.post(
+                    `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
+                )
+                resolve()
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
+    private getExecutionStatus({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: string
+        workspaceId: string
+    }): Promise<CompilationStatus> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.ensureImpactToken()
+
+                const response = await this.axios.get(
+                    `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
+                )
+                resolve(response.data)
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
+    private async executionSuccess({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: string
+        workspaceId: string
+    }) {
+        let data = await this.getExecutionStatus({
+            experimentId,
+            workspaceId,
+        })
+        while (data.status !== 'done') {
+            await sleep(1000)
+            data = await this.getExecutionStatus({
+                experimentId,
+                workspaceId,
+            })
+        }
+    }
+
+    async executeExperiment({
+        modelName,
+        workspaceId,
+    }: {
+        modelName: string
+        workspaceId: string
+    }): Promise<string> {
+        const experimentId = await this.createExperiment({
+            modelName,
+            workspaceId,
+        })
+        await this.runExperiment({
+            experimentId,
+            workspaceId,
+        })
+        await this.executionSuccess({
+            experimentId,
+            workspaceId,
+        })
+        return experimentId
+    }
+
+    getCustomFunctions(workspaceId: string): Promise<CustomFunction[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.ensureImpactToken()
+
+                const response = await this.axios.get(
+                    `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/custom-functions`
+                )
+                resolve(response.data.data.items)
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
+    getTrajectories({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: string
+        workspaceId: string
+    }): Promise<number[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.ensureImpactToken()
+
+                const response = await this.axios.post(
+                    `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/case_1/trajectories`,
+                    { variable_names: ['driveAngle'] }
+                )
+                resolve(response.data[0])
             } catch (e) {
                 reject(e)
             }
