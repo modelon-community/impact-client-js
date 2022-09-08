@@ -386,9 +386,11 @@ export class Client {
 
     getTrajectories({
         experimentId,
+        variableNames,
         workspaceId,
     }: {
         experimentId: string
+        variableNames: string[]
         workspaceId: string
     }): Promise<number[]> {
         return new Promise(async (resolve, reject) => {
@@ -397,7 +399,7 @@ export class Client {
 
                 const response = await this.axios.post(
                     `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/case_1/trajectories`,
-                    { variable_names: ['driveAngle'] }
+                    { variable_names: variableNames }
                 )
                 resolve(response.data[0])
             } catch (e) {
