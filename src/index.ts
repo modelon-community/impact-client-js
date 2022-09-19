@@ -1,6 +1,11 @@
 import Axios, { AxiosInstance } from 'axios'
 import { Cookie, CookieJar } from 'tough-cookie'
-import { getExperimentDefinition } from './experiment'
+import {
+    CustomFunctionsResponse,
+    ExecuteExperimentResponse,
+    GetTrajectoriesResponse,
+    GetWorkspacesResponse,
+} from './types'
 
 async function importModule(moduleName: string): Promise<any> {
     return await import(moduleName)
@@ -248,7 +253,7 @@ export class Client {
         }
     }
 
-    getWorkspaces(): Promise<Workspace[]> {
+    getWorkspaces(): Promise<GetWorkspacesResponse> {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.ensureImpactToken()
@@ -256,7 +261,7 @@ export class Client {
                 const response = await this.axios.get(
                     `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`
                 )
-                resolve(response.data.data.items)
+                resolve(response.data)
             } catch (e) {
                 reject(e)
             }
@@ -269,16 +274,20 @@ export class Client {
     }: {
         modelName: string
         workspaceId: string
-    }): Promise<string> {
+    }): Promise<ExecuteExperimentResponse> {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.ensureImpactToken()
+
+                const experiment = ModelicaExperimentDefinition.from({
+                    modelName,
+                })
 
                 const response = await this.axios.post(
                     `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
                     getExperimentDefinition(modelName)
                 )
-                resolve(response.data.experiment_id)
+                resolve(response.data)
             } catch (e) {
                 reject(e)
             }
@@ -353,23 +362,23 @@ export class Client {
     }: {
         modelName: string
         workspaceId: string
-    }): Promise<string> {
-        const experimentId = await this.createExperiment({
+    }): Promise<ExecuteExperimentResponse> {
+        const experiment = await this.createExperiment({
             modelName,
             workspaceId,
         })
         await this.runExperiment({
-            experimentId,
+            experimentId: experiment.experiment_id,
             workspaceId,
         })
         await this.executionSuccess({
-            experimentId,
+            experimentId: experiment.experiment_id,
             workspaceId,
         })
-        return experimentId
+        return experiment
     }
 
-    getCustomFunctions(workspaceId: string): Promise<CustomFunction[]> {
+    getCustomFunctions(workspaceId: string): Promise<CustomFunctionsResponse> {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.ensureImpactToken()
@@ -392,7 +401,7 @@ export class Client {
         experimentId: string
         variableNames: string[]
         workspaceId: string
-    }): Promise<number[]> {
+    }): Promise<GetTrajectoriesResponse> {
         return new Promise(async (resolve, reject) => {
             try {
                 await this.ensureImpactToken()
@@ -401,7 +410,7 @@ export class Client {
                     `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/case_1/trajectories`,
                     { variable_names: variableNames }
                 )
-                resolve(response.data[0])
+                resolve(response.data)
             } catch (e) {
                 reject(e)
             }
