@@ -16,6 +16,9 @@
     "files": [
         "/dist"
     ],
+    "engines": {
+        "node": ">=16 <17"
+    },
     "bugs": {
         "url": "https://github.com/modelon-community/impact-client-js/issues"
     },
