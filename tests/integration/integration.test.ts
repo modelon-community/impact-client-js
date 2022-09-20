@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
-import { Client } from '..'
-import { ModelicaExperiment } from '../src/ModelicaExperiment'
-import { GetWorkspacesResponse } from '../src/types'
+import { Client } from '../..'
+import { ModelicaExperiment } from '../../src/ModelicaExperiment'
+import { GetWorkspacesResponse } from '../../src/types'
 
 dotenv.config()
 

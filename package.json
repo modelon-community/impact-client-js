@@ -5,7 +5,9 @@
     "scripts": {
         "build": "tsup --dts",
         "lint": "eslint src/",
-        "test": "jest tests/"
+        "test": "jest tests",
+        "unit-test": "jest tests/unit",
+        "integration-test": "jest tests/integration"
     },
     "repository": {
         "type": "git",

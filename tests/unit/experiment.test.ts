@@ -1,4 +1,4 @@
-import { ModelicaExperiment } from '../src/ModelicaExperiment'
+import { ModelicaExperiment } from '../../src/ModelicaExperiment'
 
 test('Create experiment without modifiers and parameters', () => {
     const customFunction = 'dynamic'
