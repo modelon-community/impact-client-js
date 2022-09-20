@@ -23,6 +23,7 @@
     "bugs": {
         "url": "https://github.com/modelon-community/impact-client-js/issues"
     },
+    "types": "./dist/index.d.ts",
     "homepage": "https://github.com/modelon-community/impact-client-js#readme",
     "dependencies": {
         "axios": "^0.27.2",

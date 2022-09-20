@@ -1,6 +1,6 @@
 # impact-client-js
 
-Impact client js is a library created to simplify interaction with Modelon Impact
+impact-client-js is a library created to simplify interaction with Modelon Impact.
 
 ## Installation
 
@@ -13,3 +13,7 @@ IMPACT_API_KEY=<your impact api key>
 JH_TOKEN=<your JH token>
 JHMI_SERVER=<jhmi server address>
 ```
+
+Then execute tests with:
+
+`npm run test`

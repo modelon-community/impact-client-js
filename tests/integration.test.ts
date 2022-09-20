@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import { Client } from '..'
-import { ModelicaExperimentDefinition } from '../src/ModelicaExperimentDefinition'
+import { ModelicaExperiment } from '../src/ModelicaExperiment'
 import { GetWorkspacesResponse } from '../src/types'
 
 dotenv.config()
@@ -20,17 +20,45 @@ test('get workspaces', () => {
         )
 })
 
-test('create and execute experiment', () => {
-    const client = getClient()
+test(
+    'Setup and execute experiment',
+    async () => {
+        const customFunction = 'dynamic'
+        const modelName = 'Modelica.Blocks.Examples.PID_Controller'
+        const experiment = ModelicaExperiment.from({
+            customFunction,
+            modelName,
+            parameters: {
+                start_time: 0,
+                final_time: 1,
+            },
+        })
 
-    const experimentDefinition = ModelicaExperimentDefinition.from({
-        className: 'Modelica.Blocks.Examples.PID_Controller',
-    })
-    //
+        const workspaceId = 'friday0916'
 
-    client
-        .getWorkspaces()
-        .then(({ data: { items: workspaces } }: GetWorkspacesResponse) =>
-            expect(workspaces.length).toBeGreaterThanOrEqual(0)
-        )
-})
+        const client = getClient()
+
+        const experimentId = await client.executeExperiment({
+            caseIds: ['case_1'],
+            experiment,
+            workspaceId,
+        })
+        expect(typeof experimentId).toBe('string')
+
+        const cases = await client.getCases({
+            experimentId,
+            workspaceId,
+        })
+        expect(typeof cases).toBe('object')
+
+        const trajectories = await client.getTrajectories({
+            caseId: 'case_1',
+            experimentId,
+            variableNames: ['inertia1.w'],
+            workspaceId,
+        })
+        expect(trajectories.length).toBe(1)
+        expect(trajectories[0].length).toBe(502)
+    },
+    10 * 1000
+)
