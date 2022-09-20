@@ -1,17 +1,11 @@
 import { components, operations } from '../schema/impact-api'
 
-export type Cases =
-    operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items']
+export type Case = components['schemas']['Case']
 
-export type CustomFunctionsResponse =
-    operations['getCustomFunctions']['responses']['200']['content']['application/json']
-export type ExecuteExperimentResponse =
-    operations['setupExperiment']['responses']['200']['content']['application/json']
-export type GetTrajectoriesResponse =
-    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']
+export type CustomFunction =
+    operations['getCustomFunction']['responses']['200']['content']['application/json']
 
-export type GetWorkspacesResponse =
-    operations['getWorkspaces']['responses']['200']['content']['application/json']
+export type Workspace = components['schemas']['Workspace']
 
 export type ModelicaExperimentDefinition =
     components['schemas']['ExperimentDefinition']

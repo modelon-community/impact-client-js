@@ -17,3 +17,7 @@ JHMI_SERVER=<jhmi server address>
 Then execute tests with:
 
 `npm run test`
+
+## Schema
+
+The API schema is based on the build output from the impact-openapi beta branch which has then been passed through openapi-typescript.

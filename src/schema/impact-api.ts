@@ -25,66 +25,20 @@ export interface paths {
     /** Can be called periodically on a cloned workspace a client is working against. This will inform the system that this workspace is not inactive and may not be deleted. */
     put: operations["increaseClonedWorkspaceTimestamp"];
     delete: operations["deleteWorkspace"];
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/exports": {
     /** The compressed workspace may be downloaded, after successful completion of a call to this endpoint, by calling GET /workspaces/{workspace}/exports/{exportId}. */
     post: operations["prepareExportWorkspace"];
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/exports/{exportId}": {
     /** The workspace needs to be compressed by calling POST /workspaces/{workspace}/exports, before calling this API endpoint. */
     get: operations["exportWorkspace"];
     /** This API end point can be be called after a compressed workspace has been downloaded. */
     delete: operations["deleteExportedWorkspace"];
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-        /** ID of the compressed workspace to download */
-        exportId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/clone": {
     /** A created clone of a workspace is a temporary resource. It can be used executing some workload based on resources of a workspace without mutating or adding anything to it. */
     post: operations["cloneWorkspace"];
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
-  };
-  "/workspaces/{workspace}/dependencies": {
-    /** Get workspace dependencies. */
-    get: operations["getWorkspaceDependencies"];
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
-  };
-  "/workspaces/{workspace}/projects": {
-    /** Get workspace projects. */
-    get: operations["getWorkspaceProjects"];
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/libraries": {
     /** top-level libraries are available for all workspaces. It does not return any meta data for libraries stored in specific workspaces. */
@@ -93,197 +47,71 @@ export interface paths {
   "/workspaces/{workspace}/libraries": {
     get: operations["getLibraries"];
     post: operations["importLibrary"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/libraries/{library}": {
     /** The accept head is used to specify if meta data or the library itself is returned. With the default accept header '*\/*' the libraries meta data will be returned. If changed to application/zip the library will be downloaded as a zip-file if the library is structured. For an unstructured library the acceptance header text/plain can be used to download it as a mo-file. */
     get: operations["exportLibrary"];
     delete: operations["deleteLibrary"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The library identifier, '{name} {version}' or '{name}' if version is missing */
-        library: string;
-      };
-    };
   };
   "/workspaces/{workspace}/libraries/{library}/models": {
     post: operations["importFMU"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The library identifier, '{name} {version}' or '{name}' if version is missing */
-        library: string;
-      };
-    };
   };
   "/workspaces/{workspace}/custom-functions/{custom-function}": {
     /** Gets the meta-data for a custom function describing which parameters the custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center. */
     get: operations["getCustomFunction"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Name of the custom function */
-        "custom-function": string;
-      };
-    };
   };
   "/workspaces/{workspace}/custom-functions/{custom-function}/options": {
     /** Gets the (aggregated) options for a custom function. This includes: Workspace specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the workspace specific options, secondarily from the application default options and in third hand from the custom function default options. */
     get: operations["getExecutionOptions"];
     /** The values for the options are saved for a specific custom function and workspace. */
     put: operations["putExecutionOptions"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Name of the custom function */
-        "custom-function": string;
-      };
-    };
   };
   "/workspaces/{workspace}/custom-functions/{custom-function}/default-options": {
     /** Gets the application level default options for a custom function. This includes: Options configured as defaults for the application and default options specified in the custom function. For options specified on both levels, the value is taken from the application default options. */
     get: operations["getDefaultExecutionOptions"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Name of the custom function */
-        "custom-function": string;
-      };
-    };
   };
   "/workspaces/{workspace}/custom-functions": {
     /** Which custom functions that exists are useful when setting up an experiment using POST /workspaces/{workspace}/experiments. The name of a custom function is used for the field 'analysis_function' which specifies that it should be used for the experiment. The meta-data also describes which parameters each custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center. */
     get: operations["getCustomFunctions"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/options/units/conversions": {
     get: operations["getUnitConversionFactors"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables": {
     get: operations["getAllModelExecutableInfo"];
     /** The name of the model to be compiled is specified by the field 'class_name'. The remaining fields in the input are options for the compilation process. For a reference of what options can be used in the field 'compiler_options' and 'runtime_option' see the OCT User's Guide, which can be found in the Modelon Impact help center. If the FMU should be executed in Impact (rather than exported) it is recommended that 'fmi_target' is 'me', 'fmi_version' is '2.0' and 'platform' is 'auto'. If this end-point is called with the query parameter 'getCached' set to true, then a previously compiled model executable is returned, if such an FMU exists. To get a cached model executable (FMU) there must exists a successfully compiled model executable that was compiled with the same inputs as in the current call. Furthermore, if the Modelica model for which the FMU compilation is requested has been changed in a structural way, or at least one of its dependent models have changed, then a cached FMU will not be returned. Setting non-structural parameters and making graphical changes to the Modelica model will not break the cache for its compiled FMU. */
     post: operations["modelExecutableSetup"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/supported-platforms": {
     /** Can be used to find which values are supported for the field 'platform' when calling the POST method on '/workspaces/{workspace}/model-executables' */
     get: operations["getFmuPlatforms"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}": {
     get: operations["getModelExecutableInfo"];
     delete: operations["deleteModelExecutable"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The FMU ID */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/compilation": {
     get: operations["getCompilationStatus"];
     /** First call POST /workspaces/{workspace}/model-executables to setup what should be compiled. */
     post: operations["modelExecutableCompile"];
     delete: operations["cancelCompilation"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Reference ID to the model to be compiled */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/compilation/log": {
     get: operations["downloadCompilationLog"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Reference ID to the compiled model */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/binary": {
     get: operations["downloadCompiledFMU"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Reference ID to the compiled model */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/steady-state-metadata": {
     post: operations["getFmuMeta"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Reference ID to the compiled model */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/settable-parameters": {
     /** Can be used to find what parameters are feasible to have as modifiers in an experiment. */
     get: operations["getFmuParameters"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Reference ID to the compiled model */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/string-parameters-and-values": {
     /** Gets a list of parameters whose values are strings and one list with respective value in order. Can be used when requiring string parameters that don't come with the result. */
     get: operations["getFmuStringParametersAndValues"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** Reference ID to the compiled model */
-        fmuId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments": {
     get: operations["getAllExperimentInfo"];
@@ -330,161 +158,56 @@ export interface paths {
      * The old (version 1) experiment format can still be used but will be removed in a future version.
      */
     post: operations["setupExperiment"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}": {
     get: operations["getExperimentInfo"];
     /** Can be used to set a human readable identifier for an experiment. */
     put: operations["setLabel"];
     delete: operations["removeExperiment"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/execution": {
     get: operations["getExecutionStatus"];
     /** First call POST /workspaces/{workspace}/experiments to setup what should be executed. */
     post: operations["execute"];
     delete: operations["cancelExecution"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases": {
     get: operations["getAllCaseInfo"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}": {
     get: operations["getCaseInfo"];
     /** This end-point can be used to update a case input. This can be used to modify the case and then execute the case again as part of an experiment and get different results for the case. Only fields under 'input' and 'meta' can be updated. Also, the fields 'fmu_id', 'analysis_function', 'structural_parametrization' and 'fmu_base_parametrization' cannot be updated. After a case is updated the 'consistent' field will be set to 'false' to signify that case results might not match the case input. Executing the case as part of an experiment will set 'consistent' to 'true'. The recomended way to update the case is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data. */
     put: operations["putCaseInfo"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-        /** The ID of the case */
-        caseId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/log": {
     get: operations["getCaseLog"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the simulation */
-        experimentId: string;
-        /** The ID of the case */
-        caseId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result": {
     get: operations["getCaseResults"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-        /** The ID of the case */
-        caseId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/trajectories": {
     /** This end-point can be used to fetch trajectories from cases that have finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 from the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version. */
     post: operations["getCaseTrajectories"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-        /** The ID of the case */
-        caseId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts/{artifactId}": {
     get: operations["getCustomArtifact"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-        /** The ID of the case */
-        caseId: string;
-        /** The ID of the artifact */
-        artifactId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/variables": {
     get: operations["getVariables"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-      };
-    };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/trajectories": {
     /** This end-point can be used to fetch trajectories from experiments that has finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 under 'case_1' in the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version. */
     post: operations["getTrajectories"];
-    parameters: {
-      path: {
-        /** Name of the workspace */
-        workspace: string;
-        /** The ID of the experiment */
-        experimentId: string;
-      };
-    };
   };
   "/workspace-exports": {
     /** The compressed workspace will be prepared. After a successful completion of a call to this endpoint, call GET /workspace-exports/{exportId} to check status. */
     post: operations["prepareExportWorkspaceAsync"];
-    parameters: {};
   };
   "/workspace-exports/{exportId}": {
     /** The workspace needs to be setup for export by calling POST /workspace-exports, before calling this API endpoint. */
     get: operations["exportWorkspaceAsync"];
     /** This API end point can be be called after a compressed workspace has been downloaded. */
     delete: operations["deleteExportedWorkspaceAsync"];
-    parameters: {
-      path: {
-        /** ID of the compressed workspace to check status on */
-        exportId: string;
-      };
-    };
   };
   "/workspace-imports": {
     /** Will initiate import of an existing workspace. After a successful completion of a call to this endpoint, call GET /workspace-imports/{importId} to check status. */
@@ -495,22 +218,10 @@ export interface paths {
     get: operations["importWorkspaceStatus"];
     /** This API end point can be be called after a workspace has been imported. */
     delete: operations["deleteWorkspaceImport"];
-    parameters: {
-      path: {
-        /** ID of the workspace import to check status on */
-        importId: string;
-      };
-    };
   };
   "/exports/{exportId}": {
     /** This route is used for downloading exported files. Other end-points will reference here with a download URI */
     get: operations["exportFile"];
-    parameters: {
-      path: {
-        /** ID of the compressed workspace to download */
-        exportId: string;
-      };
-    };
   };
   "/uploads/results": {
     post: operations["uploadMAT"];
@@ -518,40 +229,21 @@ export interface paths {
   "/uploads/results/{uploadId}": {
     /** Get the current status of upload for a given uploadId */
     get: operations["getUploadStatus"];
-    parameters: {
-      path: {
-        /** Id for result storage */
-        uploadId: string;
-      };
-    };
   };
   "/external-result/{uploadId}": {
     /** Gets the meta-data for a result file */
     get: operations["getUploadedResultEntity"];
     delete: operations["deleteUploadedResultEntity"];
-    parameters: {
-      path: {
-        /** Id for result storage */
-        uploadId: string;
-      };
-    };
   };
   "/users/me": {
     /** Returns the ID of the current user, which is used to create API keys, and the external IDs connected to it. */
     get: operations["getCurrentUser"];
-    parameters: {};
   };
   "/users/{userId}/keys": {
     /** Get information on the API keys belonging to the user by the given ID. The information includes the key ID and the creation time but not the secret key itself. */
     get: operations["getAPIkeys"];
     /** Creates a new API key belonging to the user with the given ID. The response contains a new API key which is the only time this key can be retrieved. They key must be safely stored by the recepient, as there is no way to retrieve it at a later point. A user may only have one API key at a time, so if it is lost or compromised, it must be deleted before a new one can be created. The API key can be used with the /login endpoint to log in. Each key has an ID to identify it when deleting it. */
     post: operations["postAPIkey"];
-    parameters: {
-      path: {
-        /** ID of the user */
-        userId: string;
-      };
-    };
   };
   "/users/{userId}/keys/{keyId}": {
     /** Deletes an API key with the given ID, belonging to a specified user. */
@@ -566,171 +258,81 @@ export interface paths {
 export interface components {
   schemas: {
     Error: {
-      error?: {
-        /**
-         * @description Error message describing what went wrong
-         * @example There was an error X because of Y
-         */
-        message?: string;
-        /**
-         * @description Error code for identifying specific errors
-         * @example 12012
-         */
-        code?: number;
-      };
+      error?: components["schemas"]["Error_error"];
     };
-    /** @description Workspace meta-data */
-    Workspace: {
-      /**
-       * @description Unique workspace identifier.
-       * @example my_workspace
-       */
-      id: string;
-      /** @description True, if the workspace is a clone. */
-      is_clone: boolean;
-      /** @description If field exists, workspace is a read only dashboard workspace */
-      dashboard?: {
-        /**
-         * @description The model to view in the dashboard workspace
-         * @example Modelica.Blocks.Examples.PID_Controller
-         */
-        model: string;
-      };
-    };
+    /**
+     * @example {
+     *   "input": {
+     *     "initialize_from_case": {
+     *       "caseId": "caseId",
+     *       "experimentId": "experimentId"
+     *     },
+     *     "initialize_from_external_result": {
+     *       "uploadId": "2f036b9fab6f45c788cc466da327cc78workspace"
+     *     },
+     *     "parametrization": "{}",
+     *     "structural_parametrization": "{}",
+     *     "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *     "analysis": {
+     *       "analysis_function": "dynamic",
+     *       "solver_options": {
+     *         "key": ""
+     *       },
+     *       "simulation_options": {
+     *         "key": ""
+     *       },
+     *       "parameters": {
+     *         "start_time": 0,
+     *         "final_time": 1
+     *       },
+     *       "simulation_log_level": "NOTHING"
+     *     },
+     *     "fmu_base_parametrization": "{}"
+     *   },
+     *   "run_info": {
+     *     "datetime_started": 1549552749,
+     *     "datetime_finished": 1549552338,
+     *     "consistent": false,
+     *     "failed_at": "simulation",
+     *     "status": "successful"
+     *   },
+     *   "meta": {
+     *     "label": "Cruise operating point"
+     *   },
+     *   "id": "case_1"
+     * }
+     */
     Case: {
       /**
        * @description Case ID.
        * @example case_1
        */
       id?: string;
-      run_info: {
-        /**
-         * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'
-         * @example successful
-         */
-        status?: string;
-        /**
-         * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null
-         * @example simulation
-         */
-        failed_at?: string;
-        /**
-         * @description The unix time the case started running
-         * @example 1549552749
-         */
-        datetime_started?: number;
-        /**
-         * @description The unix time the case finshed running
-         * @example 1549552338
-         */
-        datetime_finished?: number;
-        /**
-         * @description Describes if the case 'input' is consistent with the latest case run. Will be false if the case has been updated and not executed since then
-         * @example false
-         */
-        consistent?: boolean;
-      };
-      meta: {
-        /**
-         * @description Case label
-         * @example Cruise operating point
-         */
-        label?: unknown;
-      };
-      input: {
-        /**
-         * @description Reference ID to the compiled model used running the case
-         * @example workspace_pid_controller_20090615_134530_as86g32
-         */
-        fmu_id?: string;
-        /** @description The analysis object */
-        analysis: {
-          /**
-           * @description the name of the function to run
-           * @example dynamic
-           */
-          analysis_function: string;
-          /**
-           * @description parameters to the function
-           * @example {
-           *   "start_time": 0,
-           *   "final_time": 1
-           * }
-           */
-          parameters?: { [key: string]: unknown };
-          /** @description Key-value pairs of simulation options */
-          simulation_options?: { [key: string]: number | string | boolean };
-          /** @description Key-value pairs of solver options */
-          solver_options?: { [key: string]: number | string | boolean };
-          /**
-           * @description The simulation log level
-           * @enum {string}
-           */
-          simulation_log_level?:
-            | "NOTHING"
-            | "FATAL"
-            | "ERROR"
-            | "WARNING"
-            | "INFO"
-            | "VERBOSE"
-            | "DEBUG"
-            | "ALL";
-        };
-        /** @description Parameterization of the case, a list of key value pairs where key is variable name and value is the value to use  for that variable */
-        parametrization?: { [key: string]: unknown };
-        /** @description Structural parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. These are values that cannot be applied to the FMU/Model after compilation */
-        structural_parametrization?: { [key: string]: unknown };
-        /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU */
-        fmu_base_parametrization?: { [key: string]: unknown };
-        /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID and case ID. Details on how the initialization is done depend on the custom function. */
-        initialize_from_case?: {
-          /** @description Experiment ID to initialize from */
-          experimentId: string;
-          /** @description Case ID to initialize from */
-          caseId: string;
-        };
-        /** @description Initialize the simulation using an uploaded result file. Details on how the initialization is done depends upon the custom function. */
-        initialize_from_external_result?: {
-          /**
-           * @description The ID of the result import
-           * @example 2f036b9fab6f45c788cc466da327cc78workspace
-           */
-          uploadId: string;
-        };
-      };
+      run_info: components["schemas"]["Case_run_info"];
+      meta: components["schemas"]["inline_response_200_25_data_meta"];
+      input: components["schemas"]["Case_input"];
     };
+    /**
+     * @example {
+     *   "options": {
+     *     "simulation": {
+     *       "ncp": 2000
+     *     },
+     *     "runtime": {
+     *       "use_Brent_in_1d": false
+     *     },
+     *     "compiler": {
+     *       "generate_html_diagnostics": true,
+     *       "halt_on_warning": true
+     *     },
+     *     "solver": {
+     *       "rtol": 0.0001
+     *     }
+     *   }
+     * }
+     */
     CaseExecutionOptions: {
-      options: {
-        /**
-         * @description Key-value pairs of compilation options
-         * @example {
-         *   "generate_html_diagnostics": true,
-         *   "halt_on_warning": true
-         * }
-         */
-        compiler?: { [key: string]: number | string | boolean };
-        /**
-         * @description Key-value pairs of run-time options
-         * @example {
-         *   "use_Brent_in_1d": false
-         * }
-         */
-        runtime?: { [key: string]: number | string | boolean };
-        /**
-         * @description Key-value pairs of simulation options
-         * @example {
-         *   "ncp": 2000
-         * }
-         */
-        simulation?: { [key: string]: number | string | boolean };
-        /**
-         * @description Key-value pairs of solver options
-         * @example {
-         *   "rtol": 0.0001
-         * }
-         */
-        solver?: { [key: string]: number | string | boolean };
-      };
+      options: components["schemas"]["CaseExecutionOptions_options"];
     };
     /**
      * @description Specifies expansion algorithm and its parameters.
@@ -744,9 +346,7 @@ export interface components {
      */
     Expansion:
       | components["schemas"]["LatinHyperCube"]
-      | components["schemas"]["Sobol"]
-      | components["schemas"]["FullFactorial"]
-      | components["schemas"]["Saltelli"];
+      | components["schemas"]["FullFactorial"];
     FullFactorial: {
       /**
        * @description Full factorial expansion algorithm
@@ -760,39 +360,7 @@ export interface components {
        * @enum {string}
        */
       algorithm: "LATINHYPERCUBE";
-      /** @description Latin hypercube expansion algorithm parameters */
-      parameters: {
-        /** @description The number of samples. Must be an integer greater than 1. */
-        samples: number;
-        /** @description The seed for random number generation. Default: None */
-        seed?: number;
-      };
-    };
-    Sobol: {
-      /**
-       * @description Latin hypercube sampling expansion algorithm
-       * @enum {string}
-       */
-      algorithm: "SOBOL";
-      /** @description Latin hypercube expansion algorithm parameters */
-      parameters: {
-        /** @description The number of samples. Must be an integer greater than 1. */
-        samples: number;
-      };
-    };
-    Saltelli: {
-      /**
-       * @description Saltelli expansion algorithm
-       * @enum {string}
-       */
-      algorithm: "SALTELLI";
-      /** @description Latin hypercube expansion algorithm parameters */
-      parameters: {
-        /** @description The number of samples per (non-singular) modifier in the following sensitivity analysis. Must be a positive integer. It corresponds to the accuracy/resolution of the following sensisivity analysis and depends on the number of non-singular modifiers D. The number of cases in the resulting experiment expansion will be - N*(2*D + 2) if secondOrderAnalysis == true and N*(D + 2) if secondOrderAnalysis == false, where N is samplesPerModifier and D is the number of non-singular modifiers. */
-        samplesPerModifier: number;
-        /** @description Set to true if the resulting samples are to be used for second order sensitivity analysis, otherwise set to false. */
-        secondOrderAnalysis: boolean;
-      };
+      parameters: components["schemas"]["LatinHyperCube_parameters"];
     };
     /** @description A compilation error with file and class location info */
     ErrorWithFileAndClassLocation: {
@@ -803,24 +371,7 @@ export interface components {
       msg?: string;
       /** @enum {string} */
       locationType?: "FileAndClassLocation";
-      location?: {
-        class?: {
-          /** @example 2 */
-          beginColumn?: number;
-          /** @example 2 */
-          endColumn?: number;
-          /** @example 2 */
-          beginLine?: number;
-          /** @example 2 */
-          endLine?: number;
-          /**
-           * @description Class name
-           * @example Workspace.Example
-           */
-          qualifiedName?: string;
-        };
-        file?: components["schemas"]["FileLocation"];
-      };
+      location?: components["schemas"]["ErrorWithFileAndClassLocation_location"];
     };
     /** @description A compilation error with file location info */
     ErrorWithFileLocation: {
@@ -852,186 +403,49 @@ export interface components {
       msg?: string;
       /** @enum {string} */
       locationType?: "PathLocation";
-      location?: {
-        /**
-         * @description Path to a file used in compilation
-         * @example /impact/libraries/BrokenLib/BrokenFile.moc
-         */
-        path?: string;
-      };
+      location?: components["schemas"]["ErrorWithPathLocation_location"];
     };
+    /**
+     * @example {
+     *   "input": {
+     *     "compiler_options": {
+     *       "generate_html_diagnostics": true
+     *     },
+     *     "runtime_options": {
+     *       "log_level": 4
+     *     },
+     *     "fmi_version": "2.0",
+     *     "compiler_log_level": "info",
+     *     "model_snapshot": "2b3a4-adf3",
+     *     "toolchain_version": "0.0.1",
+     *     "disabled_libs": "[VDL, ML]",
+     *     "class_name": "Workspace.PID_Controller",
+     *     "fmi_target": "me",
+     *     "platform": "win64"
+     *   },
+     *   "run_info": {
+     *     "datetime_started": 1549552749,
+     *     "datetime_finished": 1549552338,
+     *     "errors": [
+     *       "",
+     *       ""
+     *     ],
+     *     "status": "failed"
+     *   },
+     *   "id": "workspace_pid_controller_20090615_134530_as86g32"
+     * }
+     */
     ModelExecutableRunInfoV2: {
       /** @example workspace_pid_controller_20090615_134530_as86g32 */
       id?: string;
-      /** @description The input for how the compilation was done */
-      input?: {
-        /**
-         * @description Model class name
-         * @example Workspace.PID_Controller
-         */
-        class_name?: string;
-        /**
-         * @description Compiler options settings
-         * @example {
-         *   "generate_html_diagnostics": true
-         * }
-         */
-        compiler_options?: { [key: string]: unknown };
-        /**
-         * @description Runtime options settings
-         * @example {
-         *   "log_level": 4
-         * }
-         */
-        runtime_options?: { [key: string]: unknown };
-        /**
-         * @description Compiler log level
-         * @example info
-         */
-        compiler_log_level?: string;
-        /**
-         * @description Flavour of the FMU
-         * @example me
-         */
-        fmi_target?: string;
-        /**
-         * @description Version of FMI for the FMU
-         * @example 2.0
-         */
-        fmi_version?: string;
-        /**
-         * @description Platform for FMU binary
-         * @example win64
-         */
-        platform?: string;
-        /**
-         * @description An unique identifier representing some state of all models and libraries used when compiling
-         * @example 2b3a4-adf3
-         */
-        model_snapshot?: string;
-        /**
-         * @description List of libraries not used when compiling
-         * @example [VDL, ML]
-         */
-        disabled_libs?: string[];
-        /**
-         * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1
-         * @example 0.0.1
-         */
-        toolchain_version?: string;
-      };
-      /** @description The run info of the compilation */
-      run_info?: {
-        /**
-         * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully
-         * @example failed
-         */
-        status?: string;
-        /**
-         * @description The unix time the compilation was started
-         * @example 1549552749
-         */
-        datetime_started?: number;
-        /** @description An array containing the compilation errors in case status is 'failed' */
-        errors?: (
-          | components["schemas"]["ErrorWithFileAndClassLocation"]
-          | components["schemas"]["ErrorWithFileLocation"]
-          | components["schemas"]["ErrorWithNoLocation"]
-          | components["schemas"]["ErrorWithPathLocation"]
-        )[];
-        /**
-         * @description The unix time the compilation was finished
-         * @example 1549552338
-         */
-        datetime_finished?: number;
-      };
+      input?: components["schemas"]["ModelExecutableRunInfoV2_input"];
+      run_info?: components["schemas"]["ModelExecutableRunInfoV2_run_info"];
     };
     ModelExecutableRunInfoV1: {
       /** @example workspace_pid_controller_20090615_134530_as86g32 */
       id?: string;
-      /** @description The input for how the compilation was done */
-      input?: {
-        /**
-         * @description Model class name
-         * @example Workspace.PID_Controller
-         */
-        class_name?: string;
-        /**
-         * @description Compiler options settings
-         * @example {
-         *   "generate_html_diagnostics": true
-         * }
-         */
-        compiler_options?: { [key: string]: unknown };
-        /**
-         * @description Runtime options settings
-         * @example {
-         *   "log_level": 4
-         * }
-         */
-        runtime_options?: { [key: string]: unknown };
-        /**
-         * @description Compiler log level
-         * @example info
-         */
-        compiler_log_level?: string;
-        /**
-         * @description Flavour of the FMU
-         * @example me
-         */
-        fmi_target?: string;
-        /**
-         * @description Version of FMI for the FMU
-         * @example 2.0
-         */
-        fmi_version?: string;
-        /**
-         * @description Platform for FMU binary
-         * @example win64
-         */
-        platform?: string;
-        /**
-         * @description An unique identifier representing some state of all models and libraries used when compiling
-         * @example 2b3a4-adf3
-         */
-        model_snapshot?: string;
-        /**
-         * @description List of libraries not used when compiling
-         * @example [VDL, ML]
-         */
-        disabled_libs?: string[];
-        /**
-         * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1
-         * @example 0.0.1
-         */
-        toolchain_version?: string;
-      };
-      /** @description The run info of the compilation */
-      run_info?: {
-        /**
-         * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully
-         * @example failed
-         */
-        status?: string;
-        /**
-         * @description The unix time the compilation was started
-         * @example 1549552749
-         */
-        datetime_started?: number;
-        /**
-         * @description An array containing the compilation errors in case status is 'failed'
-         * @example [
-         *   "Could not match 'variable1' with any equation",
-         *   "Nominal of 'variable2' is 0"
-         * ]
-         */
-        errors?: string[];
-        /**
-         * @description The unix time the compilation was finished
-         * @example 1549552338
-         */
-        datetime_finished?: number;
-      };
+      input?: components["schemas"]["ModelExecutableRunInfoV2_input"];
+      run_info?: components["schemas"]["ModelExecutableRunInfoV1_run_info"];
     };
     FileLocation: {
       /** @example 2 */
@@ -1053,7 +467,23 @@ export interface components {
        */
       file?: string;
     };
-    /** @description The analysis object */
+    /**
+     * @description The analysis object
+     * @example {
+     *   "solverOptions": {
+     *     "key": ""
+     *   },
+     *   "simulationOptions": {
+     *     "key": ""
+     *   },
+     *   "type": "dynamic",
+     *   "parameters": {
+     *     "start_time": 0,
+     *     "final_time": 1
+     *   },
+     *   "simulationLogLevel": "WARNING"
+     * }
+     */
     Analysis: {
       /**
        * @description The name of the custom function that will be executed
@@ -1102,13 +532,7 @@ export interface components {
       variables?: { [key: string]: number | string | boolean };
       /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
       initializeFrom?: string;
-      /** @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases */
-      initializeFromCase?: {
-        /** @description Experiment ID to initialize from */
-        experimentId: string;
-        /** @description Case ID to initialize from */
-        caseId: string;
-      };
+      initializeFromCase?: components["schemas"]["Modifiers_initializeFromCase"];
       /**
        * @description The ID of the result import
        * @example 2f036b9fab6f45c788cc466da327cc78workspace
@@ -1172,6 +596,12 @@ export interface components {
           | "ALL";
       };
     }[];
+    /**
+     * @example {
+     *   "modelica": "{}",
+     *   "fmu": "{}"
+     * }
+     */
     Model: (unknown | unknown) & {
       fmu?: {
         /**
@@ -1233,20 +663,130 @@ export interface components {
         platform: "linux64" | "win32" | "win64" | "auto";
       };
     };
+    /**
+     * @example {
+     *   "extensions": [
+     *     "{}",
+     *     "{}"
+     *   ],
+     *   "version": 2,
+     *   "base": {
+     *     "model": {
+     *       "modelica": "{}",
+     *       "fmu": "{}"
+     *     },
+     *     "modifiers": {
+     *       "variables": {
+     *         "integrator.k": 1,
+     *         "inertia1.J": "uniform(1,5)",
+     *         "inertia2.J": 2
+     *       },
+     *       "initializeFrom": ""
+     *     },
+     *     "analysis": {
+     *       "solverOptions": {
+     *         "key": ""
+     *       },
+     *       "simulationOptions": {
+     *         "key": ""
+     *       },
+     *       "type": "dynamic",
+     *       "parameters": {
+     *         "start_time": 0,
+     *         "final_time": 1
+     *       },
+     *       "simulationLogLevel": "WARNING"
+     *     },
+     *     "expansion": {
+     *       "algorithm": "LatinHyperCube",
+     *       "parameters": {
+     *         "samples": 5,
+     *         "seed": 1
+     *       }
+     *     }
+     *   }
+     * }
+     */
     ExperimentDefinition: {
       /**
        * @description Experiment version, should be '2'
        * @example 2
        */
       version: number;
-      base: {
-        model: components["schemas"]["Model"];
-        modifiers?: components["schemas"]["Modifiers"];
-        expansion?: components["schemas"]["Expansion"];
-        analysis: components["schemas"]["Analysis"];
-      };
-      extensions?: components["schemas"]["Extensions"];
+      base: components["schemas"]["ExperimentDefinition_base"];
+      /** @description List of extensions to define cases. Each 'extension' defined will be merged with 'base' to create a case. When merging 'base' with an 'extension', the 'extension' will override the corresponding definitions in 'base'. It is not possible to use any operators (like the range operator) when using extensions. */
+      extensions?: {
+        /**
+         * @example {
+         *   "variables": {
+         *     "inertia2.J": 5
+         *   }
+         * }
+         */
+        modifiers?: {
+          /** @description Specifies parameter values. */
+          variables?: { [key: string]: number | string | boolean };
+          /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
+          initializeFrom?: string;
+          /** @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases */
+          initializeFromCase?: {
+            /** @description Experiment ID to initialize from */
+            experimentId: string;
+            /** @description Case ID to initialize from */
+            caseId: string;
+          };
+        };
+        /** @description An array of case data. Only the first index in the case data array will be used for extensions currently. */
+        caseData?: {
+          /** @description Specifies case label. */
+          label?: unknown;
+        }[];
+        /** @description The analysis object */
+        analysis?: {
+          /**
+           * @description Parameters to the custom function
+           * @example {
+           *   "start_time": 0,
+           *   "final_time": 1
+           * }
+           */
+          parameters?: { [key: string]: number | string | boolean };
+          /** @description Key-value pairs of simulation options */
+          simulationOptions?: { [key: string]: number | string | boolean };
+          /** @description Key-value pairs of solver options */
+          solverOptions?: { [key: string]: number | string | boolean };
+          /**
+           * @description The simulation log level
+           * @default WARNING
+           * @enum {string}
+           */
+          simulationLogLevel:
+            | "NOTHING"
+            | "FATAL"
+            | "ERROR"
+            | "WARNING"
+            | "INFO"
+            | "VERBOSE"
+            | "DEBUG"
+            | "ALL";
+        };
+      }[];
     };
+    /**
+     * @example {
+     *   "model_names": [
+     *     "Workspace.PID_Controller",
+     *     "Workspace.PID_Controller"
+     *   ],
+     *   "label": "my label",
+     *   "user_data": {
+     *     "parametrizationFrom": "specification 3.4",
+     *     "externalToolVersion": "9.0"
+     *   },
+     *   "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *   "created_epoch": 1550836039
+     * }
+     */
     ExperimentMetaData: {
       /** @example workspace_pid_controller_20090615_134530_as86g32 */
       experiment_hash?: string;
@@ -1264,40 +804,3265 @@ export interface components {
        */
       user_data?: { [key: string]: unknown };
     };
+    /**
+     * @example {
+     *   "data": {
+     *     "data": {
+     *       "resourceUri": "api/external-result/2f036b9fab6f45c788cc466da327cc78workspace"
+     *     },
+     *     "id": "2f036b9fab6f45c788cc466da327cc78workspace",
+     *     "error": {
+     *       "code": 12015,
+     *       "message": "Could not upload given result file to the specified workspace. Could not read version number of the workspace 'my_workspace' or unsupported file type given."
+     *     },
+     *     "status": "ready"
+     *   }
+     * }
+     */
     ExternalResultUploadStatus: {
-      data?: {
-        /**
-         * @description The ID of the result import
-         * @example 2f036b9fab6f45c788cc466da327cc78workspace
-         */
-        id?: string;
-        /**
-         * @description current status of the upload
-         * @example ready
-         */
-        status?: string;
-        /** @description Data for access to the meta data for the given upload, only exists in response if the upload was successful. Use the field 'status' to see if this is the case. */
-        data?: {
-          /**
-           * @description URI for the result resource
-           * @example api/external-result/2f036b9fab6f45c788cc466da327cc78workspace
-           */
-          resourceUri?: string;
-        };
-        /** @description Error message if the upload fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
-        error?: {
-          /**
-           * @description Error message describing what went wrong
-           * @example Could not upload given result file to the specified workspace. Could not read version number of the workspace 'my_workspace' or unsupported file type given.
-           */
-          message?: string;
-          /**
-           * @description Error code for identifying specific errors
-           * @example 12015
-           */
-          code?: number;
-        };
-      };
+      data?: components["schemas"]["ExternalResultUploadStatus_data"];
+    };
+    /**
+     * @description API meta-data
+     * @example {
+     *   "version": "1.0.0"
+     * }
+     */
+    inline_response_200: {
+      /** @description The semantic version of this API */
+      version?: string;
+    };
+    inline_object: {
+      /**
+       * @description An API key.
+       * @example secret-api-key
+       */
+      secretKey?: string;
+    };
+    /**
+     * @example {
+     *   "identifier": "identifier"
+     * }
+     */
+    inline_response_200_1: {
+      /** @description A user identifier. */
+      identifier?: string;
+    };
+    /** @description Workspace meta-data */
+    inline_response_200_2_data_items: {
+      /** @description Unique workspace identifier. */
+      id?: string;
+      /** @description True, if the workspace is a clone. */
+      is_clone?: boolean;
+    };
+    inline_response_200_2_data: {
+      items?: components["schemas"]["inline_response_200_2_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "id": "workspace1",
+     *         "is_clone": false
+     *       },
+     *       {
+     *         "id": "workspace2",
+     *         "is_clone": true
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_2: {
+      data?: components["schemas"]["inline_response_200_2_data"];
+    };
+    inline_object_1: {
+      /**
+       * Format: binary
+       * @description The zip-file
+       */
+      file?: string;
+    };
+    /**
+     * @example {
+     *   "id": "my_workspace"
+     * }
+     */
+    inline_response_200_3: {
+      /**
+       * @description The ID of the imported workspace
+       * @example my_workspace
+       */
+      id?: string;
+    };
+    /**
+     * @example {
+     *   "id": "workspace1",
+     *   "is_clone": false
+     * }
+     */
+    inline_response_200_4: {
+      /** @description Unique workspace identifier. */
+      id?: string;
+      /** @description True, if the workspace is a clone. */
+      is_clone?: boolean;
+    };
+    /** @description Name of Modelica library to include in workspace export */
+    _workspaces__workspace__exports_contents_libraries: {
+      /**
+       * @description The name of the library
+       * @example LiquidCooling
+       */
+      name: string;
+      /**
+       * @description A list of resources to exclude when exporting library
+       * @example [
+       *   "my_plot.png",
+       *   "my_sheet.csv"
+       * ]
+       */
+      resources_to_exclude: string[];
+    };
+    _workspaces__workspace__exports_contents: {
+      /**
+       * @description List of dictionaries, describing which libraries to include when downloading the workspace
+       * @example [
+       *   {
+       *     "name": "LiquidCooling",
+       *     "resources_to_exclude": []
+       *   },
+       *   {
+       *     "name": "Workspace",
+       *     "resources_to_exclude": [
+       *       "my_plot.png",
+       *       "my_sheet.csv"
+       *     ]
+       *   }
+       * ]
+       */
+      libraries: components["schemas"]["_workspaces__workspace__exports_contents_libraries"][];
+      /**
+       * @description List of experiments to include when downloading the workspace
+       * @example [
+       *   "_nics_multibody_examples_elementary_doublependulum_20191029_084342_2c956e9",
+       *   "modelica_blocks_examples_pid_controller_20191023_151659_f32a30d"
+       * ]
+       */
+      experiment_ids: string[];
+      /**
+       * @description List of model executables to include when downloading the workspace
+       * @example [
+       *   "_nics_multibody_examples_elementary_doublependulum_20191029_084342_2c956e9",
+       *   "modelica_blocks_examples_pid_controller_20191023_151659_f32a30d"
+       * ]
+       */
+      fmu_ids: string[];
+    };
+    inline_object_2: {
+      contents: components["schemas"]["_workspaces__workspace__exports_contents"];
+    };
+    /**
+     * @example {
+     *   "export_id": "79sd8-3n2a4-e3t24",
+     *   "file_size": 10481015
+     * }
+     */
+    inline_response_200_5: {
+      /**
+       * @description ID for downloading the compressed workspace
+       * @example 79sd8-3n2a4-e3t24
+       */
+      export_id?: string;
+      /**
+       * @description The size of the compressed workspace, in bytes
+       * @example 10481015
+       */
+      file_size?: number;
+    };
+    /**
+     * @example {
+     *   "workspace_id": "MyClonedWorkspace"
+     * }
+     */
+    inline_response_200_6: {
+      /**
+       * @description The name of the new cloned workspace
+       * @example MyClonedWorkspace
+       */
+      workspace_id?: string;
+    };
+    inline_response_200_7_data: {
+      /** @description List of objects containing all top-level libraries and their metadata. */
+      items?: { [key: string]: unknown }[];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "id": "Hydraulics 4.9",
+     *         "version": "4.9",
+     *         "uses": {},
+     *         "name": "Hydraulics"
+     *       },
+     *       {
+     *         "id": "Modelon 2.6",
+     *         "version": "2.6",
+     *         "uses": {
+     *           "Modelica": {
+     *             "version": "3.2.2"
+     *           }
+     *         },
+     *         "name": "Modelon"
+     *       },
+     *       {
+     *         "id": "Single",
+     *         "uses": {},
+     *         "name": "Single"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_7: {
+      data?: components["schemas"]["inline_response_200_7_data"];
+    };
+    inline_response_200_8_data: {
+      items?: { [key: string]: unknown }[];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "id": "Hydraulics 4.9",
+     *         "version": "4.9",
+     *         "uses": {},
+     *         "name": "Hydraulics",
+     *         "archive": "mol"
+     *       },
+     *       {
+     *         "id": "Workspace",
+     *         "uses": {},
+     *         "name": "Workspace"
+     *       },
+     *       {
+     *         "id": "Modelon 2.6",
+     *         "version": "2.6",
+     *         "uses": {
+     *           "Modelica": {
+     *             "version": "3.2.2"
+     *           }
+     *         },
+     *         "name": "Modelon"
+     *       },
+     *       {
+     *         "id": "Single",
+     *         "uses": {},
+     *         "name": "Single"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_8: {
+      data?: components["schemas"]["inline_response_200_8_data"];
+    };
+    inline_object_3: {
+      /**
+       * Format: binary
+       * @description The file containing the model library.
+       */
+      file?: string;
+    };
+    /**
+     * @example {
+     *   "name": "Modelon",
+     *   "uses": {
+     *     "Modelica": "3.2.2",
+     *     "ThermalPower": "1.14"
+     *   },
+     *   "archive": "mol",
+     *   "version": "1.0"
+     * }
+     */
+    inline_response_200_9: {
+      /**
+       * @description The model library identifier
+       * @example Modelon
+       */
+      name: string;
+      /**
+       * @description The model library dependencies
+       * @example {
+       *   "Modelica": "3.2.2",
+       *   "ThermalPower": "1.14"
+       * }
+       */
+      uses: { [key: string]: unknown };
+      /**
+       * @description File ending for the model library archive, either 'zip' or 'mol'
+       * @example mol
+       */
+      archive?: string;
+      /**
+       * @description The version number of the model library
+       * @example 1.0
+       */
+      version?: string;
+    };
+    /** @description Import options */
+    _workspaces__workspace__libraries__library__models_options: {
+      /**
+       * @description Qualified name of generated class. By default, 'className' is set to the name of the library followed by a name based on the filename of the imported FMU.
+       * @example Workspace.Modelica_Electrical_Spice3_Examples_Spice3BenchmarkRtlInverter
+       */
+      className?: string;
+      /** @description Determines if any already existing files in the library should be overwritten. By default, the existing files are not overwritten. */
+      overwrite?: boolean;
+      /**
+       * @description Specifies what variables from the FMU to include in the wrapper model. By default, all the variables will be included in the wrapper model.
+       * @example [
+       *   "variable1",
+       *   "variable2"
+       * ]
+       */
+      includePatterns?: string[];
+      /**
+       * @description Specifies what variables from the FMU to exclude in the wrapper model. By default, all the variables will be included in the wrapper model.
+       * @example [
+       *   "variable1",
+       *   "variable2"
+       * ]
+       */
+      excludePatterns?: string[];
+      /**
+       * @description Specify which variables in the imported FMU will be inputs in the created Modelica wrapper model. By default, all the inputs are kept as inputs
+       * @example [
+       *   "variable1",
+       *   "variable2"
+       * ]
+       */
+      topLevelInputs?: string[];
+      /**
+       * @description Specifies the value for the 'step size' parameter in the generated model. By default, the parameter is set to zero, which in turn means that the step size will be set during simulation based on simulation properties such as the time interval.
+       * @example 0.1
+       */
+      stepSize?: number;
+    };
+    inline_object_4: {
+      /**
+       * Format: binary
+       * @description The FMU file.
+       */
+      file: string;
+      options: components["schemas"]["_workspaces__workspace__libraries__library__models_options"];
+    };
+    /**
+     * @example {
+     *   "library": {
+     *     "id": "Hydraulics 4.9",
+     *     "version": "4.9",
+     *     "uses": {},
+     *     "name": "Hydraulics",
+     *     "archive": "mol"
+     *   },
+     *   "importWarnings": [
+     *     "Specified argument for 'top_level_inputs=['a']' does not match any variable"
+     *   ],
+     *   "fmuClassPath": "Workspace.PID_Controller.Model"
+     * }
+     */
+    inline_response_200_10: {
+      /**
+       * @description The modelica class path for the imported FMU
+       * @example Workspace.PID_Controller.Model
+       */
+      fmuClassPath: string;
+      /**
+       * @description An array containing warnings generated during FMU import
+       * @example [
+       *   "Specified argument for 'top_level_inputs=['a']' does not match any variable"
+       * ]
+       */
+      importWarnings?: string[];
+      /**
+       * @description Meta data for the library the FMU was imported to.
+       * @example {
+       *   "id": "Hydraulics 4.9",
+       *   "version": "4.9",
+       *   "uses": {},
+       *   "name": "Hydraulics",
+       *   "archive": "mol"
+       * }
+       */
+      library?: { [key: string]: unknown };
+    };
+    /**
+     * @example {
+     *   "defaultValue": 2,
+     *   "values": [
+     *     "small",
+     *     "medium",
+     *     "large"
+     *   ],
+     *   "name": "my_custom_function_parameter",
+     *   "description": "This is my custom function parameter, supports values of '1', '2' and '3'",
+     *   "optional": "true",
+     *   "type": "Number"
+     * }
+     */
+    inline_response_200_11_parameters: {
+      /**
+       * @description Name of the custom function parameter
+       * @example my_custom_function_parameter
+       */
+      name: string;
+      /**
+       * @description Data type of the custom function parameter, supported types are 'Number', 'String', 'Boolean' and 'Enumeration'
+       * @example Number
+       */
+      type: string;
+      /**
+       * @description A list specifying values to choose the parameter from (applicable only for parameters of type Enumeration).
+       * @example [
+       *   "small",
+       *   "medium",
+       *   "large"
+       * ]
+       */
+      values?: string[];
+      /**
+       * @description Description of the custom function parameter
+       * @example This is my custom function parameter, supports values of '1', '2' and '3'
+       */
+      description: string;
+      /**
+       * @description If this custom function parameter is optional when calling this custom function, supported values are 'true' and 'false'
+       * @example true
+       */
+      optional?: string;
+      /**
+       * @description Default value for this custom function parameter, its data type should be as specified in 'type' (except for enumeration parameters, where the default value should be one of the enumerated values).
+       * @example 2
+       */
+      defaultValue?: string | number | boolean;
+    };
+    /**
+     * @example {
+     *   "can_initialize_from": true,
+     *   "name": "my_custom_function",
+     *   "description": "This is my custom function!",
+     *   "version": "0.0.1",
+     *   "parameters": [
+     *     {
+     *       "defaultValue": 2,
+     *       "values": [
+     *         "small",
+     *         "medium",
+     *         "large"
+     *       ],
+     *       "name": "my_custom_function_parameter",
+     *       "description": "This is my custom function parameter, supports values of '1', '2' and '3'",
+     *       "optional": "true",
+     *       "type": "Number"
+     *     },
+     *     {
+     *       "defaultValue": 2,
+     *       "values": [
+     *         "small",
+     *         "medium",
+     *         "large"
+     *       ],
+     *       "name": "my_custom_function_parameter",
+     *       "description": "This is my custom function parameter, supports values of '1', '2' and '3'",
+     *       "optional": "true",
+     *       "type": "Number"
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_11: {
+      /**
+       * @description Custom function signature schema version
+       * @example 0.0.1
+       */
+      version?: string;
+      /**
+       * @description Name of the custom function
+       * @example my_custom_function
+       */
+      name?: string;
+      /**
+       * @description Description of the custom function
+       * @example This is my custom function!
+       */
+      description?: string;
+      /** @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment. */
+      can_initialize_from?: boolean;
+      /** @description A list of parameters that should be supplied in the experiment definition if this custom function is used. */
+      parameters?: components["schemas"]["inline_response_200_11_parameters"][];
+    };
+    /**
+     * @example {
+     *   "simulation": {},
+     *   "runtime": {},
+     *   "compiler": {
+     *     "c_compiler": "gcc",
+     *     "interactive_fmu": true,
+     *     "expose_scalar_equation_blocks_in_interactive_fmu": true,
+     *     "merge_blt_blocks": true,
+     *     "hand_guided_tearing": true,
+     *     "local_iteration_in_tearing": "annotation",
+     *     "equation_sorting": true,
+     *     "automatic_tearing": true,
+     *     "divide_by_vars_in_tearing": true,
+     *     "variability_propagation": false
+     *   },
+     *   "solver": {
+     *     "max_iter_no_jacobian": 1,
+     *     "tolerance": 0.00001,
+     *     "step_limit_factor": 1,
+     *     "jacobian_calculation_mode": 9,
+     *     "residual_equation_scaling": 5
+     *   }
+     * }
+     */
+    inline_response_200_12: {
+      /**
+       * @description Compilation options
+       * @example {
+       *   "c_compiler": "gcc",
+       *   "interactive_fmu": true,
+       *   "expose_scalar_equation_blocks_in_interactive_fmu": true,
+       *   "merge_blt_blocks": true,
+       *   "hand_guided_tearing": true,
+       *   "local_iteration_in_tearing": "annotation",
+       *   "equation_sorting": true,
+       *   "automatic_tearing": true,
+       *   "divide_by_vars_in_tearing": true,
+       *   "variability_propagation": false
+       * }
+       */
+      compiler?: { [key: string]: unknown };
+      /**
+       * @description Run-time options
+       * @example {}
+       */
+      runtime?: { [key: string]: unknown };
+      /**
+       * @description Simulation options
+       * @example {}
+       */
+      simulation?: { [key: string]: unknown };
+      /**
+       * @description Solver options
+       * @example {
+       *   "max_iter_no_jacobian": 1,
+       *   "tolerance": 0.00001,
+       *   "step_limit_factor": 1,
+       *   "jacobian_calculation_mode": 9,
+       *   "residual_equation_scaling": 5
+       * }
+       */
+      solver?: { [key: string]: unknown };
+    };
+    inline_response_200_13_data_items: {
+      /**
+       * @description Custom function signature schema version
+       * @example 0.0.1
+       */
+      version: string;
+      /**
+       * @description Name of the custom function
+       * @example my_custom_function
+       */
+      name: string;
+      /**
+       * @description Description of the custom function
+       * @example This is my custom function!
+       */
+      description: string;
+      /** @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment. */
+      can_initialize_from: boolean;
+      /** @description A list of parameters that should be supplied in the experiment definition if this custom function is used. */
+      parameters: components["schemas"]["inline_response_200_11_parameters"][];
+    };
+    inline_response_200_13_data: {
+      items?: components["schemas"]["inline_response_200_13_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "version": "1.0.0",
+     *         "name": "simulate_dynamic",
+     *         "description": "Performs a dynamic simulation",
+     *         "parameters": [
+     *           {
+     *             "name": "start_time",
+     *             "type": "number",
+     *             "description": "",
+     *             "optional": "false",
+     *             "defaultValue": 0
+     *           },
+     *           {
+     *             "name": "final_time",
+     *             "type": "number",
+     *             "description": "",
+     *             "optional": "false",
+     *             "defaultValue": 1
+     *           }
+     *         ]
+     *       },
+     *       {
+     *         "version": "1.0.0",
+     *         "name": "steady_state",
+     *         "description": "Performs a steady state simulation"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_13: {
+      data?: components["schemas"]["inline_response_200_13_data"];
+    };
+    /**
+     * @example {
+     *   "unit": "K",
+     *   "offset": -273.15,
+     *   "multiplier": 1,
+     *   "displayUnit": "degC"
+     * }
+     */
+    inline_response_200_14_si: {
+      /** @example K */
+      unit: string;
+      /** @example degC */
+      displayUnit: string;
+      /** @example 1 */
+      multiplier: number;
+      /** @example -273.15 */
+      offset: number;
+    };
+    /**
+     * @example {
+     *   "unit": "K",
+     *   "offset": -459.67,
+     *   "multiplier": 1.8,
+     *   "displayUnit": "degF"
+     * }
+     */
+    inline_response_200_14_imperial: {
+      /** @example K */
+      unit: string;
+      /** @example degF */
+      displayUnit: string;
+      /** @example 1.8 */
+      multiplier: number;
+      /** @example -459.67 */
+      offset: number;
+    };
+    /**
+     * @description Unit conversion factors
+     * @example {
+     *   "si": [
+     *     {
+     *       "unit": "K",
+     *       "offset": -273.15,
+     *       "multiplier": 1,
+     *       "displayUnit": "degC"
+     *     },
+     *     {
+     *       "unit": "K",
+     *       "offset": -273.15,
+     *       "multiplier": 1,
+     *       "displayUnit": "degC"
+     *     }
+     *   ],
+     *   "imperial": [
+     *     {
+     *       "unit": "K",
+     *       "offset": -459.67,
+     *       "multiplier": 1.8,
+     *       "displayUnit": "degF"
+     *     },
+     *     {
+     *       "unit": "K",
+     *       "offset": -459.67,
+     *       "multiplier": 1.8,
+     *       "displayUnit": "degF"
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_14: {
+      /** @description SI unit conversions */
+      si?: components["schemas"]["inline_response_200_14_si"][];
+      /** @description Imperial unit conversions */
+      imperial?: components["schemas"]["inline_response_200_14_imperial"][];
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     {
+     *       "input": {
+     *         "compiler_options": {
+     *           "generate_html_diagnostics": true
+     *         },
+     *         "runtime_options": {
+     *           "log_level": 4
+     *         },
+     *         "fmi_version": "2.0",
+     *         "compiler_log_level": "info",
+     *         "model_snapshot": "2b3a4-adf3",
+     *         "toolchain_version": "0.0.1",
+     *         "disabled_libs": "[VDL, ML]",
+     *         "class_name": "Workspace.PID_Controller",
+     *         "fmi_target": "me",
+     *         "platform": "win64"
+     *       },
+     *       "run_info": {
+     *         "datetime_started": 1549552749,
+     *         "datetime_finished": 1549552338,
+     *         "errors": [
+     *           "",
+     *           ""
+     *         ],
+     *         "status": "failed"
+     *       },
+     *       "id": "workspace_pid_controller_20090615_134530_as86g32"
+     *     },
+     *     {
+     *       "input": {
+     *         "compiler_options": {
+     *           "generate_html_diagnostics": true
+     *         },
+     *         "runtime_options": {
+     *           "log_level": 4
+     *         },
+     *         "fmi_version": "2.0",
+     *         "compiler_log_level": "info",
+     *         "model_snapshot": "2b3a4-adf3",
+     *         "toolchain_version": "0.0.1",
+     *         "disabled_libs": "[VDL, ML]",
+     *         "class_name": "Workspace.PID_Controller",
+     *         "fmi_target": "me",
+     *         "platform": "win64"
+     *       },
+     *       "run_info": {
+     *         "datetime_started": 1549552749,
+     *         "datetime_finished": 1549552338,
+     *         "errors": [
+     *           "",
+     *           ""
+     *         ],
+     *         "status": "failed"
+     *       },
+     *       "id": "workspace_pid_controller_20090615_134530_as86g32"
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_15_data: {
+      /** @description List of all model executables */
+      items?: components["schemas"]["ModelExecutableRunInfoV2"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "input": {
+     *           "compiler_options": {
+     *             "generate_html_diagnostics": true
+     *           },
+     *           "runtime_options": {
+     *             "log_level": 4
+     *           },
+     *           "fmi_version": "2.0",
+     *           "compiler_log_level": "info",
+     *           "model_snapshot": "2b3a4-adf3",
+     *           "toolchain_version": "0.0.1",
+     *           "disabled_libs": "[VDL, ML]",
+     *           "class_name": "Workspace.PID_Controller",
+     *           "fmi_target": "me",
+     *           "platform": "win64"
+     *         },
+     *         "run_info": {
+     *           "datetime_started": 1549552749,
+     *           "datetime_finished": 1549552338,
+     *           "errors": [
+     *             "",
+     *             ""
+     *           ],
+     *           "status": "failed"
+     *         },
+     *         "id": "workspace_pid_controller_20090615_134530_as86g32"
+     *       },
+     *       {
+     *         "input": {
+     *           "compiler_options": {
+     *             "generate_html_diagnostics": true
+     *           },
+     *           "runtime_options": {
+     *             "log_level": 4
+     *           },
+     *           "fmi_version": "2.0",
+     *           "compiler_log_level": "info",
+     *           "model_snapshot": "2b3a4-adf3",
+     *           "toolchain_version": "0.0.1",
+     *           "disabled_libs": "[VDL, ML]",
+     *           "class_name": "Workspace.PID_Controller",
+     *           "fmi_target": "me",
+     *           "platform": "win64"
+     *         },
+     *         "run_info": {
+     *           "datetime_started": 1549552749,
+     *           "datetime_finished": 1549552338,
+     *           "errors": [
+     *             "",
+     *             ""
+     *           ],
+     *           "status": "failed"
+     *         },
+     *         "id": "workspace_pid_controller_20090615_134530_as86g32"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_15: {
+      data?: components["schemas"]["inline_response_200_15_data"];
+    };
+    /** @description The input for how the compilation was done */
+    _workspaces__workspace__model_executables_input: {
+      /**
+       * @description Model class name
+       * @example Workspace.PID_Controller
+       */
+      class_name: string;
+      /**
+       * @description Key-value pairs of compilation options
+       * @example {
+       *   "generate_html_diagnostics": true
+       * }
+       */
+      compiler_options: { [key: string]: number | string | boolean };
+      /**
+       * @description Key-value pairs of run-time options
+       * @example {
+       *   "log_level": 4
+       * }
+       */
+      runtime_options: { [key: string]: number | string | boolean };
+      /**
+       * @description Compiler log level
+       * @example info
+       */
+      compiler_log_level: string;
+      /**
+       * @description Flavour of the FMU
+       * @example me
+       * @enum {string}
+       */
+      fmi_target: "me" | "cs" | "me+cs";
+      /**
+       * @description Version of FMI for the FMU
+       * @example 2.0
+       * @enum {string}
+       */
+      fmi_version: "1.0" | "2.0";
+      /**
+       * @description Platform for FMU binary
+       * @example win64
+       * @enum {string}
+       */
+      platform: "linux64" | "win32" | "win64" | "auto";
+    };
+    inline_object_5: {
+      input: components["schemas"]["_workspaces__workspace__model_executables_input"];
+    };
+    /**
+     * @example {
+     *   "id": "workspace_pid_controller_20090615_134530_as86g32",
+     *   "parametersMissing": [
+     *     "inertia1.J",
+     *     "inertia1.J"
+     *   ],
+     *   "parameters": {
+     *     "inertia1.J": 2
+     *   }
+     * }
+     */
+    inline_response_200_16: {
+      /**
+       * @description A unique identifier for an FMU. Will be null if getCached=true and no cached FMU is available.
+       * @example workspace_pid_controller_20090615_134530_as86g32
+       */
+      id?: string;
+      /**
+       * @description Parameter values to be set on the FMU referenced by the 'id', for it to represent current model setup. Empty if getCached=false.
+       * @example {
+       *   "inertia1.J": 2
+       * }
+       */
+      parameters?: { [key: string]: unknown };
+      /** @description Parameters to be set for the FMU referenced by the 'id', default value is otherwise not guaranteed to represent current model setup. Empty if getCached=false or allowNonStructuralMissing=false. */
+      parametersMissing?: string[];
+    };
+    /**
+     * @example {
+     *   "platforms": [
+     *     "win32",
+     *     "win64"
+     *   ]
+     * }
+     */
+    inline_response_200_17_data: {
+      /**
+       * @description An array containing the list of platforms in which the FMU can be generated
+       * @example [
+       *   "win32",
+       *   "win64"
+       * ]
+       */
+      platforms?: string[];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "platforms": [
+     *       "win32",
+     *       "win64"
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_17: {
+      data?: components["schemas"]["inline_response_200_17_data"];
+    };
+    inline_response_200_18_progresses: {
+      /**
+       * @description A message about the progress of the execution.
+       * @example Simulation at time 3.45
+       */
+      message?: string;
+      /**
+       * @description A number between 0 and 1 indicating how the execution is progressing
+       * @example 0.43
+       */
+      percentage?: number;
+      /**
+       * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'
+       * @example compilation
+       */
+      stage?: string;
+      /**
+       * @description True if the compilation is done
+       * @example true
+       */
+      done?: boolean;
+    };
+    /**
+     * @description Shows total number of executions and how many have finished. The status string can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
+     * @example {
+     *   "finished_executions": 0,
+     *   "total_executions": 1,
+     *   "status": "running",
+     *   "progresses": [
+     *     {
+     *       "message": "Compiling...",
+     *       "percentage": 0,
+     *       "stage": "compilation",
+     *       "done": false
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_18: {
+      /**
+       * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string.
+       * @example 27
+       */
+      finished_executions?: number;
+      /**
+       * @description Total number of executions.
+       * @example 50
+       */
+      total_executions?: number;
+      /**
+       * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
+       * @example running
+       */
+      status?: string;
+      /** @description An array containing progress information about all executions */
+      progresses?: components["schemas"]["inline_response_200_18_progresses"][];
+    };
+    inline_object_6: {
+      /**
+       * @description The current parameter state of the FMU
+       * @example {
+       *   "foo": 1,
+       *   "bar": 2
+       * }
+       */
+      parameterState: { [key: string]: unknown };
+    };
+    /**
+     * @description The steady state meta-data
+     * @example {
+     *   "residual_variable_count": 1,
+     *   "iteration_variable_count": 2
+     * }
+     */
+    inline_response_200_19_steady_state: {
+      /**
+       * @description Number of residual variables
+       * @example 1
+       */
+      residual_variable_count?: number;
+      /**
+       * @description Number of iteration variables
+       * @example 2
+       */
+      iteration_variable_count?: number;
+    };
+    /**
+     * @example {
+     *   "steady_state": {
+     *     "residual_variable_count": 1,
+     *     "iteration_variable_count": 2
+     *   }
+     * }
+     */
+    inline_response_200_19: {
+      steady_state?: components["schemas"]["inline_response_200_19_steady_state"];
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     [
+     *       "var1",
+     *       "var2"
+     *     ],
+     *     [
+     *       "val1",
+     *       "val2"
+     *     ]
+     *   ]
+     * }
+     */
+    inline_response_200_20_data: {
+      /**
+       * @description An array containing two arrays, the first containing parameter names and the second containing respective string values
+       * @example [
+       *   [
+       *     "var1",
+       *     "var2"
+       *   ],
+       *   [
+       *     "val1",
+       *     "val2"
+       *   ]
+       * ]
+       */
+      items?: string[][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       [
+     *         "var1",
+     *         "var2"
+     *       ],
+     *       [
+     *         "val1",
+     *         "val2"
+     *       ]
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_20: {
+      data?: components["schemas"]["inline_response_200_20_data"];
+    };
+    /**
+     * @example {
+     *   "cancelled": 0,
+     *   "failed": 0,
+     *   "errors": [
+     *     "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *   ],
+     *   "status": "failed",
+     *   "successful": 15,
+     *   "not_started": 0
+     * }
+     */
+    inline_response_200_21_data_run_info: {
+      /**
+       * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run
+       * @example failed
+       */
+      status?: string;
+      /**
+       * @description An array containing errors if status is 'failed'
+       * @example [
+       *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+       * ]
+       */
+      errors?: string[];
+      /**
+       * @description Number of cases that are failed
+       * @example 0
+       */
+      failed?: number;
+      /**
+       * @description Number of cases that are successful
+       * @example 15
+       */
+      successful?: number;
+      /**
+       * @description Number of cases that are not started
+       * @example 0
+       */
+      not_started?: number;
+      /**
+       * @description Number of cases that are cancelled
+       * @example 0
+       */
+      cancelled?: number;
+    };
+    /**
+     * @example {
+     *   "run_info": {
+     *     "cancelled": 0,
+     *     "failed": 0,
+     *     "errors": [
+     *       "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *     ],
+     *     "status": "failed",
+     *     "successful": 15,
+     *     "not_started": 0
+     *   },
+     *   "experiment": {
+     *     "extensions": [
+     *       "{}",
+     *       "{}"
+     *     ],
+     *     "version": 2,
+     *     "base": {
+     *       "model": {
+     *         "modelica": "{}",
+     *         "fmu": "{}"
+     *       },
+     *       "modifiers": {
+     *         "variables": {
+     *           "integrator.k": 1,
+     *           "inertia1.J": "uniform(1,5)",
+     *           "inertia2.J": 2
+     *         },
+     *         "initializeFrom": ""
+     *       },
+     *       "analysis": {
+     *         "solverOptions": {
+     *           "key": ""
+     *         },
+     *         "simulationOptions": {
+     *           "key": ""
+     *         },
+     *         "type": "dynamic",
+     *         "parameters": {
+     *           "start_time": 0,
+     *           "final_time": 1
+     *         },
+     *         "simulationLogLevel": "WARNING"
+     *       },
+     *       "expansion": {
+     *         "algorithm": "LatinHyperCube",
+     *         "parameters": {
+     *           "samples": 5,
+     *           "seed": 1
+     *         }
+     *       }
+     *     }
+     *   },
+     *   "meta_data": {
+     *     "model_names": [
+     *       "Workspace.PID_Controller",
+     *       "Workspace.PID_Controller"
+     *     ],
+     *     "label": "my label",
+     *     "user_data": {
+     *       "parametrizationFrom": "specification 3.4",
+     *       "externalToolVersion": "9.0"
+     *     },
+     *     "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *     "created_epoch": 1550836039
+     *   },
+     *   "id": "workspace_pid_controller_20200705_170234_546ccba"
+     * }
+     */
+    inline_response_200_21_data_items: {
+      /** @example workspace_pid_controller_20200705_170234_546ccba */
+      id?: string;
+      experiment?: components["schemas"]["ExperimentDefinition"];
+      run_info?: components["schemas"]["inline_response_200_21_data_run_info"];
+      meta_data?: components["schemas"]["ExperimentMetaData"];
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     {
+     *       "run_info": {
+     *         "cancelled": 0,
+     *         "failed": 0,
+     *         "errors": [
+     *           "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *         ],
+     *         "status": "failed",
+     *         "successful": 15,
+     *         "not_started": 0
+     *       },
+     *       "experiment": {
+     *         "extensions": [
+     *           "{}",
+     *           "{}"
+     *         ],
+     *         "version": 2,
+     *         "base": {
+     *           "model": {
+     *             "modelica": "{}",
+     *             "fmu": "{}"
+     *           },
+     *           "modifiers": {
+     *             "variables": {
+     *               "integrator.k": 1,
+     *               "inertia1.J": "uniform(1,5)",
+     *               "inertia2.J": 2
+     *             },
+     *             "initializeFrom": ""
+     *           },
+     *           "analysis": {
+     *             "solverOptions": {
+     *               "key": ""
+     *             },
+     *             "simulationOptions": {
+     *               "key": ""
+     *             },
+     *             "type": "dynamic",
+     *             "parameters": {
+     *               "start_time": 0,
+     *               "final_time": 1
+     *             },
+     *             "simulationLogLevel": "WARNING"
+     *           },
+     *           "expansion": {
+     *             "algorithm": "LatinHyperCube",
+     *             "parameters": {
+     *               "samples": 5,
+     *               "seed": 1
+     *             }
+     *           }
+     *         }
+     *       },
+     *       "meta_data": {
+     *         "model_names": [
+     *           "Workspace.PID_Controller",
+     *           "Workspace.PID_Controller"
+     *         ],
+     *         "label": "my label",
+     *         "user_data": {
+     *           "parametrizationFrom": "specification 3.4",
+     *           "externalToolVersion": "9.0"
+     *         },
+     *         "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *         "created_epoch": 1550836039
+     *       },
+     *       "id": "workspace_pid_controller_20200705_170234_546ccba"
+     *     },
+     *     {
+     *       "run_info": {
+     *         "cancelled": 0,
+     *         "failed": 0,
+     *         "errors": [
+     *           "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *         ],
+     *         "status": "failed",
+     *         "successful": 15,
+     *         "not_started": 0
+     *       },
+     *       "experiment": {
+     *         "extensions": [
+     *           "{}",
+     *           "{}"
+     *         ],
+     *         "version": 2,
+     *         "base": {
+     *           "model": {
+     *             "modelica": "{}",
+     *             "fmu": "{}"
+     *           },
+     *           "modifiers": {
+     *             "variables": {
+     *               "integrator.k": 1,
+     *               "inertia1.J": "uniform(1,5)",
+     *               "inertia2.J": 2
+     *             },
+     *             "initializeFrom": ""
+     *           },
+     *           "analysis": {
+     *             "solverOptions": {
+     *               "key": ""
+     *             },
+     *             "simulationOptions": {
+     *               "key": ""
+     *             },
+     *             "type": "dynamic",
+     *             "parameters": {
+     *               "start_time": 0,
+     *               "final_time": 1
+     *             },
+     *             "simulationLogLevel": "WARNING"
+     *           },
+     *           "expansion": {
+     *             "algorithm": "LatinHyperCube",
+     *             "parameters": {
+     *               "samples": 5,
+     *               "seed": 1
+     *             }
+     *           }
+     *         }
+     *       },
+     *       "meta_data": {
+     *         "model_names": [
+     *           "Workspace.PID_Controller",
+     *           "Workspace.PID_Controller"
+     *         ],
+     *         "label": "my label",
+     *         "user_data": {
+     *           "parametrizationFrom": "specification 3.4",
+     *           "externalToolVersion": "9.0"
+     *         },
+     *         "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *         "created_epoch": 1550836039
+     *       },
+     *       "id": "workspace_pid_controller_20200705_170234_546ccba"
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_21_data: {
+      /** @description List of all experiments */
+      items?: components["schemas"]["inline_response_200_21_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "run_info": {
+     *           "cancelled": 0,
+     *           "failed": 0,
+     *           "errors": [
+     *             "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *           ],
+     *           "status": "failed",
+     *           "successful": 15,
+     *           "not_started": 0
+     *         },
+     *         "experiment": {
+     *           "extensions": [
+     *             "{}",
+     *             "{}"
+     *           ],
+     *           "version": 2,
+     *           "base": {
+     *             "model": {
+     *               "modelica": "{}",
+     *               "fmu": "{}"
+     *             },
+     *             "modifiers": {
+     *               "variables": {
+     *                 "integrator.k": 1,
+     *                 "inertia1.J": "uniform(1,5)",
+     *                 "inertia2.J": 2
+     *               },
+     *               "initializeFrom": ""
+     *             },
+     *             "analysis": {
+     *               "solverOptions": {
+     *                 "key": ""
+     *               },
+     *               "simulationOptions": {
+     *                 "key": ""
+     *               },
+     *               "type": "dynamic",
+     *               "parameters": {
+     *                 "start_time": 0,
+     *                 "final_time": 1
+     *               },
+     *               "simulationLogLevel": "WARNING"
+     *             },
+     *             "expansion": {
+     *               "algorithm": "LatinHyperCube",
+     *               "parameters": {
+     *                 "samples": 5,
+     *                 "seed": 1
+     *               }
+     *             }
+     *           }
+     *         },
+     *         "meta_data": {
+     *           "model_names": [
+     *             "Workspace.PID_Controller",
+     *             "Workspace.PID_Controller"
+     *           ],
+     *           "label": "my label",
+     *           "user_data": {
+     *             "parametrizationFrom": "specification 3.4",
+     *             "externalToolVersion": "9.0"
+     *           },
+     *           "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *           "created_epoch": 1550836039
+     *         },
+     *         "id": "workspace_pid_controller_20200705_170234_546ccba"
+     *       },
+     *       {
+     *         "run_info": {
+     *           "cancelled": 0,
+     *           "failed": 0,
+     *           "errors": [
+     *             "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *           ],
+     *           "status": "failed",
+     *           "successful": 15,
+     *           "not_started": 0
+     *         },
+     *         "experiment": {
+     *           "extensions": [
+     *             "{}",
+     *             "{}"
+     *           ],
+     *           "version": 2,
+     *           "base": {
+     *             "model": {
+     *               "modelica": "{}",
+     *               "fmu": "{}"
+     *             },
+     *             "modifiers": {
+     *               "variables": {
+     *                 "integrator.k": 1,
+     *                 "inertia1.J": "uniform(1,5)",
+     *                 "inertia2.J": 2
+     *               },
+     *               "initializeFrom": ""
+     *             },
+     *             "analysis": {
+     *               "solverOptions": {
+     *                 "key": ""
+     *               },
+     *               "simulationOptions": {
+     *                 "key": ""
+     *               },
+     *               "type": "dynamic",
+     *               "parameters": {
+     *                 "start_time": 0,
+     *                 "final_time": 1
+     *               },
+     *               "simulationLogLevel": "WARNING"
+     *             },
+     *             "expansion": {
+     *               "algorithm": "LatinHyperCube",
+     *               "parameters": {
+     *                 "samples": 5,
+     *                 "seed": 1
+     *               }
+     *             }
+     *           }
+     *         },
+     *         "meta_data": {
+     *           "model_names": [
+     *             "Workspace.PID_Controller",
+     *             "Workspace.PID_Controller"
+     *           ],
+     *           "label": "my label",
+     *           "user_data": {
+     *             "parametrizationFrom": "specification 3.4",
+     *             "externalToolVersion": "9.0"
+     *           },
+     *           "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *           "created_epoch": 1550836039
+     *         },
+     *         "id": "workspace_pid_controller_20200705_170234_546ccba"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_21: {
+      data?: components["schemas"]["inline_response_200_21_data"];
+    };
+    inline_object_7: {
+      experiment: components["schemas"]["ExperimentDefinition"];
+      /**
+       * @description Up to 2048 bytes of custom data to be associated with the experiment.
+       * @example {
+       *   "parametrizationFrom": "specification 3.4",
+       *   "externalToolVersion": "9.0"
+       * }
+       */
+      userData?: { [key: string]: unknown };
+    };
+    /**
+     * @example {
+     *   "experiment_id": "workspace_pid_controller_20090615_134530_as86g32"
+     * }
+     */
+    inline_response_200_22: {
+      /**
+       * @description An object with an unique identifier for this experiment, used to track this experiment in other API calls.
+       * @example workspace_pid_controller_20090615_134530_as86g32
+       */
+      experiment_id?: string;
+    };
+    /**
+     * @example {
+     *   "cancelled": 0,
+     *   "failed": 0,
+     *   "errors": [
+     *     "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *   ],
+     *   "status": "failed",
+     *   "successful": 2,
+     *   "not_started": 0
+     * }
+     */
+    inline_response_200_23_run_info: {
+      /**
+       * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run
+       * @example failed
+       */
+      status?: string;
+      /**
+       * @description An array containing errors if status is 'failed'
+       * @example [
+       *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+       * ]
+       */
+      errors?: string[];
+      /**
+       * @description Number of cases that are failed
+       * @example 0
+       */
+      failed?: number;
+      /**
+       * @description Number of cases that are successful
+       * @example 2
+       */
+      successful?: number;
+      /**
+       * @description Number of cases that are not started
+       * @example 0
+       */
+      not_started?: number;
+      /**
+       * @description Number of cases that are cancelled
+       * @example 0
+       */
+      cancelled?: number;
+    };
+    /**
+     * @example {
+     *   "run_info": {
+     *     "cancelled": 0,
+     *     "failed": 0,
+     *     "errors": [
+     *       "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+     *     ],
+     *     "status": "failed",
+     *     "successful": 2,
+     *     "not_started": 0
+     *   },
+     *   "experiment": {
+     *     "extensions": [
+     *       "{}",
+     *       "{}"
+     *     ],
+     *     "version": 2,
+     *     "base": {
+     *       "model": {
+     *         "modelica": "{}",
+     *         "fmu": "{}"
+     *       },
+     *       "modifiers": {
+     *         "variables": {
+     *           "integrator.k": 1,
+     *           "inertia1.J": "uniform(1,5)",
+     *           "inertia2.J": 2
+     *         },
+     *         "initializeFrom": ""
+     *       },
+     *       "analysis": {
+     *         "solverOptions": {
+     *           "key": ""
+     *         },
+     *         "simulationOptions": {
+     *           "key": ""
+     *         },
+     *         "type": "dynamic",
+     *         "parameters": {
+     *           "start_time": 0,
+     *           "final_time": 1
+     *         },
+     *         "simulationLogLevel": "WARNING"
+     *       },
+     *       "expansion": {
+     *         "algorithm": "LatinHyperCube",
+     *         "parameters": {
+     *           "samples": 5,
+     *           "seed": 1
+     *         }
+     *       }
+     *     }
+     *   },
+     *   "meta_data": {
+     *     "model_names": [
+     *       "Workspace.PID_Controller",
+     *       "Workspace.PID_Controller"
+     *     ],
+     *     "label": "my label",
+     *     "user_data": {
+     *       "parametrizationFrom": "specification 3.4",
+     *       "externalToolVersion": "9.0"
+     *     },
+     *     "experiment_hash": "workspace_pid_controller_20090615_134530_as86g32",
+     *     "created_epoch": 1550836039
+     *   },
+     *   "id": "workspace_pid_controller_20200705_170234_546ccba"
+     * }
+     */
+    inline_response_200_23: {
+      /** @example workspace_pid_controller_20200705_170234_546ccba */
+      id?: string;
+      experiment?: components["schemas"]["ExperimentDefinition"];
+      meta_data?: components["schemas"]["ExperimentMetaData"];
+      run_info?: components["schemas"]["inline_response_200_23_run_info"];
+    };
+    inline_object_8: {
+      /**
+       * @description The new label for the experiment
+       * @example tuning of P part
+       */
+      label: string;
+    };
+    inline_response_200_24_progresses: {
+      /**
+       * @description A messag about the progress of the exectuion.
+       * @example Simulation at time 3.45
+       */
+      message?: string;
+      /**
+       * @description A number between 0 and 1 indicating how the execution is progressing
+       * @example 0.43
+       */
+      percentage?: number;
+      /**
+       * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'
+       * @example compilation
+       */
+      stage?: string;
+      /**
+       * @description True if the execution is done
+       * @example true
+       */
+      done?: boolean;
+    };
+    /**
+     * @description Shows total number of executions and how many have finished. The status string can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
+     * @example {
+     *   "finished_executions": 1,
+     *   "total_executions": 2,
+     *   "status": "running",
+     *   "progresses": [
+     *     {
+     *       "message": "Simulating at 1.0",
+     *       "percentage": 1,
+     *       "stage": "simulation",
+     *       "done": true
+     *     },
+     *     {
+     *       "message": "Simulating at 0.2",
+     *       "percentage": 0.2,
+     *       "stage": "simulation",
+     *       "done": false
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_24: {
+      /**
+       * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string.
+       * @example 27
+       */
+      finished_executions?: number;
+      /**
+       * @description Total number of executions.
+       * @example 50
+       */
+      total_executions?: number;
+      /**
+       * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
+       * @example running
+       */
+      status?: string;
+      /** @description An array containing progress information about all executions */
+      progresses?: components["schemas"]["inline_response_200_24_progresses"][];
+    };
+    _workspaces__workspace__experiments__experimentId__execution_includeCases: {
+      /**
+       * @description List of cases to execute
+       * @example [
+       *   "case_1",
+       *   "case_2"
+       * ]
+       */
+      ids?: unknown[];
+    };
+    inline_object_9: {
+      includeCases?: components["schemas"]["_workspaces__workspace__experiments__experimentId__execution_includeCases"];
+    };
+    /**
+     * @example {
+     *   "label": "Cruise operating point"
+     * }
+     */
+    inline_response_200_25_data_meta: {
+      /**
+       * @description Case label
+       * @example Cruise operating point
+       */
+      label?: unknown;
+    };
+    /**
+     * @example {
+     *   "datetime_started": 1549552749,
+     *   "datetime_finished": 1549552338,
+     *   "failed_at": "simulation",
+     *   "status": "successful"
+     * }
+     */
+    inline_response_200_25_data_run_info: {
+      /**
+       * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'
+       * @example successful
+       */
+      status?: string;
+      /**
+       * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null
+       * @example simulation
+       */
+      failed_at?: string;
+      /**
+       * @description The unix time the case started running
+       * @example 1549552749
+       */
+      datetime_started?: number;
+      /**
+       * @description The unix time the case finshed running
+       * @example 1549552338
+       */
+      datetime_finished?: number;
+    };
+    /**
+     * @description The analysis object
+     * @example {
+     *   "analysis_function": "dynamic",
+     *   "solver_options": "{}",
+     *   "simulation_options": "{}",
+     *   "parameters": {
+     *     "start_time": 0,
+     *     "final_time": 1
+     *   }
+     * }
+     */
+    inline_response_200_25_data_input_analysis: {
+      /**
+       * @description the name of the custom function
+       * @example dynamic
+       */
+      analysis_function: string;
+      /**
+       * @description parameters to the custom function
+       * @example {
+       *   "start_time": 0,
+       *   "final_time": 1
+       * }
+       */
+      parameters?: { [key: string]: unknown };
+      /** @description Key-value pairs of simulation options */
+      simulation_options?: { [key: string]: unknown };
+      /** @description Key-value pairs of solver options */
+      solver_options?: { [key: string]: unknown };
+    };
+    /**
+     * @example {
+     *   "parametrization": "{}",
+     *   "structural_parametrization": "{}",
+     *   "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *   "analysis": {
+     *     "analysis_function": "dynamic",
+     *     "solver_options": "{}",
+     *     "simulation_options": "{}",
+     *     "parameters": {
+     *       "start_time": 0,
+     *       "final_time": 1
+     *     }
+     *   },
+     *   "fmu_base_parametrization": "{}"
+     * }
+     */
+    inline_response_200_25_data_input: {
+      /**
+       * @description Reference ID to the compiled model used running the case
+       * @example workspace_pid_controller_20090615_134530_as86g32
+       */
+      fmu_id?: string;
+      analysis?: components["schemas"]["inline_response_200_25_data_input_analysis"];
+      /** @description Parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable */
+      parametrization?: { [key: string]: unknown };
+      /** @description Structural parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. These are values that cannot be applied to the FMU/Model after compilation */
+      structural_parametrization?: { [key: string]: unknown };
+      /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU */
+      fmu_base_parametrization?: { [key: string]: unknown };
+    };
+    /**
+     * @example {
+     *   "input": {
+     *     "parametrization": "{}",
+     *     "structural_parametrization": "{}",
+     *     "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *     "analysis": {
+     *       "analysis_function": "dynamic",
+     *       "solver_options": "{}",
+     *       "simulation_options": "{}",
+     *       "parameters": {
+     *         "start_time": 0,
+     *         "final_time": 1
+     *       }
+     *     },
+     *     "fmu_base_parametrization": "{}"
+     *   },
+     *   "run_info": {
+     *     "datetime_started": 1549552749,
+     *     "datetime_finished": 1549552338,
+     *     "failed_at": "simulation",
+     *     "status": "successful"
+     *   },
+     *   "meta": {
+     *     "label": "Cruise operating point"
+     *   },
+     *   "id": "case_1"
+     * }
+     */
+    inline_response_200_25_data_items: {
+      /**
+       * @description Case ID.
+       * @example case_1
+       */
+      id?: string;
+      meta?: components["schemas"]["inline_response_200_25_data_meta"];
+      run_info?: components["schemas"]["inline_response_200_25_data_run_info"];
+      input?: components["schemas"]["inline_response_200_25_data_input"];
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     {
+     *       "input": {
+     *         "parametrization": "{}",
+     *         "structural_parametrization": "{}",
+     *         "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *         "analysis": {
+     *           "analysis_function": "dynamic",
+     *           "solver_options": "{}",
+     *           "simulation_options": "{}",
+     *           "parameters": {
+     *             "start_time": 0,
+     *             "final_time": 1
+     *           }
+     *         },
+     *         "fmu_base_parametrization": "{}"
+     *       },
+     *       "run_info": {
+     *         "datetime_started": 1549552749,
+     *         "datetime_finished": 1549552338,
+     *         "failed_at": "simulation",
+     *         "status": "successful"
+     *       },
+     *       "meta": {
+     *         "label": "Cruise operating point"
+     *       },
+     *       "id": "case_1"
+     *     },
+     *     {
+     *       "input": {
+     *         "parametrization": "{}",
+     *         "structural_parametrization": "{}",
+     *         "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *         "analysis": {
+     *           "analysis_function": "dynamic",
+     *           "solver_options": "{}",
+     *           "simulation_options": "{}",
+     *           "parameters": {
+     *             "start_time": 0,
+     *             "final_time": 1
+     *           }
+     *         },
+     *         "fmu_base_parametrization": "{}"
+     *       },
+     *       "run_info": {
+     *         "datetime_started": 1549552749,
+     *         "datetime_finished": 1549552338,
+     *         "failed_at": "simulation",
+     *         "status": "successful"
+     *       },
+     *       "meta": {
+     *         "label": "Cruise operating point"
+     *       },
+     *       "id": "case_1"
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_25_data: {
+      items?: components["schemas"]["inline_response_200_25_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "input": {
+     *           "parametrization": "{}",
+     *           "structural_parametrization": "{}",
+     *           "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *           "analysis": {
+     *             "analysis_function": "dynamic",
+     *             "solver_options": "{}",
+     *             "simulation_options": "{}",
+     *             "parameters": {
+     *               "start_time": 0,
+     *               "final_time": 1
+     *             }
+     *           },
+     *           "fmu_base_parametrization": "{}"
+     *         },
+     *         "run_info": {
+     *           "datetime_started": 1549552749,
+     *           "datetime_finished": 1549552338,
+     *           "failed_at": "simulation",
+     *           "status": "successful"
+     *         },
+     *         "meta": {
+     *           "label": "Cruise operating point"
+     *         },
+     *         "id": "case_1"
+     *       },
+     *       {
+     *         "input": {
+     *           "parametrization": "{}",
+     *           "structural_parametrization": "{}",
+     *           "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *           "analysis": {
+     *             "analysis_function": "dynamic",
+     *             "solver_options": "{}",
+     *             "simulation_options": "{}",
+     *             "parameters": {
+     *               "start_time": 0,
+     *               "final_time": 1
+     *             }
+     *           },
+     *           "fmu_base_parametrization": "{}"
+     *         },
+     *         "run_info": {
+     *           "datetime_started": 1549552749,
+     *           "datetime_finished": 1549552338,
+     *           "failed_at": "simulation",
+     *           "status": "successful"
+     *         },
+     *         "meta": {
+     *           "label": "Cruise operating point"
+     *         },
+     *         "id": "case_1"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_25: {
+      data?: components["schemas"]["inline_response_200_25_data"];
+    };
+    inline_object_10: {
+      /**
+       * @description The variable names trajectories should be fetched for
+       * @example [
+       *   "variable1",
+       *   "variable2"
+       * ]
+       */
+      variable_names: string[];
+    };
+    /**
+     * @example {
+     *   "fixed": false,
+     *   "trajectory": [
+     *     1,
+     *     2,
+     *     3,
+     *     4
+     *   ]
+     * }
+     */
+    inline_response_200_26_data_items: {
+      /**
+       * @description If true, the trajectory does not vary with 'time' and only a single value is returned.
+       * @example false
+       */
+      fixed?: boolean;
+      /**
+       * @description The result trajectory for a variable, is an array of values.
+       * @example [
+       *   1,
+       *   2,
+       *   3,
+       *   4
+       * ]
+       */
+      trajectory?: (Partial<number> & Partial<string>)[];
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     {
+     *       "fixed": false,
+     *       "trajectory": [
+     *         1,
+     *         2,
+     *         3,
+     *         4
+     *       ]
+     *     },
+     *     {
+     *       "fixed": false,
+     *       "trajectory": [
+     *         1,
+     *         2,
+     *         3,
+     *         4
+     *       ]
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_26_data: {
+      items?: components["schemas"]["inline_response_200_26_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "fixed": false,
+     *         "trajectory": [
+     *           1,
+     *           2,
+     *           3,
+     *           4
+     *         ]
+     *       },
+     *       {
+     *         "fixed": false,
+     *         "trajectory": [
+     *           1,
+     *           2,
+     *           3,
+     *           4
+     *         ]
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_26: {
+      data?: components["schemas"]["inline_response_200_26_data"];
+    };
+    inline_object_11: {
+      /**
+       * @description The variable names trajectories should be fetched for
+       * @example [
+       *   "variable1",
+       *   "variable2"
+       * ]
+       */
+      variable_names: string[];
+    };
+    /**
+     * @example {
+     *   "caseId": "case_1",
+     *   "items": [
+     *     {
+     *       "fixed": false,
+     *       "trajectory": [
+     *         1,
+     *         2,
+     *         3,
+     *         4
+     *       ]
+     *     },
+     *     {
+     *       "fixed": false,
+     *       "trajectory": [
+     *         1,
+     *         2,
+     *         3,
+     *         4
+     *       ]
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_27_data_items: {
+      /**
+       * @description The case ID for which corresponding data in 'items' belong to.
+       * @example case_1
+       */
+      caseId?: string;
+      /** @description Trajectories for all variables given in request body for one case. */
+      items?: components["schemas"]["inline_response_200_26_data_items"][];
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     {
+     *       "caseId": "case_1",
+     *       "items": [
+     *         {
+     *           "fixed": false,
+     *           "trajectory": [
+     *             1,
+     *             2,
+     *             3,
+     *             4
+     *           ]
+     *         },
+     *         {
+     *           "fixed": false,
+     *           "trajectory": [
+     *             1,
+     *             2,
+     *             3,
+     *             4
+     *           ]
+     *         }
+     *       ]
+     *     },
+     *     {
+     *       "caseId": "case_1",
+     *       "items": [
+     *         {
+     *           "fixed": false,
+     *           "trajectory": [
+     *             1,
+     *             2,
+     *             3,
+     *             4
+     *           ]
+     *         },
+     *         {
+     *           "fixed": false,
+     *           "trajectory": [
+     *             1,
+     *             2,
+     *             3,
+     *             4
+     *           ]
+     *         }
+     *       ]
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_27_data: {
+      items?: components["schemas"]["inline_response_200_27_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "caseId": "case_1",
+     *         "items": [
+     *           {
+     *             "fixed": false,
+     *             "trajectory": [
+     *               1,
+     *               2,
+     *               3,
+     *               4
+     *             ]
+     *           },
+     *           {
+     *             "fixed": false,
+     *             "trajectory": [
+     *               1,
+     *               2,
+     *               3,
+     *               4
+     *             ]
+     *           }
+     *         ]
+     *       },
+     *       {
+     *         "caseId": "case_1",
+     *         "items": [
+     *           {
+     *             "fixed": false,
+     *             "trajectory": [
+     *               1,
+     *               2,
+     *               3,
+     *               4
+     *             ]
+     *           },
+     *           {
+     *             "fixed": false,
+     *             "trajectory": [
+     *               1,
+     *               2,
+     *               3,
+     *               4
+     *             ]
+     *           }
+     *         ]
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_27: {
+      data?: components["schemas"]["inline_response_200_27_data"];
+    };
+    inline_object_12: {
+      /**
+       * @description The ID for the workspace to export
+       * @example my_workspace
+       */
+      workspaceId: string;
+      contents: components["schemas"]["_workspaces__workspace__exports_contents"];
+    };
+    /**
+     * @example {
+     *   "location": "api/workspace-exports/79sd8-3n2a4-e3t24"
+     * }
+     */
+    inline_response_201_data: {
+      /**
+       * @description location for checking status of workspace compression
+       * @example api/workspace-exports/79sd8-3n2a4-e3t24
+       */
+      location?: string;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "location": "api/workspace-exports/79sd8-3n2a4-e3t24"
+     *   }
+     * }
+     */
+    inline_response_201: {
+      data?: components["schemas"]["inline_response_201_data"];
+    };
+    /**
+     * @description Data for the workspace to download, only exists in response if workspace is ready to be downloaded. Use the field 'status' to see if this is the case.
+     * @example {
+     *   "size": 10481015,
+     *   "downloadUri": "api/exports/79sd8-3n2a4-e3t24"
+     * }
+     */
+    inline_response_200_28_data_data: {
+      /**
+       * @description URI for downloading the workspace
+       * @example api/exports/79sd8-3n2a4-e3t24
+       */
+      downloadUri?: string;
+      /**
+       * @description The size of the compressed workspace, in bytes
+       * @example 10481015
+       */
+      size?: number;
+    };
+    /**
+     * @description Error message if the export fails, only exists if an error has occurred. Use the field 'status' to see if this is the case.
+     * @example {
+     *   "code": 12072,
+     *   "message": "Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded"
+     * }
+     */
+    inline_response_200_28_data_error: {
+      /**
+       * @description Error message describing what went wrong
+       * @example Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded
+       */
+      message?: string;
+      /**
+       * @description Error code for identifying specific errors
+       * @example 12072
+       */
+      code?: number;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "size": 10481015,
+     *     "downloadUri": "api/exports/79sd8-3n2a4-e3t24"
+     *   },
+     *   "id": "79sd8-3n2a4-e3t24",
+     *   "error": {
+     *     "code": 12072,
+     *     "message": "Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded"
+     *   },
+     *   "status": "status"
+     * }
+     */
+    inline_response_200_28_data: {
+      /**
+       * @description ID for workspace export
+       * @example 79sd8-3n2a4-e3t24
+       */
+      id?: string;
+      /** @description Will be 'running' if export is on-going, 'ready' if export is finished and can be downloaded, or 'error' if an error occured. */
+      status?: string;
+      data?: components["schemas"]["inline_response_200_28_data_data"];
+      error?: components["schemas"]["inline_response_200_28_data_error"];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "data": {
+     *       "size": 10481015,
+     *       "downloadUri": "api/exports/79sd8-3n2a4-e3t24"
+     *     },
+     *     "id": "79sd8-3n2a4-e3t24",
+     *     "error": {
+     *       "code": 12072,
+     *       "message": "Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded"
+     *     },
+     *     "status": "status"
+     *   }
+     * }
+     */
+    inline_response_200_28: {
+      data?: components["schemas"]["inline_response_200_28_data"];
+    };
+    inline_object_13: {
+      /**
+       * Format: binary
+       * @description The zip-file
+       */
+      file?: string;
+    };
+    /**
+     * @example {
+     *   "location": "api/workspace-imports/fd90-4gkl-vf89"
+     * }
+     */
+    inline_response_201_1_data: {
+      /**
+       * @description The ID of the workspace import
+       * @example api/workspace-imports/fd90-4gkl-vf89
+       */
+      location?: string;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "location": "api/workspace-imports/fd90-4gkl-vf89"
+     *   }
+     * }
+     */
+    inline_response_201_1: {
+      data?: components["schemas"]["inline_response_201_1_data"];
+    };
+    /**
+     * @description Data for the workspace imported, only exists in response if workspace is imported and ready to use. Use the field 'status' to see if this is the case.
+     * @example {
+     *   "resourceUri": "api/workspaces/my_workspace",
+     *   "workspaceId": "my_workspace"
+     * }
+     */
+    inline_response_200_29_data_data: {
+      /**
+       * @description URI for the imported workspace resource
+       * @example api/workspaces/my_workspace
+       */
+      resourceUri?: string;
+      /**
+       * @description The ID for the workspace imported
+       * @example my_workspace
+       */
+      workspaceId?: string;
+    };
+    /**
+     * @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case.
+     * @example {
+     *   "code": 12015,
+     *   "message": "Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact"
+     * }
+     */
+    inline_response_200_29_data_error: {
+      /**
+       * @description Error message describing what went wrong
+       * @example Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact
+       */
+      message?: string;
+      /**
+       * @description Error code for identifying specific errors
+       * @example 12015
+       */
+      code?: number;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "resourceUri": "api/workspaces/my_workspace",
+     *     "workspaceId": "my_workspace"
+     *   },
+     *   "id": "79sd8-3n2a4-e3t24",
+     *   "error": {
+     *     "code": 12015,
+     *     "message": "Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact"
+     *   },
+     *   "status": "status"
+     * }
+     */
+    inline_response_200_29_data: {
+      /**
+       * @description ID for workspace import
+       * @example 79sd8-3n2a4-e3t24
+       */
+      id?: string;
+      /** @description Will be 'running' if import is on-going, 'ready' if import is finished and can be used, or 'error' if an error occured. */
+      status?: string;
+      data?: components["schemas"]["inline_response_200_29_data_data"];
+      error?: components["schemas"]["inline_response_200_29_data_error"];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "data": {
+     *       "resourceUri": "api/workspaces/my_workspace",
+     *       "workspaceId": "my_workspace"
+     *     },
+     *     "id": "79sd8-3n2a4-e3t24",
+     *     "error": {
+     *       "code": 12015,
+     *       "message": "Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact"
+     *     },
+     *     "status": "status"
+     *   }
+     * }
+     */
+    inline_response_200_29: {
+      data?: components["schemas"]["inline_response_200_29_data"];
+    };
+    inline_response_400_error: {
+      /**
+       * @description Error message describing what went wrong
+       * @example Could not export workspace 'ceb6ac1ed71040eb8f3df7f69157e658', reason: 'Maximum allowed zip file size of 95MB exceeded'
+       */
+      message?: string;
+      /**
+       * @description Error code for identifying specific errors
+       * @example 12072
+       */
+      code?: number;
+    };
+    inline_response_400: {
+      error?: components["schemas"]["inline_response_400_error"];
+    };
+    /** @description Context describing the model and associated values */
+    _uploads_results_options_context: {
+      /**
+       * @description Workspace id
+       * @example my_workspace
+       */
+      workspaceId: string;
+    };
+    /** @description Upload options */
+    _uploads_results_options: {
+      /**
+       * @description Meaningful label for results association. If not given the name of the file uploaded will be used
+       * @example result_for_PID.mat
+       */
+      name?: string;
+      /**
+       * @description Description of the result. If not given an empty string will be used
+       * @example This is a result file for PID controller
+       */
+      description?: string;
+      context: components["schemas"]["_uploads_results_options_context"];
+    };
+    inline_object_14: {
+      /**
+       * Format: binary
+       * @description The result file in question.
+       */
+      file: string;
+      options: components["schemas"]["_uploads_results_options"];
+    };
+    /**
+     * @example {
+     *   "createdAt": "2021-09-02T08:26:49.612Z",
+     *   "name": "result_for_PID",
+     *   "description": "This is a result file for PID controller",
+     *   "id": "2f036b9fab6f45c788cc466da327cc78workspace",
+     *   "workspaceId": "workspace"
+     * }
+     */
+    inline_response_200_30_data: {
+      /**
+       * @description Id for result storage
+       * @example 2f036b9fab6f45c788cc466da327cc78workspace
+       */
+      id?: string;
+      /**
+       * @description Timestamp of when the external result was imported
+       * @example 2021-09-02T08:26:49.612Z
+       */
+      createdAt?: string;
+      /**
+       * @description Meaningful label for results association
+       * @example result_for_PID
+       */
+      name?: string;
+      /**
+       * @description Description of the result
+       * @example This is a result file for PID controller
+       */
+      description?: string;
+      /**
+       * @description Name of workspace
+       * @example workspace
+       */
+      workspaceId?: string;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "createdAt": "2021-09-02T08:26:49.612Z",
+     *     "name": "result_for_PID",
+     *     "description": "This is a result file for PID controller",
+     *     "id": "2f036b9fab6f45c788cc466da327cc78workspace",
+     *     "workspaceId": "workspace"
+     *   }
+     * }
+     */
+    inline_response_200_30: {
+      data?: components["schemas"]["inline_response_200_30_data"];
+    };
+    /**
+     * @example {
+     *   "id": "name@company.com"
+     * }
+     */
+    inline_response_200_31_data_externalUsers: {
+      /**
+       * @description ExternalID
+       * @example name@company.com
+       */
+      id?: string;
+    };
+    /**
+     * @example {
+     *   "license": "impact-pro",
+     *   "externalUsers": [
+     *     {
+     *       "id": "name@company.com"
+     *     },
+     *     {
+     *       "id": "name@company.com"
+     *     }
+     *   ],
+     *   "id": "2bb76154701c47c38d1950ea60d2c025"
+     * }
+     */
+    inline_response_200_31_data: {
+      /**
+       * @description The user ID.
+       * @example 2bb76154701c47c38d1950ea60d2c025
+       */
+      id: string;
+      /** @description List of external IDs that are connected to this user ID. */
+      externalUsers?: components["schemas"]["inline_response_200_31_data_externalUsers"][];
+      /**
+       * @description The users license. If field is missing the user does not have a license.
+       * @example impact-pro
+       * @enum {string}
+       */
+      license?: "impact-pro" | "impact-base" | "impact-deployment";
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "license": "impact-pro",
+     *     "externalUsers": [
+     *       {
+     *         "id": "name@company.com"
+     *       },
+     *       {
+     *         "id": "name@company.com"
+     *       }
+     *     ],
+     *     "id": "2bb76154701c47c38d1950ea60d2c025"
+     *   }
+     * }
+     */
+    inline_response_200_31: {
+      data?: components["schemas"]["inline_response_200_31_data"];
+    };
+    /**
+     * @description Information about an API key
+     * @example {
+     *   "createdAt": 1588016253,
+     *   "id": "zPY1U0KuBP"
+     * }
+     */
+    inline_response_200_32_data_items: {
+      /**
+       * @description The ID of the key
+       * @example zPY1U0KuBP
+       */
+      id?: string;
+      /**
+       * @description Timestamp of when the key was created
+       * @example 1588016253
+       */
+      createdAt?: number;
+    };
+    /**
+     * @example {
+     *   "items": [
+     *     {
+     *       "createdAt": 1588016253,
+     *       "id": "zPY1U0KuBP"
+     *     },
+     *     {
+     *       "createdAt": 1588016253,
+     *       "id": "zPY1U0KuBP"
+     *     }
+     *   ]
+     * }
+     */
+    inline_response_200_32_data: {
+      items?: components["schemas"]["inline_response_200_32_data_items"][];
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "items": [
+     *       {
+     *         "createdAt": 1588016253,
+     *         "id": "zPY1U0KuBP"
+     *       },
+     *       {
+     *         "createdAt": 1588016253,
+     *         "id": "zPY1U0KuBP"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    inline_response_200_32: {
+      data?: components["schemas"]["inline_response_200_32_data"];
+    };
+    /**
+     * @example {
+     *   "created_at": 1588016253,
+     *   "id": "zPY1U0KuBP",
+     *   "secret": "secret-api-key"
+     * }
+     */
+    inline_response_200_33_data: {
+      /**
+       * @description The API key ID.
+       * @example zPY1U0KuBP
+       */
+      id?: string;
+      /**
+       * @description The API key.
+       * @example secret-api-key
+       */
+      secret?: string;
+      /**
+       * @description The timestamp of when the key was created.
+       * @example 1588016253
+       */
+      created_at?: number;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "created_at": 1588016253,
+     *     "id": "zPY1U0KuBP",
+     *     "secret": "secret-api-key"
+     *   }
+     * }
+     */
+    inline_response_200_33: {
+      data?: components["schemas"]["inline_response_200_33_data"];
+    };
+    inline_object_15: {
+      /**
+       * @description An API key to validate
+       * @example secret-api-key
+       */
+      secret: string;
+    };
+    /**
+     * @example {
+     *   "id": "2bb76154701c47c38d1950ea60d2c025"
+     * }
+     */
+    inline_response_200_34_data: {
+      /**
+       * @description The user ID of the owner of the key.
+       * @example 2bb76154701c47c38d1950ea60d2c025
+       */
+      id?: string;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "id": "2bb76154701c47c38d1950ea60d2c025"
+     *   }
+     * }
+     */
+    inline_response_200_34: {
+      data?: components["schemas"]["inline_response_200_34_data"];
+    };
+    inline_response_400_1_error: {
+      /**
+       * @description Error message describing what went wrong
+       * @example The provided API key is not valid
+       */
+      message?: string;
+      /**
+       * @description Error code for identifying specific errors
+       * @example 12035
+       */
+      code?: number;
+    };
+    inline_response_400_1: {
+      error?: components["schemas"]["inline_response_400_1_error"];
+    };
+    Error_error: {
+      /**
+       * @description Error message describing what went wrong
+       * @example There was an error X because of Y
+       */
+      message?: string;
+      /**
+       * @description Error code for identifying specific errors
+       * @example 12012
+       */
+      code?: number;
+    };
+    /**
+     * @example {
+     *   "datetime_started": 1549552749,
+     *   "datetime_finished": 1549552338,
+     *   "consistent": false,
+     *   "failed_at": "simulation",
+     *   "status": "successful"
+     * }
+     */
+    Case_run_info: {
+      /**
+       * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'
+       * @example successful
+       */
+      status?: string;
+      /**
+       * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null
+       * @example simulation
+       */
+      failed_at?: string;
+      /**
+       * @description The unix time the case started running
+       * @example 1549552749
+       */
+      datetime_started?: number;
+      /**
+       * @description The unix time the case finshed running
+       * @example 1549552338
+       */
+      datetime_finished?: number;
+      /**
+       * @description Describes if the case 'input' is consistent with the latest case run. Will be false if the case has been updated and not executed since then
+       * @example false
+       */
+      consistent?: boolean;
+    };
+    /**
+     * @description The analysis object
+     * @example {
+     *   "analysis_function": "dynamic",
+     *   "solver_options": {
+     *     "key": ""
+     *   },
+     *   "simulation_options": {
+     *     "key": ""
+     *   },
+     *   "parameters": {
+     *     "start_time": 0,
+     *     "final_time": 1
+     *   },
+     *   "simulation_log_level": "NOTHING"
+     * }
+     */
+    Case_input_analysis: {
+      /**
+       * @description the name of the function to run
+       * @example dynamic
+       */
+      analysis_function: string;
+      /**
+       * @description parameters to the function
+       * @example {
+       *   "start_time": 0,
+       *   "final_time": 1
+       * }
+       */
+      parameters?: { [key: string]: unknown };
+      /** @description Key-value pairs of simulation options */
+      simulation_options?: { [key: string]: number | string | boolean };
+      /** @description Key-value pairs of solver options */
+      solver_options?: { [key: string]: number | string | boolean };
+      /**
+       * @description The simulation log level
+       * @enum {string}
+       */
+      simulation_log_level?:
+        | "NOTHING"
+        | "FATAL"
+        | "ERROR"
+        | "WARNING"
+        | "INFO"
+        | "VERBOSE"
+        | "DEBUG"
+        | "ALL";
+    };
+    /**
+     * @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID and case ID. Details on how the initialization is done depend on the custom function.
+     * @example {
+     *   "caseId": "caseId",
+     *   "experimentId": "experimentId"
+     * }
+     */
+    Case_input_initialize_from_case: {
+      /** @description Experiment ID to initialize from */
+      experimentId: string;
+      /** @description Case ID to initialize from */
+      caseId: string;
+    };
+    /**
+     * @description Initialize the simulation using an uploaded result file. Details on how the initialization is done depends upon the custom function.
+     * @example {
+     *   "uploadId": "2f036b9fab6f45c788cc466da327cc78workspace"
+     * }
+     */
+    Case_input_initialize_from_external_result: {
+      /**
+       * @description The ID of the result import
+       * @example 2f036b9fab6f45c788cc466da327cc78workspace
+       */
+      uploadId: string;
+    };
+    /**
+     * @example {
+     *   "initialize_from_case": {
+     *     "caseId": "caseId",
+     *     "experimentId": "experimentId"
+     *   },
+     *   "initialize_from_external_result": {
+     *     "uploadId": "2f036b9fab6f45c788cc466da327cc78workspace"
+     *   },
+     *   "parametrization": "{}",
+     *   "structural_parametrization": "{}",
+     *   "fmu_id": "workspace_pid_controller_20090615_134530_as86g32",
+     *   "analysis": {
+     *     "analysis_function": "dynamic",
+     *     "solver_options": {
+     *       "key": ""
+     *     },
+     *     "simulation_options": {
+     *       "key": ""
+     *     },
+     *     "parameters": {
+     *       "start_time": 0,
+     *       "final_time": 1
+     *     },
+     *     "simulation_log_level": "NOTHING"
+     *   },
+     *   "fmu_base_parametrization": "{}"
+     * }
+     */
+    Case_input: {
+      /**
+       * @description Reference ID to the compiled model used running the case
+       * @example workspace_pid_controller_20090615_134530_as86g32
+       */
+      fmu_id?: string;
+      analysis: components["schemas"]["Case_input_analysis"];
+      /** @description Parameterization of the case, a list of key value pairs where key is variable name and value is the value to use  for that variable */
+      parametrization?: { [key: string]: unknown };
+      /** @description Structural parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. These are values that cannot be applied to the FMU/Model after compilation */
+      structural_parametrization?: { [key: string]: unknown };
+      /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU */
+      fmu_base_parametrization?: { [key: string]: unknown };
+      initialize_from_case?: components["schemas"]["Case_input_initialize_from_case"];
+      initialize_from_external_result?: components["schemas"]["Case_input_initialize_from_external_result"];
+    };
+    /**
+     * @example {
+     *   "simulation": {
+     *     "ncp": 2000
+     *   },
+     *   "runtime": {
+     *     "use_Brent_in_1d": false
+     *   },
+     *   "compiler": {
+     *     "generate_html_diagnostics": true,
+     *     "halt_on_warning": true
+     *   },
+     *   "solver": {
+     *     "rtol": 0.0001
+     *   }
+     * }
+     */
+    CaseExecutionOptions_options: {
+      /**
+       * @description Key-value pairs of compilation options
+       * @example {
+       *   "generate_html_diagnostics": true,
+       *   "halt_on_warning": true
+       * }
+       */
+      compiler?: { [key: string]: number | string | boolean };
+      /**
+       * @description Key-value pairs of run-time options
+       * @example {
+       *   "use_Brent_in_1d": false
+       * }
+       */
+      runtime?: { [key: string]: number | string | boolean };
+      /**
+       * @description Key-value pairs of simulation options
+       * @example {
+       *   "ncp": 2000
+       * }
+       */
+      simulation?: { [key: string]: number | string | boolean };
+      /**
+       * @description Key-value pairs of solver options
+       * @example {
+       *   "rtol": 0.0001
+       * }
+       */
+      solver?: { [key: string]: number | string | boolean };
+    };
+    /** @description Latin hypercube expansion algorithm parameters */
+    LatinHyperCube_parameters: {
+      /** @description The number of samples. Must be an integer greater than 1. */
+      samples: number;
+      /** @description The seed for random number generation. Default: None */
+      seed?: number;
+    };
+    ErrorWithFileAndClassLocation_location_class: {
+      /** @example 2 */
+      beginColumn?: number;
+      /** @example 2 */
+      endColumn?: number;
+      /** @example 2 */
+      beginLine?: number;
+      /** @example 2 */
+      endLine?: number;
+      /**
+       * @description Class name
+       * @example Workspace.Example
+       */
+      qualifiedName?: string;
+    };
+    ErrorWithFileAndClassLocation_location: {
+      class?: components["schemas"]["ErrorWithFileAndClassLocation_location_class"];
+      file?: components["schemas"]["FileLocation"];
+    };
+    ErrorWithPathLocation_location: {
+      /**
+       * @description Path to a file used in compilation
+       * @example /impact/libraries/BrokenLib/BrokenFile.moc
+       */
+      path?: string;
+    };
+    /**
+     * @description The input for how the compilation was done
+     * @example {
+     *   "compiler_options": {
+     *     "generate_html_diagnostics": true
+     *   },
+     *   "runtime_options": {
+     *     "log_level": 4
+     *   },
+     *   "fmi_version": "2.0",
+     *   "compiler_log_level": "info",
+     *   "model_snapshot": "2b3a4-adf3",
+     *   "toolchain_version": "0.0.1",
+     *   "disabled_libs": "[VDL, ML]",
+     *   "class_name": "Workspace.PID_Controller",
+     *   "fmi_target": "me",
+     *   "platform": "win64"
+     * }
+     */
+    ModelExecutableRunInfoV2_input: {
+      /**
+       * @description Model class name
+       * @example Workspace.PID_Controller
+       */
+      class_name?: string;
+      /**
+       * @description Compiler options settings
+       * @example {
+       *   "generate_html_diagnostics": true
+       * }
+       */
+      compiler_options?: { [key: string]: unknown };
+      /**
+       * @description Runtime options settings
+       * @example {
+       *   "log_level": 4
+       * }
+       */
+      runtime_options?: { [key: string]: unknown };
+      /**
+       * @description Compiler log level
+       * @example info
+       */
+      compiler_log_level?: string;
+      /**
+       * @description Flavour of the FMU
+       * @example me
+       */
+      fmi_target?: string;
+      /**
+       * @description Version of FMI for the FMU
+       * @example 2.0
+       */
+      fmi_version?: string;
+      /**
+       * @description Platform for FMU binary
+       * @example win64
+       */
+      platform?: string;
+      /**
+       * @description An unique identifier representing some state of all models and libraries used when compiling
+       * @example 2b3a4-adf3
+       */
+      model_snapshot?: string;
+      /**
+       * @description List of libraries not used when compiling
+       * @example [VDL, ML]
+       */
+      disabled_libs?: string[];
+      /**
+       * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1
+       * @example 0.0.1
+       */
+      toolchain_version?: string;
+    };
+    /**
+     * @description The run info of the compilation
+     * @example {
+     *   "datetime_started": 1549552749,
+     *   "datetime_finished": 1549552338,
+     *   "errors": [
+     *     "",
+     *     ""
+     *   ],
+     *   "status": "failed"
+     * }
+     */
+    ModelExecutableRunInfoV2_run_info: {
+      /**
+       * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully
+       * @example failed
+       */
+      status?: string;
+      /**
+       * @description The unix time the compilation was started
+       * @example 1549552749
+       */
+      datetime_started?: number;
+      /** @description An array containing the compilation errors in case status is 'failed' */
+      errors?: (
+        | components["schemas"]["ErrorWithFileAndClassLocation"]
+        | components["schemas"]["ErrorWithFileLocation"]
+        | components["schemas"]["ErrorWithNoLocation"]
+        | components["schemas"]["ErrorWithPathLocation"]
+      )[];
+      /**
+       * @description The unix time the compilation was finished
+       * @example 1549552338
+       */
+      datetime_finished?: number;
+    };
+    /** @description The run info of the compilation */
+    ModelExecutableRunInfoV1_run_info: {
+      /**
+       * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully
+       * @example failed
+       */
+      status?: string;
+      /**
+       * @description The unix time the compilation was started
+       * @example 1549552749
+       */
+      datetime_started?: number;
+      /**
+       * @description An array containing the compilation errors in case status is 'failed'
+       * @example [
+       *   "Could not match 'variable1' with any equation",
+       *   "Nominal of 'variable2' is 0"
+       * ]
+       */
+      errors?: string[];
+      /**
+       * @description The unix time the compilation was finished
+       * @example 1549552338
+       */
+      datetime_finished?: number;
+    };
+    /** @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases */
+    Modifiers_initializeFromCase: {
+      /** @description Experiment ID to initialize from */
+      experimentId: string;
+      /** @description Case ID to initialize from */
+      caseId: string;
+    };
+    /**
+     * @example {
+     *   "model": {
+     *     "modelica": "{}",
+     *     "fmu": "{}"
+     *   },
+     *   "modifiers": {
+     *     "variables": {
+     *       "integrator.k": 1,
+     *       "inertia1.J": "uniform(1,5)",
+     *       "inertia2.J": 2
+     *     },
+     *     "initializeFrom": ""
+     *   },
+     *   "analysis": {
+     *     "solverOptions": {
+     *       "key": ""
+     *     },
+     *     "simulationOptions": {
+     *       "key": ""
+     *     },
+     *     "type": "dynamic",
+     *     "parameters": {
+     *       "start_time": 0,
+     *       "final_time": 1
+     *     },
+     *     "simulationLogLevel": "WARNING"
+     *   },
+     *   "expansion": {
+     *     "algorithm": "LatinHyperCube",
+     *     "parameters": {
+     *       "samples": 5,
+     *       "seed": 1
+     *     }
+     *   }
+     * }
+     */
+    ExperimentDefinition_base: {
+      model: components["schemas"]["Model"];
+      modifiers?: components["schemas"]["Modifiers"];
+      expansion?: components["schemas"]["Expansion"];
+      analysis: components["schemas"]["Analysis"];
+    };
+    /**
+     * @description Data for access to the meta data for the given upload, only exists in response if the upload was successful. Use the field 'status' to see if this is the case.
+     * @example {
+     *   "resourceUri": "api/external-result/2f036b9fab6f45c788cc466da327cc78workspace"
+     * }
+     */
+    ExternalResultUploadStatus_data_data: {
+      /**
+       * @description URI for the result resource
+       * @example api/external-result/2f036b9fab6f45c788cc466da327cc78workspace
+       */
+      resourceUri?: string;
+    };
+    /**
+     * @description Error message if the upload fails, only exists if an error has occurred. Use the field 'status' to see if this is the case.
+     * @example {
+     *   "code": 12015,
+     *   "message": "Could not upload given result file to the specified workspace. Could not read version number of the workspace 'my_workspace' or unsupported file type given."
+     * }
+     */
+    ExternalResultUploadStatus_data_error: {
+      /**
+       * @description Error message describing what went wrong
+       * @example Could not upload given result file to the specified workspace. Could not read version number of the workspace 'my_workspace' or unsupported file type given.
+       */
+      message?: string;
+      /**
+       * @description Error code for identifying specific errors
+       * @example 12015
+       */
+      code?: number;
+    };
+    /**
+     * @example {
+     *   "data": {
+     *     "resourceUri": "api/external-result/2f036b9fab6f45c788cc466da327cc78workspace"
+     *   },
+     *   "id": "2f036b9fab6f45c788cc466da327cc78workspace",
+     *   "error": {
+     *     "code": 12015,
+     *     "message": "Could not upload given result file to the specified workspace. Could not read version number of the workspace 'my_workspace' or unsupported file type given."
+     *   },
+     *   "status": "ready"
+     * }
+     */
+    ExternalResultUploadStatus_data: {
+      /**
+       * @description The ID of the result import
+       * @example 2f036b9fab6f45c788cc466da327cc78workspace
+       */
+      id?: string;
+      /**
+       * @description current status of the upload
+       * @example ready
+       */
+      status?: string;
+      data?: components["schemas"]["ExternalResultUploadStatus_data_data"];
+      error?: components["schemas"]["ExternalResultUploadStatus_data_error"];
     };
   };
   responses: {
@@ -1344,6 +4109,90 @@ export interface components {
       };
     };
   };
+  requestBodies: {
+    inline_object_1: {
+      content: {
+        "multipart/form-data": components["schemas"]["inline_object_1"];
+        "application/json": components["schemas"]["inline_object_1"];
+      };
+    };
+    inline_object_9: {
+      content: {
+        "application/json": components["schemas"]["inline_object_9"];
+      };
+    };
+    inline_object_10: {
+      content: {
+        "application/json": components["schemas"]["inline_object_10"];
+      };
+    };
+    inline_object_8: {
+      content: {
+        "application/json": components["schemas"]["inline_object_8"];
+      };
+    };
+    inline_object_7: {
+      content: {
+        "application/vnd.impact.experiment.v2+json": components["schemas"]["inline_object_7"];
+        "application/vnd.impact.experiment.v1+json": components["schemas"]["inline_object_7"];
+      };
+    };
+    inline_object_12: {
+      content: {
+        "application/json": components["schemas"]["inline_object_12"];
+      };
+    };
+    inline_object_6: {
+      content: {
+        "application/json": components["schemas"]["inline_object_6"];
+      };
+    };
+    inline_object_11: {
+      content: {
+        "application/json": components["schemas"]["inline_object_11"];
+      };
+    };
+    inline_object_5: {
+      content: {
+        "application/json": components["schemas"]["inline_object_5"];
+      };
+    };
+    inline_object_14: {
+      content: {
+        "multipart/form-data": components["schemas"]["inline_object_14"];
+      };
+    };
+    inline_object_4: {
+      content: {
+        "multipart/form-data": components["schemas"]["inline_object_4"];
+      };
+    };
+    inline_object_13: {
+      content: {
+        "multipart/form-data": components["schemas"]["inline_object_13"];
+      };
+    };
+    inline_object_3: {
+      content: {
+        "multipart/form-data": components["schemas"]["inline_object_3"];
+      };
+    };
+    inline_object_2: {
+      content: {
+        "application/json": components["schemas"]["inline_object_2"];
+      };
+    };
+    inline_object_15: {
+      content: {
+        "application/json": components["schemas"]["inline_object_15"];
+      };
+    };
+    inline_object: {
+      content: {
+        "application/json": components["schemas"]["inline_object"];
+      };
+    };
+  };
 }
 
 export interface operations {
@@ -1354,13 +4203,15 @@ export interface operations {
       /** A JSON object consisting of the APIs meta data, most notably the semantic version of it. */
       200: {
         content: {
-          "application/json": {
-            /** @description The semantic version of this API */
-            version?: string;
-          };
+          "application/json": components["schemas"]["inline_response_200"];
         };
       };
-      500: components["responses"]["UnexpectedError"];
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created <a class="visible-link" href="/admin/keys">in the API key manager</a>. */
@@ -1375,40 +4226,53 @@ export interface operations {
       /** The user is already logged in and the JWT is valid */
       200: {
         content: {
-          "application/json": {
-            /** @description A user identifier. */
-            identifier?: string;
-          };
+          "application/json": components["schemas"]["inline_response_200_1"];
         };
       };
       /** The user was logged in and a new JWT was created */
       201: {
         content: {
-          "application/json": {
-            /** @description A user identifier. */
-            identifier?: string;
-          };
+          "application/json": components["schemas"]["inline_response_200_1"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** Optional request body for logging in with an API key. */
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description An API key.
-           * @example secret-api-key
-           */
-          secretKey?: string;
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object"];
   };
   /** The workspace ID in the returned object serve as unique IDs that can be used in other API calls to perform operations for a specific workspace. */
   getWorkspaces: {
@@ -1417,18 +4281,39 @@ export interface operations {
       /** All workspaces meta-data and their IDs. The object meta-data contains the workspace id and if the workspace is a clone. */
       200: {
         content: {
-          "application/json": {
-            data: {
-              items: components["schemas"]["Workspace"][];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_2"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** If creating a workspace with a name already existing, this call will have no effect. Importing a workspace with a name already existing will give it a new name. */
@@ -1438,43 +4323,35 @@ export interface operations {
       /** OK: Workspace added and ID of the workspace was returned. */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description The ID of the imported workspace
-             * @example my_workspace
-             */
-            id?: string;
-          };
+          "application/json": components["schemas"]["inline_response_200_3"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** The workspace that will be added to the system depends on the content type, application/json is used for creating a new workspace and multipart/form-data is used to import a workspace. */
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /**
-           * Format: binary
-           * @description The zip-file
-           * @example my_workspace.zip
-           */
-          file?: string;
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
-        "application/json": {
-          /** @description Input for creating a new workspace */
-          new: {
-            /**
-             * @description The name of the workspace to create
-             * @example my_workspace
-             */
-            name: string;
-          };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_1"];
   };
   /** Used when not a specific workspace should be deleted but rather all workspaces with some attribute. */
   deleteWorkspaces: {
@@ -1489,10 +4366,30 @@ export interface operations {
       200: unknown;
       /** OK: The targeted workspaces have been marked for deletion */
       202: unknown;
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getWorkspaceId: {
@@ -1506,15 +4403,45 @@ export interface operations {
       /** Workspace ID and its meta-data. The object meta-data contains the workspace id and if the workspace is a clone. */
       200: {
         content: {
-          "application/json": components["schemas"]["Workspace"];
+          "application/json": components["schemas"]["inline_response_200_4"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Can be called periodically on a cloned workspace a client is working against. This will inform the system that this workspace is not inactive and may not be deleted. */
@@ -1528,12 +4455,42 @@ export interface operations {
     responses: {
       /** OK: The timestamp was succesfully increased to the current time. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   deleteWorkspace: {
@@ -1546,12 +4503,42 @@ export interface operations {
     responses: {
       /** OK: The workspace was deleted. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** The compressed workspace may be downloaded, after successful completion of a call to this endpoint, by calling GET /workspaces/{workspace}/exports/{exportId}. */
@@ -1566,83 +4553,47 @@ export interface operations {
       /** OK: The ID used for downloading the compressed workspace and the size of the resulting zip file was returned. */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description ID for downloading the compressed workspace
-             * @example 79sd8-3n2a4-e3t24
-             */
-            export_id?: string;
-            /**
-             * @description The size of the compressed workspace, in bytes
-             * @example 10481015
-             */
-            file_size?: number;
-          };
+          "application/json": components["schemas"]["inline_response_200_5"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** Specification of what workspace resources to included when exporting the workspace. */
-    requestBody: {
-      content: {
-        "application/json": {
-          contents: {
-            /**
-             * @description List of dictionaries, describing which libraries to include when downloading the workspace
-             * @example [
-             *   {
-             *     "name": "LiquidCooling",
-             *     "resources_to_exclude": []
-             *   },
-             *   {
-             *     "name": "Workspace",
-             *     "resources_to_exclude": [
-             *       "my_plot.png",
-             *       "my_sheet.csv"
-             *     ]
-             *   }
-             * ]
-             */
-            libraries: {
-              /**
-               * @description The name of the library
-               * @example LiquidCooling
-               */
-              name: string;
-              /**
-               * @description A list of resources to exclude when exporting library
-               * @example [
-               *   "my_plot.png",
-               *   "my_sheet.csv"
-               * ]
-               */
-              resources_to_exclude: string[];
-            }[];
-            /**
-             * @description List of experiments to include when downloading the workspace
-             * @example [
-             *   "_nics_multibody_examples_elementary_doublependulum_20191029_084342_2c956e9",
-             *   "modelica_blocks_examples_pid_controller_20191023_151659_f32a30d"
-             * ]
-             */
-            experiment_ids: string[];
-            /**
-             * @description List of model executables to include when downloading the workspace
-             * @example [
-             *   "_nics_multibody_examples_elementary_doublependulum_20191029_084342_2c956e9",
-             *   "modelica_blocks_examples_pid_controller_20191023_151659_f32a30d"
-             * ]
-             */
-            fmu_ids: string[];
-          };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_2"];
   };
   /** The workspace needs to be compressed by calling POST /workspaces/{workspace}/exports, before calling this API endpoint. */
   exportWorkspace: {
@@ -1661,12 +4612,42 @@ export interface operations {
           "application/zip": string;
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This API end point can be be called after a compressed workspace has been downloaded. */
@@ -1682,12 +4663,42 @@ export interface operations {
     responses: {
       /** OK: The workspace with the specified ID was deleted. */
       200: unknown;
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** A created clone of a workspace is a temporary resource. It can be used executing some workload based on resources of a workspace without mutating or adding anything to it. */
@@ -1702,92 +4713,39 @@ export interface operations {
       /** OK: The workspace was cloned and the ID of the clone was returned. */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description The name of the new cloned workspace
-             * @example MyClonedWorkspace
-             */
-            workspace_id?: string;
-          };
+          "application/json": components["schemas"]["inline_response_200_6"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  /** Get workspace dependencies. */
-  getWorkspaceDependencies: {
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
-    responses: {
-      /** OK: The workspace dependencies were returned. */
-      200: {
+      /** The request could not be performed because of missing authentication. */
+      401: {
         content: {
-          "application/json": {
-            /**
-             * @description Project id
-             * @example 79sd8-3n2a4-e3t24
-             */
-            id?: string;
-            /**
-             * @description Project name
-             * @example MyProject
-             */
-            name?: string;
-            /** @description List of content objects. */
-            content?: { [key: string]: unknown }[];
-          };
+          "application/json": components["schemas"]["Error"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  /** Get workspace projects. */
-  getWorkspaceProjects: {
-    parameters: {
-      path: {
-        /** ID of the workspace */
-        workspace: string;
-      };
-    };
-    responses: {
-      /** OK: The workspace projects were returned. */
-      200: {
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
         content: {
-          "application/json": {
-            /**
-             * @description Project id
-             * @example 79sd8-3n2a4-e3t24
-             */
-            id?: string;
-            /**
-             * @description Project name
-             * @example MyProject
-             */
-            name?: string;
-            /** @description List of content objects. */
-            content?: { [key: string]: unknown }[];
-          };
+          "application/json": components["schemas"]["Error"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** top-level libraries are available for all workspaces. It does not return any meta data for libraries stored in specific workspaces. */
@@ -1797,19 +4755,39 @@ export interface operations {
       /** A list of meta data for all top-level model libraries. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /** @description List of objects containing all top-level libraries and their metadata. */
-              items?: { [key: string]: unknown }[];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_7"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getLibraries: {
@@ -1823,20 +4801,51 @@ export interface operations {
       /** A list containing meta data for all libraries in the workspace. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              items?: { [key: string]: unknown }[];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_8"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   importLibrary: {
@@ -1850,54 +4859,53 @@ export interface operations {
       /** The meta data for the added model library. */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description The model library identifier
-             * @example Modelon
-             */
-            name: string;
-            /**
-             * @description The model library dependencies
-             * @example {
-             *   "Modelica": "3.2.2",
-             *   "ThermalPower": "1.14"
-             * }
-             */
-            uses: { [key: string]: unknown };
-            /**
-             * @description File ending for the model library archive, either 'zip' or 'mol'
-             * @example mol
-             */
-            archive?: string;
-            /**
-             * @description The version number of the model library
-             * @example 1.0
-             */
-            version?: string;
-          };
+          "application/json": components["schemas"]["inline_response_200_9"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** The file containing the model library, of type .mo, .mol or .zip. */
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /**
-           * Format: binary
-           * @description The file containing the model library.
-           * @example Modelon 2.6.zip
-           */
-          file?: string;
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_3"];
   };
   /** The accept head is used to specify if meta data or the library itself is returned. With the default accept header '*\/*' the libraries meta data will be returned. If changed to application/zip the library will be downloaded as a zip-file if the library is structured. For an unstructured library the acceptance header text/plain can be used to download it as a mo-file. */
   exportLibrary: {
@@ -1918,13 +4926,48 @@ export interface operations {
           "text/plain": string;
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   deleteLibrary: {
@@ -1939,13 +4982,48 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   importFMU: {
@@ -1961,96 +5039,53 @@ export interface operations {
       /** OK. The FMU has been imported to the workspace. */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description The modelica class path for the imported FMU
-             * @example Workspace.PID_Controller.Model
-             */
-            fmuClassPath: string;
-            /**
-             * @description An array containing warnings generated during FMU import
-             * @example [
-             *   "Specified argument for 'top_level_inputs=['a']' does not match any variable"
-             * ]
-             */
-            importWarnings?: string[];
-            /**
-             * @description Meta data for the library the FMU was imported to.
-             * @example {
-             *   "id": "Hydraulics 4.9",
-             *   "version": "4.9",
-             *   "uses": {},
-             *   "name": "Hydraulics",
-             *   "archive": "mol"
-             * }
-             */
-            library?: { [key: string]: unknown };
-          };
+          "application/json": components["schemas"]["inline_response_200_10"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** The file with a .fmu extension and options to import. */
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /**
-           * Format: binary
-           * @description The FMU file.
-           * @example PID.fmu
-           */
-          file: string;
-          /**
-           * @description Import options
-           * @default {}
-           */
-          options: {
-            /**
-             * @description Qualified name of generated class. By default, 'className' is set to the name of the library followed by a name based on the filename of the imported FMU.
-             * @example Workspace.Modelica_Electrical_Spice3_Examples_Spice3BenchmarkRtlInverter
-             */
-            className?: string;
-            /** @description Determines if any already existing files in the library should be overwritten. By default, the existing files are not overwritten. */
-            overwrite?: boolean;
-            /**
-             * @description Specifies what variables from the FMU to include in the wrapper model. By default, all the variables will be included in the wrapper model.
-             * @example [
-             *   "variable1",
-             *   "variable2"
-             * ]
-             */
-            includePatterns?: string[];
-            /**
-             * @description Specifies what variables from the FMU to exclude in the wrapper model. By default, all the variables will be included in the wrapper model.
-             * @example [
-             *   "variable1",
-             *   "variable2"
-             * ]
-             */
-            excludePatterns?: string[];
-            /**
-             * @description Specify which variables in the imported FMU will be inputs in the created Modelica wrapper model. By default, all the inputs are kept as inputs
-             * @example [
-             *   "variable1",
-             *   "variable2"
-             * ]
-             */
-            topLevelInputs?: string[];
-            /**
-             * @description Specifies the value for the 'step size' parameter in the generated model. By default, the parameter is set to zero, which in turn means that the step size will be set during simulation based on simulation properties such as the time interval.
-             * @example 0.1
-             */
-            stepSize?: number;
-          };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_4"];
   };
   /** Gets the meta-data for a custom function describing which parameters the custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center. */
   getCustomFunction: {
@@ -2066,70 +5101,45 @@ export interface operations {
       /** A custom function and its meta-data */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description Custom function signature schema version
-             * @example 0.0.1
-             */
-            version?: string;
-            /**
-             * @description Name of the custom function
-             * @example my_custom_function
-             */
-            name?: string;
-            /**
-             * @description Description of the custom function
-             * @example This is my custom function!
-             */
-            description?: string;
-            /** @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment. */
-            can_initialize_from?: boolean;
-            /** @description A list of parameters that should be supplied in the experiment definition if this custom function is used. */
-            parameters?: {
-              /**
-               * @description Name of the custom function parameter
-               * @example my_custom_function_parameter
-               */
-              name: string;
-              /**
-               * @description Data type of the custom function parameter, supported types are 'Number', 'String', 'Boolean' and 'Enumeration'
-               * @example Number
-               */
-              type: string;
-              /**
-               * @description A list specifying values to choose the parameter from (applicable only for parameters of type Enumeration).
-               * @example [
-               *   "small",
-               *   "medium",
-               *   "large"
-               * ]
-               */
-              values?: string[];
-              /**
-               * @description Description of the custom function parameter
-               * @example This is my custom function parameter, supports values of '1', '2' and '3'
-               */
-              description: string;
-              /**
-               * @description If this custom function parameter is optional when calling this custom function, supported values are 'true' and 'false'
-               * @example true
-               */
-              optional?: string;
-              /**
-               * @description Default value for this custom function parameter, its data type should be as specified in 'type' (except for enumeration parameters, where the default value should be one of the enumerated values).
-               * @example 2
-               */
-              defaultValue?: string | number | boolean;
-            }[];
-          };
+          "application/json": components["schemas"]["inline_response_200_11"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Gets the (aggregated) options for a custom function. This includes: Workspace specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the workspace specific options, secondarily from the application default options and in third hand from the custom function default options. */
@@ -2149,13 +5159,48 @@ export interface operations {
           "application/json": components["schemas"]["CaseExecutionOptions"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** The values for the options are saved for a specific custom function and workspace. */
@@ -2171,13 +5216,48 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
     /** Execution options to set for custom function */
     requestBody: {
@@ -2200,54 +5280,51 @@ export interface operations {
       /** The application level default execution options for a custom function */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description Compilation options
-             * @example {
-             *   "c_compiler": "gcc",
-             *   "interactive_fmu": true,
-             *   "expose_scalar_equation_blocks_in_interactive_fmu": true,
-             *   "merge_blt_blocks": true,
-             *   "hand_guided_tearing": true,
-             *   "local_iteration_in_tearing": "annotation",
-             *   "equation_sorting": true,
-             *   "automatic_tearing": true,
-             *   "divide_by_vars_in_tearing": true,
-             *   "variability_propagation": false
-             * }
-             */
-            compiler?: { [key: string]: unknown };
-            /**
-             * @description Run-time options
-             * @example {}
-             */
-            runtime?: { [key: string]: unknown };
-            /**
-             * @description Simulation options
-             * @example {}
-             */
-            simulation?: { [key: string]: unknown };
-            /**
-             * @description Solver options
-             * @example {
-             *   "max_iter_no_jacobian": 1,
-             *   "tolerance": 0.00001,
-             *   "step_limit_factor": 1,
-             *   "jacobian_calculation_mode": 9,
-             *   "residual_equation_scaling": 5
-             * }
-             */
-            solver?: { [key: string]: unknown };
-          };
+          "application/json": components["schemas"]["inline_response_200_12"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Which custom functions that exists are useful when setting up an experiment using POST /workspaces/{workspace}/experiments. The name of a custom function is used for the field 'analysis_function' which specifies that it should be used for the experiment. The meta-data also describes which parameters each custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center. */
@@ -2262,74 +5339,45 @@ export interface operations {
       /** A list of custom functions and their meta-data */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              items?: {
-                /**
-                 * @description Custom function signature schema version
-                 * @example 0.0.1
-                 */
-                version: string;
-                /**
-                 * @description Name of the custom function
-                 * @example my_custom_function
-                 */
-                name: string;
-                /**
-                 * @description Description of the custom function
-                 * @example This is my custom function!
-                 */
-                description: string;
-                /** @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment. */
-                can_initialize_from: boolean;
-                /** @description A list of parameters that should be supplied in the experiment definition if this custom function is used. */
-                parameters: {
-                  /**
-                   * @description Name of the custom function parameter
-                   * @example my_custom_function_parameter
-                   */
-                  name: string;
-                  /**
-                   * @description Data type of the custom function parameter, supported types are 'Number', 'String', 'Boolean' and 'Enumeration'
-                   * @example Number
-                   */
-                  type: string;
-                  /**
-                   * @description A list specifying values to choose the parameter from (applicable only for parameters of type Enumeration).
-                   * @example [
-                   *   "small",
-                   *   "medium",
-                   *   "large"
-                   * ]
-                   */
-                  values?: string[];
-                  /**
-                   * @description Description of the custom function parameter
-                   * @example This is my custom function parameter, supports values of '1', '2' and '3'
-                   */
-                  description: string;
-                  /**
-                   * @description If this custom function parameter is optional when calling this custom function, supported values are 'true' and 'false'
-                   * @example true
-                   */
-                  optional?: string;
-                  /**
-                   * @description Default value for this custom function parameter, its data type should be as specified in 'type' (except for enumeration parameters, where the default value should be one of the enumerated values).
-                   * @example 2
-                   */
-                  defaultValue?: string | number | boolean;
-                }[];
-              }[];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_13"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getUnitConversionFactors: {
@@ -2343,38 +5391,45 @@ export interface operations {
       /** A dictionary specifying the unit conversion factors for SI units and for imperial units. */
       200: {
         content: {
-          "application/json": {
-            /** @description SI unit conversions */
-            si?: {
-              /** @example K */
-              unit: string;
-              /** @example degC */
-              displayUnit: string;
-              /** @example 1 */
-              multiplier: number;
-              /** @example -273.15 */
-              offset: number;
-            }[];
-            /** @description Imperial unit conversions */
-            imperial?: {
-              /** @example K */
-              unit: string;
-              /** @example degF */
-              displayUnit: string;
-              /** @example 1.8 */
-              multiplier: number;
-              /** @example -459.67 */
-              offset: number;
-            }[];
-          };
+          "application/json": components["schemas"]["inline_response_200_14"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getAllModelExecutableInfo: {
@@ -2388,26 +5443,46 @@ export interface operations {
       /** The results and run info for all compilations. The response objects contain the FMU ID and the additional fields are what would be returned from .../model-executables/{fmuId}. */
       200: {
         content: {
-          "application/vnd.impact.model-executable.v2+json": {
-            data?: {
-              /** @description List of all model executables */
-              items?: components["schemas"]["ModelExecutableRunInfoV2"][];
-            };
-          };
-          "application/vnd.impact.model-executable.v1+json": {
-            data?: {
-              /** @description List of all model executables */
-              items?: components["schemas"]["ModelExecutableRunInfoV1"][];
-            };
-          };
+          "application/vnd.impact.model-executable.v2+json": components["schemas"]["inline_response_200_15"];
+          "application/vnd.impact.model-executable.v1+json": components["schemas"]["inline_response_200_15"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** The name of the model to be compiled is specified by the field 'class_name'. The remaining fields in the input are options for the compilation process. For a reference of what options can be used in the field 'compiler_options' and 'runtime_option' see the OCT User's Guide, which can be found in the Modelon Impact help center. If the FMU should be executed in Impact (rather than exported) it is recommended that 'fmi_target' is 'me', 'fmi_version' is '2.0' and 'platform' is 'auto'. If this end-point is called with the query parameter 'getCached' set to true, then a previously compiled model executable is returned, if such an FMU exists. To get a cached model executable (FMU) there must exists a successfully compiled model executable that was compiled with the same inputs as in the current call. Furthermore, if the Modelica model for which the FMU compilation is requested has been changed in a structural way, or at least one of its dependent models have changed, then a cached FMU will not be returned. Setting non-structural parameters and making graphical changes to the Modelica model will not break the cache for its compiled FMU. */
@@ -2428,82 +5503,41 @@ export interface operations {
       /** An identifier for the FMU being compiled (ID). */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description A unique identifier for an FMU. Will be null if getCached=true and no cached FMU is available.
-             * @example workspace_pid_controller_20090615_134530_as86g32
-             */
-            id?: string;
-            /**
-             * @description Parameter values to be set on the FMU referenced by the 'id', for it to represent current model setup. Empty if getCached=false.
-             * @example {
-             *   "inertia1.J": 2
-             * }
-             */
-            parameters?: { [key: string]: unknown };
-            /** @description Parameters to be set for the FMU referenced by the 'id', default value is otherwise not guaranteed to represent current model setup. Empty if getCached=false or allowNonStructuralMissing=false. */
-            parametersMissing?: string[];
-          };
+          "application/json": components["schemas"]["inline_response_200_16"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** Compilation parameters */
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @description The input for how the compilation was done */
-          input: {
-            /**
-             * @description Model class name
-             * @example Workspace.PID_Controller
-             */
-            class_name: string;
-            /**
-             * @description Key-value pairs of compilation options
-             * @example {
-             *   "generate_html_diagnostics": true
-             * }
-             */
-            compiler_options: { [key: string]: number | string | boolean };
-            /**
-             * @description Key-value pairs of run-time options
-             * @example {
-             *   "log_level": 4
-             * }
-             */
-            runtime_options: { [key: string]: number | string | boolean };
-            /**
-             * @description Compiler log level
-             * @example info
-             */
-            compiler_log_level: string;
-            /**
-             * @description Flavour of the FMU
-             * @example me
-             * @enum {string}
-             */
-            fmi_target: "me" | "cs" | "me+cs";
-            /**
-             * @description Version of FMI for the FMU
-             * @example 2.0
-             * @enum {string}
-             */
-            fmi_version: "1.0" | "2.0";
-            /**
-             * @description Platform for FMU binary
-             * @example win64
-             * @enum {string}
-             */
-            platform: "linux64" | "win32" | "win64" | "auto";
-          };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_5"];
   };
   /** Can be used to find which values are supported for the field 'platform' when calling the POST method on '/workspaces/{workspace}/model-executables' */
   getFmuPlatforms: {
@@ -2517,27 +5551,51 @@ export interface operations {
       /** A list of the supported FMU's generation platforms */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description An array containing the list of platforms in which the FMU can be generated
-               * @example [
-               *   "win32",
-               *   "win64"
-               * ]
-               */
-              platforms?: string[];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_17"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getModelExecutableInfo: {
@@ -2557,13 +5615,48 @@ export interface operations {
           "application/vnd.impact.model-executable.v1+json": components["schemas"]["ModelExecutableRunInfoV1"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   deleteModelExecutable: {
@@ -2578,13 +5671,48 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getCompilationStatus: {
@@ -2600,55 +5728,51 @@ export interface operations {
       /** Status of the compilation */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string.
-             * @example 27
-             */
-            finished_executions?: number;
-            /**
-             * @description Total number of executions.
-             * @example 50
-             */
-            total_executions?: number;
-            /**
-             * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
-             * @example running
-             */
-            status?: string;
-            /** @description An array containing progress information about all executions */
-            progresses?: {
-              /**
-               * @description A message about the progress of the execution.
-               * @example Simulation at time 3.45
-               */
-              message?: string;
-              /**
-               * @description A number between 0 and 1 indicating how the execution is progressing
-               * @example 0.43
-               */
-              percentage?: number;
-              /**
-               * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'
-               * @example compilation
-               */
-              stage?: string;
-              /**
-               * @description True if the compilation is done
-               * @example true
-               */
-              done?: boolean;
-            }[];
-          };
+          "application/json": components["schemas"]["inline_response_200_18"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** First call POST /workspaces/{workspace}/model-executables to setup what should be compiled. */
@@ -2664,13 +5788,48 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   cancelCompilation: {
@@ -2685,13 +5844,48 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   downloadCompilationLog: {
@@ -2710,13 +5904,48 @@ export interface operations {
           "text/plain": string;
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   downloadCompiledFMU: {
@@ -2735,13 +5964,48 @@ export interface operations {
           "application/zip": string;
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getFmuMeta: {
@@ -2757,46 +6021,53 @@ export interface operations {
       /** The FMU meta-data */
       200: {
         content: {
-          "application/json": {
-            /** @description The steady state meta-data */
-            steady_state?: {
-              /**
-               * @description Number of residual variables
-               * @example 1
-               */
-              residual_variable_count?: number;
-              /**
-               * @description Number of iteration variables
-               * @example 2
-               */
-              iteration_variable_count?: number;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_19"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** The current parameter state of the FMU */
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description The current parameter state of the FMU
-           * @example {
-           *   "foo": 1,
-           *   "bar": 2
-           * }
-           */
-          parameterState: { [key: string]: unknown };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_6"];
   };
   /** Can be used to find what parameters are feasible to have as modifiers in an experiment. */
   getFmuParameters: {
@@ -2815,13 +6086,48 @@ export interface operations {
           "application/json": string[];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Gets a list of parameters whose values are strings and one list with respective value in order. Can be used when requiring string parameters that don't come with the result. */
@@ -2838,33 +6144,51 @@ export interface operations {
       /** An object containing a list of two lists. The first list is the names of the parameters, and the second is a list of the parameter values in the same order */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description An array containing two arrays, the first containing parameter names and the second containing respective string values
-               * @example [
-               *   [
-               *     "var1",
-               *     "var2"
-               *   ],
-               *   [
-               *     "val1",
-               *     "val2"
-               *   ]
-               * ]
-               */
-              items?: string[][];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_20"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getAllExperimentInfo: {
@@ -2878,155 +6202,52 @@ export interface operations {
       /** The experiment setups and run info for all experiments. The objects contain the experiment ids, and additional values are what would be returned from .../experiments/{experimentId} */
       200: {
         content: {
-          "application/vnd.impact.experiment.v2+json": {
-            data?: {
-              /** @description List of all experiments */
-              items?: {
-                /** @example workspace_pid_controller_20200705_170234_546ccba */
-                id?: string;
-                experiment?: components["schemas"]["ExperimentDefinition"];
-                run_info?: {
-                  /**
-                   * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run
-                   * @example failed
-                   */
-                  status?: string;
-                  /**
-                   * @description An array containing errors if status is 'failed'
-                   * @example [
-                   *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-                   * ]
-                   */
-                  errors?: string[];
-                  /**
-                   * @description Number of cases that are failed
-                   * @example 0
-                   */
-                  failed?: number;
-                  /**
-                   * @description Number of cases that are successful
-                   * @example 15
-                   */
-                  successful?: number;
-                  /**
-                   * @description Number of cases that are not started
-                   * @example 0
-                   */
-                  not_started?: number;
-                  /**
-                   * @description Number of cases that are cancelled
-                   * @example 0
-                   */
-                  cancelled?: number;
-                };
-                meta_data?: components["schemas"]["ExperimentMetaData"];
-              }[];
-            };
-          };
-          "application/vnd.impact.experiment.v1+json": {
-            data?: {
-              /** @description List of all experiments */
-              items?: {
-                /** @example workspace_pid_controller_20200705_170234_546ccba */
-                id?: string;
-                experiment?: {
-                  /**
-                   * @description Reference ID to the compiled model
-                   * @example workspace_pid_controller_20090615_134530_as86g32
-                   */
-                  fmu_id: string;
-                  /**
-                   * @example {
-                   *   "variables": {
-                   *     "integrator.k": 1,
-                   *     "inertia1.J": "range(1,5,5)",
-                   *     "inertia2.J": "range(5,10,3)"
-                   *   },
-                   *   "initializeFrom": ""
-                   * }
-                   */
-                  modifiers?: {
-                    /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified a full factorial is used to determine all different parameterizations for the experiment */
-                    variables?: { [key: string]: number | string | boolean };
-                    /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function */
-                    initializeFrom?: string;
-                  };
-                  /** @description The analysis object */
-                  analysis: {
-                    /**
-                     * @description The name of the custom function that will be executed
-                     * @example dynamic
-                     */
-                    analysis_function: string;
-                    /**
-                     * @description Parameters to the custom function
-                     * @example {
-                     *   "start_time": 0,
-                     *   "final_time": 1
-                     * }
-                     */
-                    parameters?: { [key: string]: number | string | boolean };
-                    /** @description Key-value pairs of simulation options */
-                    simulation_options?: {
-                      [key: string]: number | string | boolean;
-                    };
-                    /** @description Key-value pairs of solver options */
-                    solver_options?: {
-                      [key: string]: number | string | boolean;
-                    };
-                    /**
-                     * @description The simulation log level
-                     * @default WARNING
-                     * @enum {string}
-                     */
-                    simulation_log_level:
-                      | "NOTHING"
-                      | "FATAL"
-                      | "ERROR"
-                      | "WARNING"
-                      | "INFO"
-                      | "VERBOSE"
-                      | "DEBUG"
-                      | "ALL";
-                  };
-                };
-                run_info?: {
-                  /**
-                   * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run
-                   * @example failed
-                   */
-                  status?: string;
-                  /**
-                   * @description An array containing errors if status is 'failed'
-                   * @example [
-                   *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-                   * ]
-                   */
-                  errors?: string[];
-                  /**
-                   * @description Number of cases that are failed
-                   * @example 0
-                   */
-                  failed?: number;
-                  /**
-                   * @description Number of cases that are successful
-                   * @example 15
-                   */
-                  successful?: number;
-                };
-                meta_data?: components["schemas"]["ExperimentMetaData"];
-              }[];
-            };
-          };
+          "application/vnd.impact.experiment.v2+json": components["schemas"]["inline_response_200_21"];
+          "application/vnd.impact.experiment.v1+json": components["schemas"]["inline_response_200_21"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /**
@@ -3082,106 +6303,53 @@ export interface operations {
       /** An identifier for the experiment (ID). */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description An object with an unique identifier for this experiment, used to track this experiment in other API calls.
-             * @example workspace_pid_controller_20090615_134530_as86g32
-             */
-            experiment_id: string;
-          };
+          "application/json": components["schemas"]["inline_response_200_22"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** Experiment parameters */
-    requestBody: {
-      content: {
-        "application/vnd.impact.experiment.v2+json": {
-          experiment: components["schemas"]["ExperimentDefinition"];
-          /**
-           * @description Up to 2048 bytes of custom data to be associated with the experiment.
-           * @example {
-           *   "parametrizationFrom": "specification 3.4",
-           *   "externalToolVersion": "9.0"
-           * }
-           */
-          userData?: { [key: string]: unknown };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
-        "application/vnd.impact.experiment.v1+json": {
-          experiment: {
-            /**
-             * @description Reference ID to the compiled model
-             * @example workspace_pid_controller_20090615_134530_as86g32
-             */
-            fmu_id: string;
-            /**
-             * @example {
-             *   "variables": {
-             *     "integrator.k": 1,
-             *     "inertia1.J": "range(1,5,5)",
-             *     "inertia2.J": "range(5,10,3)"
-             *   },
-             *   "initializeFrom": ""
-             * }
-             */
-            modifiers?: {
-              /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified a full factorial is used to determine all different parameterizations for the experiment */
-              variables?: { [key: string]: number | string | boolean };
-              /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function */
-              initializeFrom?: string;
-            };
-            /** @description The analysis object */
-            analysis: {
-              /**
-               * @description The name of the custom function that will be executed
-               * @example dynamic
-               */
-              analysis_function: string;
-              /**
-               * @description Parameters to the custom function
-               * @example {
-               *   "start_time": 0,
-               *   "final_time": 1
-               * }
-               */
-              parameters?: { [key: string]: number | string | boolean };
-              /** @description Key-value pairs of simulation options */
-              simulation_options?: { [key: string]: number | string | boolean };
-              /** @description Key-value pairs of solver options */
-              solver_options?: { [key: string]: number | string | boolean };
-              /**
-               * @description The simulation log level
-               * @default WARNING
-               * @enum {string}
-               */
-              simulation_log_level:
-                | "NOTHING"
-                | "FATAL"
-                | "ERROR"
-                | "WARNING"
-                | "INFO"
-                | "VERBOSE"
-                | "DEBUG"
-                | "ALL";
-            };
-          };
-          /**
-           * @description Up to 2048 bytes of custom data to be associated with the experiment.
-           * @example {
-           *   "parametrizationFrom": "specification 3.4",
-           *   "externalToolVersion": "9.0"
-           * }
-           */
-          userData?: { [key: string]: unknown };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_7"];
   };
   getExperimentInfo: {
     parameters: {
@@ -3196,143 +6364,52 @@ export interface operations {
       /** The experiment information as JSON */
       200: {
         content: {
-          "application/vnd.impact.experiment.v2+json": {
-            /** @example workspace_pid_controller_20200705_170234_546ccba */
-            id?: string;
-            experiment?: components["schemas"]["ExperimentDefinition"];
-            meta_data?: components["schemas"]["ExperimentMetaData"];
-            run_info?: {
-              /**
-               * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run
-               * @example failed
-               */
-              status?: string;
-              /**
-               * @description An array containing errors if status is 'failed'
-               * @example [
-               *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-               * ]
-               */
-              errors?: string[];
-              /**
-               * @description Number of cases that are failed
-               * @example 0
-               */
-              failed?: number;
-              /**
-               * @description Number of cases that are successful
-               * @example 2
-               */
-              successful?: number;
-              /**
-               * @description Number of cases that are not started
-               * @example 0
-               */
-              not_started?: number;
-              /**
-               * @description Number of cases that are cancelled
-               * @example 0
-               */
-              cancelled?: number;
-            };
-          };
-          "application/vnd.impact.experiment.v1+json": {
-            /** @example workspace_pid_controller_20200705_170234_546ccba */
-            id?: string;
-            experiment?: {
-              /**
-               * @description Reference ID to the compiled model
-               * @example workspace_pid_controller_20090615_134530_as86g32
-               */
-              fmu_id: string;
-              /**
-               * @example {
-               *   "variables": {
-               *     "integrator.k": 1,
-               *     "inertia1.J": "range(1,5,5)",
-               *     "inertia2.J": "range(5,10,3)"
-               *   },
-               *   "initializeFrom": ""
-               * }
-               */
-              modifiers?: {
-                /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified a full factorial is used to determine all different parameterizations for the experiment */
-                variables?: { [key: string]: number | string | boolean };
-                /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function */
-                initializeFrom?: string;
-              };
-              /** @description The analysis object */
-              analysis: {
-                /**
-                 * @description The name of the custom function that will be executed
-                 * @example dynamic
-                 */
-                analysis_function: string;
-                /**
-                 * @description Parameters to the custom function
-                 * @example {
-                 *   "start_time": 0,
-                 *   "final_time": 1
-                 * }
-                 */
-                parameters?: { [key: string]: number | string | boolean };
-                /** @description Key-value pairs of simulation options */
-                simulation_options?: {
-                  [key: string]: number | string | boolean;
-                };
-                /** @description Key-value pairs of solver options */
-                solver_options?: { [key: string]: number | string | boolean };
-                /**
-                 * @description The simulation log level
-                 * @default WARNING
-                 * @enum {string}
-                 */
-                simulation_log_level:
-                  | "NOTHING"
-                  | "FATAL"
-                  | "ERROR"
-                  | "WARNING"
-                  | "INFO"
-                  | "VERBOSE"
-                  | "DEBUG"
-                  | "ALL";
-              };
-            };
-            meta_data?: components["schemas"]["ExperimentMetaData"];
-            run_info?: {
-              /**
-               * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run
-               * @example failed
-               */
-              status?: string;
-              /**
-               * @description An array containing errors if status is 'failed'
-               * @example [
-               *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-               * ]
-               */
-              errors?: string[];
-              /**
-               * @description Number of cases that are failed
-               * @example 0
-               */
-              failed?: number;
-              /**
-               * @description Number of cases that are successful
-               * @example 2
-               */
-              successful?: number;
-            };
-          };
+          "application/vnd.impact.experiment.v2+json": components["schemas"]["inline_response_200_23"];
+          "application/vnd.impact.experiment.v1+json": components["schemas"]["inline_response_200_23"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Can be used to set a human readable identifier for an experiment. */
@@ -3348,26 +6425,50 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** The new label for the experiment */
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description The new label for the experiment
-           * @example tuning of P part
-           */
-          label: string;
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_8"];
   };
   removeExperiment: {
     parameters: {
@@ -3381,13 +6482,48 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getExecutionStatus: {
@@ -3403,55 +6539,51 @@ export interface operations {
       /** Status */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string.
-             * @example 27
-             */
-            finished_executions?: number;
-            /**
-             * @description Total number of executions.
-             * @example 50
-             */
-            total_executions?: number;
-            /**
-             * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
-             * @example running
-             */
-            status?: string;
-            /** @description An array containing progress information about all executions */
-            progresses?: {
-              /**
-               * @description A messag about the progress of the exectuion.
-               * @example Simulation at time 3.45
-               */
-              message?: string;
-              /**
-               * @description A number between 0 and 1 indicating how the execution is progressing
-               * @example 0.43
-               */
-              percentage?: number;
-              /**
-               * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'
-               * @example compilation
-               */
-              stage?: string;
-              /**
-               * @description True if the execution is done
-               * @example true
-               */
-              done?: boolean;
-            }[];
-          };
+          "application/json": components["schemas"]["inline_response_200_24"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** First call POST /workspaces/{workspace}/experiments to setup what should be executed. */
@@ -3467,34 +6599,50 @@ export interface operations {
     responses: {
       /** The experiment is executed */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** Optional request body for how execution should run */
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @description The cases to include in the execution */
-          includeCases?: {
-            /** @description List of cases to execute */
-            ids?: string[];
-          };
-          /** @description Options for how the execution is run */
-          options?: {
-            /**
-             * @description If true, then compilation will always be done even if a previous compilation result could be used. Default is false
-             * @example true
-             */
-            forceCompilation?: boolean;
-          };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_9"];
   };
   cancelExecution: {
     parameters: {
@@ -3508,13 +6656,48 @@ export interface operations {
     responses: {
       /** The experiment is cancelled */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getAllCaseInfo: {
@@ -3530,88 +6713,51 @@ export interface operations {
       /** The case information as JSON */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              items?: {
-                /**
-                 * @description Case ID.
-                 * @example case_1
-                 */
-                id?: string;
-                meta?: {
-                  /**
-                   * @description Case label
-                   * @example Cruise operating point
-                   */
-                  label?: unknown;
-                };
-                run_info?: {
-                  /**
-                   * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'
-                   * @example successful
-                   */
-                  status?: string;
-                  /**
-                   * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null
-                   * @example simulation
-                   */
-                  failed_at?: string;
-                  /**
-                   * @description The unix time the case started running
-                   * @example 1549552749
-                   */
-                  datetime_started?: number;
-                  /**
-                   * @description The unix time the case finshed running
-                   * @example 1549552338
-                   */
-                  datetime_finished?: number;
-                };
-                input?: {
-                  /**
-                   * @description Reference ID to the compiled model used running the case
-                   * @example workspace_pid_controller_20090615_134530_as86g32
-                   */
-                  fmu_id?: string;
-                  /** @description The analysis object */
-                  analysis?: {
-                    /**
-                     * @description the name of the custom function
-                     * @example dynamic
-                     */
-                    analysis_function: string;
-                    /**
-                     * @description parameters to the custom function
-                     * @example {
-                     *   "start_time": 0,
-                     *   "final_time": 1
-                     * }
-                     */
-                    parameters?: { [key: string]: unknown };
-                    /** @description Key-value pairs of simulation options */
-                    simulation_options?: { [key: string]: unknown };
-                    /** @description Key-value pairs of solver options */
-                    solver_options?: { [key: string]: unknown };
-                  };
-                  /** @description Parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable */
-                  parametrization?: { [key: string]: unknown };
-                  /** @description Structural parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. These are values that cannot be applied to the FMU/Model after compilation */
-                  structural_parametrization?: { [key: string]: unknown };
-                  /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU */
-                  fmu_base_parametrization?: { [key: string]: unknown };
-                };
-              }[];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_25"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getCaseInfo: {
@@ -3632,13 +6778,48 @@ export interface operations {
           "application/json": components["schemas"]["Case"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This end-point can be used to update a case input. This can be used to modify the case and then execute the case again as part of an experiment and get different results for the case. Only fields under 'input' and 'meta' can be updated. Also, the fields 'fmu_id', 'analysis_function', 'structural_parametrization' and 'fmu_base_parametrization' cannot be updated. After a case is updated the 'consistent' field will be set to 'false' to signify that case results might not match the case input. Executing the case as part of an experiment will set 'consistent' to 'true'. The recomended way to update the case is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data. */
@@ -3656,13 +6837,48 @@ export interface operations {
     responses: {
       /** The case is updated */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
     /** Case information */
     requestBody: {
@@ -3689,13 +6905,48 @@ export interface operations {
           "text/plain": string;
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getCaseResults: {
@@ -3717,13 +6968,48 @@ export interface operations {
           "text/csv": string;
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This end-point can be used to fetch trajectories from cases that have finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 from the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version. */
@@ -3746,54 +7032,54 @@ export interface operations {
       /** Experiment results for each variable in request body. */
       200: {
         content: {
-          "application/vnd.impact.trajectories.v2+json": {
-            data?: {
-              items?: {
-                /**
-                 * @description If true, the trajectory does not vary with 'time' and only a single value is returned.
-                 * @example false
-                 */
-                fixed?: boolean;
-                /**
-                 * @description The result trajectory for a variable, is an array of values.
-                 * @example [
-                 *   1,
-                 *   2,
-                 *   3,
-                 *   4
-                 * ]
-                 */
-                trajectory?: (Partial<number> & Partial<string>)[];
-              }[];
-            };
-          };
-          "application/vnd.impact.trajectories.v1+json": (Partial<number> &
-            Partial<string>)[][];
+          "application/vnd.impact.trajectories.v2+json": components["schemas"]["inline_response_200_26"];
+          "application/vnd.impact.trajectories.v1+json": components["schemas"]["inline_response_200_26"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** A list of variable names for which the trajectories should be returned */
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description The variable names trajectories should be fetched for
-           * @example [
-           *   "variable1",
-           *   "variable2"
-           * ]
-           */
-          variable_names: string[];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_10"];
   };
   getCustomArtifact: {
     parameters: {
@@ -3815,13 +7101,48 @@ export interface operations {
           "application/octet-stream": string;
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   getVariables: {
@@ -3840,13 +7161,48 @@ export interface operations {
           "application/json": string[];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This end-point can be used to fetch trajectories from experiments that has finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 under 'case_1' in the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version. */
@@ -3867,62 +7223,54 @@ export interface operations {
       /** Experiment results for all cases of experiment and for each variable in request body. */
       200: {
         content: {
-          "application/vnd.impact.trajectories.v2+json": {
-            data?: {
-              items?: {
-                /**
-                 * @description The case ID for which corresponding data in 'items' belong to.
-                 * @example case_1
-                 */
-                caseId?: string;
-                /** @description Trajectories for all variables given in request body for one case. */
-                items?: {
-                  /**
-                   * @description If true, the trajectory does not vary with 'time' and only a single value is returned.
-                   * @example false
-                   */
-                  fixed?: boolean;
-                  /**
-                   * @description The result trajectory for a variable, is an array of values.
-                   * @example [
-                   *   1,
-                   *   2,
-                   *   3,
-                   *   4
-                   * ]
-                   */
-                  trajectory?: (Partial<number> & Partial<string>)[];
-                }[];
-              }[];
-            };
-          };
-          "application/vnd.impact.trajectories.v1+json": (Partial<number> &
-            Partial<string>)[][][];
+          "application/vnd.impact.trajectories.v2+json": components["schemas"]["inline_response_200_27"];
+          "application/vnd.impact.trajectories.v1+json": components["schemas"]["inline_response_200_27"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** A list of variable names for which the trajectories should be returned */
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description The variable names trajectories should be fetched for
-           * @example [
-           *   "variable1",
-           *   "variable2"
-           * ]
-           */
-          variable_names: string[];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_11"];
   };
   /** The compressed workspace will be prepared. After a successful completion of a call to this endpoint, call GET /workspace-exports/{exportId} to check status. */
   prepareExportWorkspaceAsync: {
@@ -3931,93 +7279,47 @@ export interface operations {
       /** The location for checking status and possible data for compressed workspace */
       201: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description location for checking status of workspace compression
-               * @example api/workspace-exports/79sd8-3n2a4-e3t24
-               */
-              location?: string;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_201"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** Specification of what workspace resources to include when exporting the workspace. */
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description The ID for the workspace to export
-           * @example my_workspace
-           */
-          workspaceId: string;
-          contents: {
-            /**
-             * @description List of dictionaries, describing which libraries to include when downloading the workspace
-             * @example [
-             *   {
-             *     "name": "LiquidCooling",
-             *     "resources_to_exclude": []
-             *   },
-             *   {
-             *     "name": "Workspace",
-             *     "resources_to_exclude": [
-             *       "my_plot.png",
-             *       "my_sheet.csv"
-             *     ]
-             *   }
-             * ]
-             */
-            libraries: {
-              /**
-               * @description The name of the library
-               * @example LiquidCooling
-               */
-              name: string;
-              /**
-               * @description A list of resources to exclude when exporting library
-               * @example [
-               *   "my_plot.png",
-               *   "my_sheet.csv"
-               * ]
-               */
-              resources_to_exclude: string[];
-            }[];
-            /**
-             * @description List of experiments to include when downloading the workspace
-             * @example [
-             *   "_nics_multibody_examples_elementary_doublependulum_20191029_084342_2c956e9",
-             *   "modelica_blocks_examples_pid_controller_20191023_151659_f32a30d"
-             * ]
-             */
-            experiment_ids: string[];
-            /**
-             * @description List of model executables to include when downloading the workspace
-             * @example [
-             *   "_nics_multibody_examples_elementary_doublependulum_20191029_084342_2c956e9",
-             *   "modelica_blocks_examples_pid_controller_20191023_151659_f32a30d"
-             * ]
-             */
-            fmu_ids: string[];
-            /** @description If field exists, workspace is exported as a read only dashboard workspace */
-            dashboard?: {
-              /**
-               * @description The model to view in the dashboard workspace
-               * @example Modelica.Blocks.Examples.PID_Controller
-               */
-              model: string;
-            };
-          };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_12"];
   };
   /** The workspace needs to be setup for export by calling POST /workspace-exports, before calling this API endpoint. */
   exportWorkspaceAsync: {
@@ -4031,51 +7333,45 @@ export interface operations {
       /** Status for a workspace export and data to download it if ready. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description ID for workspace export
-               * @example 79sd8-3n2a4-e3t24
-               */
-              id?: string;
-              /** @description Will be 'running' if export is on-going, 'ready' if export is finished and can be downloaded, or 'error' if an error occured. */
-              status?: string;
-              /** @description Data for the workspace to download, only exists in response if workspace is ready to be downloaded. Use the field 'status' to see if this is the case. */
-              data?: {
-                /**
-                 * @description URI for downloading the workspace
-                 * @example api/exports/79sd8-3n2a4-e3t24
-                 */
-                downloadUri?: string;
-                /**
-                 * @description The size of the compressed workspace, in bytes
-                 * @example 10481015
-                 */
-                size?: number;
-              };
-              /** @description Error message if the export fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
-              error?: {
-                /**
-                 * @description Error message describing what went wrong
-                 * @example Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded
-                 */
-                message?: string;
-                /**
-                 * @description Error code for identifying specific errors
-                 * @example 12072
-                 */
-                code?: number;
-              };
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_28"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This API end point can be be called after a compressed workspace has been downloaded. */
@@ -4089,12 +7385,42 @@ export interface operations {
     responses: {
       /** OK: The workspace export with the specified ID was deleted. */
       200: unknown;
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Will initiate import of an existing workspace. After a successful completion of a call to this endpoint, call GET /workspace-imports/{importId} to check status. */
@@ -4104,35 +7430,35 @@ export interface operations {
       /** Workspace import created and location to check status of import is returned. */
       201: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description The ID of the workspace import
-               * @example api/workspace-imports/fd90-4gkl-vf89
-               */
-              location?: string;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_201_1"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** A zip file of a workspace given with multipart/form-data is used to import a workspace. */
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /**
-           * Format: binary
-           * @description The zip-file
-           * @example my_workspace.zip
-           */
-          file?: string;
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_13"];
   };
   /** The workspace needs to be setup for import by calling POST /workspace-imports, before calling this API endpoint. */
   importWorkspaceStatus: {
@@ -4146,51 +7472,45 @@ export interface operations {
       /** Status for a workspace import and data to resource if import is done and workspace is ready to be used. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description ID for workspace import
-               * @example 79sd8-3n2a4-e3t24
-               */
-              id?: string;
-              /** @description Will be 'running' if import is on-going, 'ready' if import is finished and can be used, or 'error' if an error occured. */
-              status?: string;
-              /** @description Data for the workspace imported, only exists in response if workspace is imported and ready to use. Use the field 'status' to see if this is the case. */
-              data?: {
-                /**
-                 * @description URI for the imported workspace resource
-                 * @example api/workspaces/my_workspace
-                 */
-                resourceUri?: string;
-                /**
-                 * @description The ID for the workspace imported
-                 * @example my_workspace
-                 */
-                workspaceId?: string;
-              };
-              /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
-              error?: {
-                /**
-                 * @description Error message describing what went wrong
-                 * @example Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact
-                 */
-                message?: string;
-                /**
-                 * @description Error code for identifying specific errors
-                 * @example 12015
-                 */
-                code?: number;
-              };
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_29"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This API end point can be be called after a workspace has been imported. */
@@ -4204,12 +7524,42 @@ export interface operations {
     responses: {
       /** OK: The workspace import with the specified ID was deleted. */
       200: unknown;
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** This route is used for downloading exported files. Other end-points will reference here with a download URI */
@@ -4230,28 +7580,45 @@ export interface operations {
       /** The resource cannot be downloaded. Most likely, something went wrong when creating the zip file */
       400: {
         content: {
-          "application/json": {
-            error?: {
-              /**
-               * @description Error message describing what went wrong
-               * @example Could not export workspace 'ceb6ac1ed71040eb8f3df7f69157e658', reason: 'Maximum allowed zip file size of 95MB exceeded'
-               */
-              message?: string;
-              /**
-               * @description Error code for identifying specific errors
-               * @example 12072
-               */
-              code?: number;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_400"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   uploadMAT: {
@@ -4263,48 +7630,50 @@ export interface operations {
           "application/json": components["schemas"]["ExternalResultUploadStatus"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    /** The file with a .mat extension and options to import. */
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /**
-           * Format: binary
-           * @description The result file in question.
-           * @example result_1.mat
-           */
-          file: string;
-          /** @description Upload options */
-          options: {
-            /**
-             * @description Meaningful label for results association. If not given the name of the file uploaded will be used
-             * @example result_for_PID.mat
-             */
-            name?: string;
-            /**
-             * @description Description of the result. If not given an empty string will be used
-             * @example This is a result file for PID controller
-             */
-            description?: string;
-            /** @description Context describing the model and associated values */
-            context: {
-              /**
-               * @description Workspace id
-               * @example my_workspace
-               */
-              workspaceId: string;
-            };
-          };
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_14"];
   };
   /** Get the current status of upload for a given uploadId */
   getUploadStatus: {
@@ -4321,12 +7690,42 @@ export interface operations {
           "application/json": components["schemas"]["ExternalResultUploadStatus"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Gets the meta-data for a result file */
@@ -4341,43 +7740,45 @@ export interface operations {
       /** External result meta-data */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description Id for result storage
-               * @example 2f036b9fab6f45c788cc466da327cc78workspace
-               */
-              id?: string;
-              /**
-               * @description Timestamp of when the external result was imported
-               * @example 2021-09-02T08:26:49.612000
-               */
-              createdAt?: string;
-              /**
-               * @description Meaningful label for results association
-               * @example result_for_PID
-               */
-              name?: string;
-              /**
-               * @description Description of the result
-               * @example This is a result file for PID controller
-               */
-              description?: string;
-              /**
-               * @description Name of workspace
-               * @example workspace
-               */
-              workspaceId?: string;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_30"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   deleteUploadedResultEntity: {
@@ -4390,52 +7791,94 @@ export interface operations {
     responses: {
       /** OK. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because there is a conflict. */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Returns the ID of the current user, which is used to create API keys, and the external IDs connected to it. */
   getCurrentUser: {
-    parameters: {};
     responses: {
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description The user ID.
-               * @example 2bb76154701c47c38d1950ea60d2c025
-               */
-              id: string;
-              /** @description List of external IDs that are connected to this user ID. */
-              externalUsers?: {
-                /**
-                 * @description ExternalID
-                 * @example name@company.com
-                 */
-                id?: string;
-              }[];
-              /**
-               * @description The users license. If field is missing the user does not have a license.
-               * @example impact-pro
-               * @enum {string}
-               */
-              license?: "impact-pro" | "impact-base" | "impact-deployment";
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_31"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Get information on the API keys belonging to the user by the given ID. The information includes the key ID and the creation time but not the secret key itself. */
@@ -4450,30 +7893,45 @@ export interface operations {
       /** Information about existing API keys. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              items?: {
-                /**
-                 * @description The ID of the key
-                 * @example zPY1U0KuBP
-                 */
-                id?: string;
-                /**
-                 * @description Timestamp of when the key was created
-                 * @example 1588016253
-                 */
-                createdAt?: number;
-              }[];
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_32"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Creates a new API key belonging to the user with the given ID. The response contains a new API key which is the only time this key can be retrieved. They key must be safely stored by the recepient, as there is no way to retrieve it at a later point. A user may only have one API key at a time, so if it is lost or compromised, it must be deleted before a new one can be created. The API key can be used with the /login endpoint to log in. Each key has an ID to identify it when deleting it. */
@@ -4488,33 +7946,45 @@ export interface operations {
       /** OK: A new API key has been created. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description The API key ID.
-               * @example zPY1U0KuBP
-               */
-              id?: string;
-              /**
-               * @description The API key.
-               * @example secret-api-key
-               */
-              secret?: string;
-              /**
-               * @description The timestamp of when the key was created.
-               * @example 1588016253
-               */
-              created_at?: number;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_33"];
         };
       };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Deletes an API key with the given ID, belonging to a specified user. */
@@ -4530,12 +8000,42 @@ export interface operations {
     responses: {
       /** OK: The API key was deleted. */
       200: unknown;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
+      /** The request could not be processed. The request is most likely not correct. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
     };
   };
   /** Validates an API key. */
@@ -4544,53 +8044,47 @@ export interface operations {
       /** Information about the user who owns the API key. */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description The user ID of the owner of the key.
-               * @example 2bb76154701c47c38d1950ea60d2c025
-               */
-              id?: string;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_200_34"];
         };
       };
       /** The provided API key is invalid. */
       400: {
         content: {
-          "application/json": {
-            error?: {
-              /**
-               * @description Error message describing what went wrong
-               * @example The provided API key is not valid
-               */
-              message?: string;
-              /**
-               * @description Error code for identifying specific errors
-               * @example 12035
-               */
-              code?: number;
-            };
-          };
+          "application/json": components["schemas"]["inline_response_400_1"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      500: components["responses"]["UnexpectedError"];
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /**
-           * @description An API key to validate
-           * @example secret-api-key
-           */
-          secret: string;
+      /** The request could not be performed because of missing authentication. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The request could not be performed because the system is out of payed for floating seats. */
+      402: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** Action is not allowed. Permissions might be insufficient. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** The resource could not be found. Typically this means that a resource the request is referencing does not exists. Common resources are workspaces, libraries, model-executables and experiments. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** An internal server error. */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
         };
       };
     };
+    requestBody: components["requestBodies"]["inline_object_15"];
   };
 }
 

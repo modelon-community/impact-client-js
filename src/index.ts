@@ -1,5 +1,19 @@
 import { Client } from './Client'
 import { ModelicaExperiment } from './ModelicaExperiment'
-import { GetWorkspacesResponse } from './types/index.d'
+import {
+    Case,
+    CustomFunction,
+    ExperimentId,
+    Trajectories,
+    Workspace,
+} from './types/index.d'
 
-export { Client, GetWorkspacesResponse, ModelicaExperiment }
+export {
+    Case,
+    Client,
+    CustomFunction,
+    ExperimentId,
+    ModelicaExperiment,
+    Trajectories,
+    Workspace,
+}

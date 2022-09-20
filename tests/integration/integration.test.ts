@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Client } from '../..'
 import { ModelicaExperiment } from '../../src/ModelicaExperiment'
-import { GetWorkspacesResponse } from '../../src/types'
+import { Workspace } from '../../src/types'
 
 dotenv.config()
 
@@ -15,7 +15,7 @@ const getClient = () =>
 test('get workspaces', () => {
     getClient()
         .getWorkspaces()
-        .then(({ data: { items: workspaces } }: GetWorkspacesResponse) =>
+        .then((workspaces: Workspace[]) =>
             expect(workspaces.length).toBeGreaterThanOrEqual(0)
         )
 })
@@ -60,5 +60,5 @@ test(
         expect(trajectories.length).toBe(1)
         expect(trajectories[0].length).toBe(502)
     },
-    10 * 1000
+    20 * 1000
 )
