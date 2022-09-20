@@ -1,6 +1,6 @@
 {
     "name": "@modelon/impact-client-js",
-    "version": "2.0.0-alpha.4",
+    "version": "2.0.0-alpha.5",
     "description": "Modelon Impact Client for Javascript",
     "scripts": {
         "build": "tsup --dts",
