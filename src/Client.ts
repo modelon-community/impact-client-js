@@ -225,17 +225,15 @@ export class Client {
 
     getWorkspaces(): Promise<Workspace[]> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
+            this.ensureImpactToken()
+                .then(() => {
                     this.axios
                         .get(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`
                         )
                         .then((response) => resolve(response.data?.data?.items))
                 })
-            } catch (e) {
-                reject(e)
-            }
+                .catch((e) => reject(e))
         })
     }
 
@@ -247,8 +245,8 @@ export class Client {
         workspaceId: string
     }): Promise<ExperimentId> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
+            this.ensureImpactToken()
+                .then(() => {
                     this.axios
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
@@ -258,9 +256,7 @@ export class Client {
                             resolve(response.data.experiment_id)
                         )
                 })
-            } catch (e) {
-                reject(e)
-            }
+                .catch((e) => reject(e))
         })
     }
 
@@ -274,25 +270,22 @@ export class Client {
         workspaceId: string
     }): Promise<void> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
-                    this.axios
-                        .post(
-                            `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
-                            {
-                                includeCases: {
-                                    ids: cases,
-                                },
-                                options: {
-                                    forceCompilation: true,
-                                },
-                            }
-                        )
-                        .then(() => resolve())
-                })
-            } catch (e) {
-                reject(e)
-            }
+            this.ensureImpactToken().then(() => {
+                this.axios
+                    .post(
+                        `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
+                        {
+                            includeCases: {
+                                ids: cases,
+                            },
+                            options: {
+                                forceCompilation: true,
+                            },
+                        }
+                    )
+                    .then(() => resolve())
+                    .catch((e) => reject(e))
+            })
         })
     }
 
@@ -304,17 +297,15 @@ export class Client {
         workspaceId: string
     }): Promise<CompilationStatus> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
+            this.ensureImpactToken()
+                .then(() => {
                     this.axios
                         .get(
                             `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
                         )
                         .then((response) => resolve(response.data))
                 })
-            } catch (e) {
-                reject(e)
-            }
+                .catch((e) => reject(e))
         })
     }
 
@@ -368,17 +359,15 @@ export class Client {
 
     getCustomFunctions(workspaceId: string): Promise<CustomFunction[]> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
+            this.ensureImpactToken()
+                .then(() => {
                     this.axios
                         .get(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/custom-functions`
                         )
                         .then((response) => resolve(response.data.data.items))
                 })
-            } catch (e) {
-                reject(e)
-            }
+                .catch((e) => reject(e))
         })
     }
 
@@ -390,17 +379,15 @@ export class Client {
         workspaceId: string
     }): Promise<Case[] | undefined> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
+            this.ensureImpactToken()
+                .then(() => {
                     this.axios
                         .get(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases`
                         )
                         .then((response) => resolve(response.data?.data?.items))
                 })
-            } catch (e) {
-                reject(e)
-            }
+                .catch((e) => reject(e))
         })
     }
 
@@ -416,8 +403,8 @@ export class Client {
         workspaceId: string
     }): Promise<Trajectories | undefined> {
         return new Promise((resolve, reject) => {
-            try {
-                this.ensureImpactToken().then(() => {
+            this.ensureImpactToken()
+                .then(() => {
                     this.axios
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/${caseId}/trajectories`,
@@ -425,9 +412,7 @@ export class Client {
                         )
                         .then((res) => resolve(res.data))
                 })
-            } catch (e) {
-                reject(e)
-            }
+                .catch((e) => reject(e))
         })
     }
 }
