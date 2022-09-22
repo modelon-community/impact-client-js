@@ -232,6 +232,7 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`
                         )
                         .then((response) => resolve(response.data?.data?.items))
+                        .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
         })
@@ -255,6 +256,7 @@ export class Client {
                         .then((response) =>
                             resolve(response.data.experiment_id)
                         )
+                        .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
         })
@@ -286,6 +288,7 @@ export class Client {
                     .then(() => resolve())
                     .catch((e) => reject(e))
             })
+                .catch((e) => reject(e))
         })
     }
 
@@ -304,6 +307,7 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
                         )
                         .then((response) => resolve(response.data))
+                        .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
         })
@@ -322,10 +326,14 @@ export class Client {
         })
         while (data.status !== 'done') {
             await sleep(1000)
-            data = await this.getExecutionStatus({
-                experimentId,
-                workspaceId,
-            })
+            try {
+                data = await this.getExecutionStatus({
+                    experimentId,
+                    workspaceId,
+                })
+            } catch (e) {
+                throw e;
+            }
         }
     }
 
@@ -366,6 +374,7 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/custom-functions`
                         )
                         .then((response) => resolve(response.data.data.items))
+                        .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
         })
@@ -386,6 +395,7 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases`
                         )
                         .then((response) => resolve(response.data?.data?.items))
+                        .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
         })
@@ -411,6 +421,7 @@ export class Client {
                             { variable_names: variableNames }
                         )
                         .then((res) => resolve(res.data))
+                        .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
         })
