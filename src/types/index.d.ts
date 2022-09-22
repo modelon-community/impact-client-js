@@ -10,6 +10,8 @@ export type Workspace = components['schemas']['Workspace']
 export type ModelicaExperimentDefinition =
     components['schemas']['ExperimentDefinition']
 
+export type ModelicaExperimentExtensions = components['schemas']['Extensions']
+
 export type ModelicaExperimentParameters =
     components['schemas']['Analysis']['parameters']
 

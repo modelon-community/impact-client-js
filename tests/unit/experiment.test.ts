@@ -41,6 +41,7 @@ test('Create experiment without modifiers and parameters', () => {
             },
             modifiers: {},
         },
+        extensions: [],
     })
 })
 
@@ -48,9 +49,18 @@ test('Create experiment with modifiers and parameters', () => {
     const customFunction = 'dynamic'
     const modelName = 'Modelica.Blocks.Examples.PID_Controller'
     const modifiers = { variables: { 'inertia1.J': 2, 'PI.k': 40 } }
+    const extensions = [
+        {
+            modifiers: { variables: { 'inertia1.w': 1, 'inertia2.w': 2 } },
+        },
+        {
+            modifiers: { variables: { 'inertia1.w': 2, 'inertia2.w': 3 } },
+        },
+    ]
 
     const modelExperiment = ModelicaExperiment.from({
         customFunction,
+        extensions,
         modelName,
         modifiers,
         parameters: {
@@ -89,5 +99,23 @@ test('Create experiment with modifiers and parameters', () => {
             },
             modifiers,
         },
+        extensions: [
+            {
+                modifiers: {
+                    variables: {
+                        'inertia1.w': 1,
+                        'inertia2.w': 2,
+                    },
+                },
+            },
+            {
+                modifiers: {
+                    variables: {
+                        'inertia1.w': 2,
+                        'inertia2.w': 3,
+                    },
+                },
+            },
+        ],
     })
 })

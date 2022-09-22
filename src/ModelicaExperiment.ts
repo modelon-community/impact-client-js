@@ -1,27 +1,32 @@
 import {
     ModelicaExperimentDefinition,
+    ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
     ModelicaExperimentParameters,
 } from './types'
 
 export class ModelicaExperiment {
     customFunction: string
+    extensions?: ModelicaExperimentExtensions
     modelName: string
     modifiers?: ModelicaExperimentModifiers
     parameters?: ModelicaExperimentParameters
 
     private constructor({
         customFunction,
+        extensions,
         modelName,
         modifiers,
         parameters,
     }: {
         customFunction: string
+        extensions?: ModelicaExperimentExtensions
         modelName: string
         modifiers?: ModelicaExperimentModifiers
         parameters?: ModelicaExperimentParameters
     }) {
         this.customFunction = customFunction
+        this.extensions = extensions
         this.modelName = modelName
         this.modifiers = modifiers
         this.parameters = parameters
@@ -29,17 +34,20 @@ export class ModelicaExperiment {
 
     static from({
         customFunction,
+        extensions,
         modelName,
         modifiers,
         parameters,
     }: {
         customFunction: string
+        extensions?: ModelicaExperimentExtensions
         modelName: string
         modifiers?: ModelicaExperimentModifiers
         parameters?: ModelicaExperimentParameters
     }): ModelicaExperiment {
         return new ModelicaExperiment({
             customFunction,
+            extensions,
             modelName,
             modifiers,
             parameters,
@@ -82,6 +90,7 @@ export class ModelicaExperiment {
                 },
                 modifiers: this.modifiers || {},
             },
+            extensions: this.extensions || [],
         }
     }
 }

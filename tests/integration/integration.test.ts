@@ -32,6 +32,24 @@ test(
                 start_time: 0,
                 final_time: 1,
             },
+            extensions: [
+                {
+                    modifiers: {
+                        variables: {
+                            'inertia1.J': 1,
+                            'inertia2.J': 2,
+                        },
+                    },
+                },
+                {
+                    modifiers: {
+                        variables: {
+                            'inertia1.J': 2,
+                            'inertia2.J': 4,
+                        },
+                    },
+                },
+            ],
         })
 
         const workspaceId = 'friday0916'
@@ -39,7 +57,7 @@ test(
         const client = getClient()
 
         const experimentId = await client.executeExperiment({
-            caseIds: ['case_1'],
+            caseIds: ['case_1', 'case_2'],
             experiment,
             workspaceId,
         })
@@ -51,14 +69,25 @@ test(
         })
         expect(typeof cases).toBe('object')
 
-        const trajectories = await client.getTrajectories({
+        let trajectories = await client.getTrajectories({
             caseId: 'case_1',
             experimentId,
-            variableNames: ['inertia1.w'],
+            variableNames: ['inertia1.w', 'inertia1.a'],
             workspaceId,
         })
-        expect(trajectories.length).toBe(1)
+        expect(trajectories.length).toBe(2)
         expect(trajectories[0].length).toBe(502)
+        expect(trajectories[1].length).toBe(502)
+
+        trajectories = await client.getTrajectories({
+            caseId: 'case_2',
+            experimentId,
+            variableNames: ['inertia1.w', 'inertia1.a'],
+            workspaceId,
+        })
+        expect(trajectories.length).toBe(2)
+        expect(trajectories[0].length).toBe(502)
+        expect(trajectories[1].length).toBe(502)
     },
     20 * 1000
 )
