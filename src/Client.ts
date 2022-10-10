@@ -3,9 +3,10 @@ import { Cookie, CookieJar } from 'tough-cookie'
 import { ModelicaExperiment } from './ModelicaExperiment'
 import {
     Case,
+    CaseTrajectories,
     CustomFunction,
     ExperimentId,
-    Trajectories,
+    ExperimentTrajectories,
     Workspace,
 } from './types'
 
@@ -272,22 +273,23 @@ export class Client {
         workspaceId: string
     }): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.ensureImpactToken().then(() => {
-                this.axios
-                    .post(
-                        `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
-                        {
-                            includeCases: {
-                                ids: cases,
-                            },
-                            options: {
-                                forceCompilation: true,
-                            },
-                        }
-                    )
-                    .then(() => resolve())
-                    .catch((e) => reject(e))
-            })
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .post(
+                            `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
+                            {
+                                includeCases: {
+                                    ids: cases,
+                                },
+                                options: {
+                                    forceCompilation: true,
+                                },
+                            }
+                        )
+                        .then(() => resolve())
+                        .catch((e) => reject(e))
+                })
                 .catch((e) => reject(e))
         })
     }
@@ -332,7 +334,7 @@ export class Client {
                     workspaceId,
                 })
             } catch (e) {
-                throw e;
+                throw e
             }
         }
     }
@@ -409,7 +411,7 @@ export class Client {
         experimentId: string
         variableNames: string[]
         workspaceId: string
-    }): Promise<Trajectories | undefined> {
+    }): Promise<ExperimentTrajectories> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -439,14 +441,19 @@ export class Client {
         experimentId: string
         variableNames: string[]
         workspaceId: string
-    }): Promise<Trajectories | undefined> {
+    }): Promise<CaseTrajectories> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/${caseId}/trajectories`,
-                            { variable_names: variableNames }
+                            { variable_names: variableNames },
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.trajectories.v2+json',
+                                },
+                            }
                         )
                         .then((res) => resolve(res.data))
                         .catch((e) => reject(e))

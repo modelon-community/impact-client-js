@@ -2,18 +2,20 @@ import { Client } from './Client'
 import { ModelicaExperiment } from './ModelicaExperiment'
 import {
     Case,
+    CaseTrajectories,
     CustomFunction,
     ExperimentId,
-    Trajectories,
+    ExperimentTrajectories,
     Workspace,
 } from './types/index.d'
 
 export {
     Case,
+    CaseTrajectories,
     Client,
     CustomFunction,
     ExperimentId,
+    ExperimentTrajectories,
     ModelicaExperiment,
-    Trajectories,
     Workspace,
 }
