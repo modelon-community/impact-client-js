@@ -401,7 +401,35 @@ export class Client {
         })
     }
 
-    getTrajectories({
+    getExperimentTrajectories({
+        experimentId,
+        variableNames,
+        workspaceId,
+    }: {
+        experimentId: string
+        variableNames: string[]
+        workspaceId: string
+    }): Promise<Trajectories | undefined> {
+        return new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .post(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/trajectories`,
+                            { variable_names: variableNames },
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.trajectories.v2+json',
+                                },
+                            }
+                        )
+                        .then((res) => resolve(res.data))
+                })
+                .catch((e) => reject(e))
+        })
+    }
+
+    getCaseTrajectories({
         caseId,
         experimentId,
         variableNames,
