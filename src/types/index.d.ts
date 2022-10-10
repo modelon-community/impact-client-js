@@ -5,6 +5,9 @@ export type Case = components['schemas']['Case']
 export type CustomFunction =
     operations['getCustomFunction']['responses']['200']['content']['application/json']
 
+export type ExecutionStatus =
+    operations['getExecutionStatus']['responses']['200']['content']['application/json']
+
 export type Workspace = components['schemas']['Workspace']
 
 export type ModelicaExperimentDefinition =

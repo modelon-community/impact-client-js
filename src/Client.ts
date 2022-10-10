@@ -5,6 +5,7 @@ import {
     Case,
     CaseTrajectories,
     CustomFunction,
+    ExecutionStatus,
     ExperimentId,
     ExperimentTrajectories,
     Workspace,
@@ -37,20 +38,6 @@ const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
         throw new Error('Access token cookie not found')
     }
     return cookie.value
-}
-
-export interface Progress {
-    message: string
-    percentage: number
-    done: boolean
-    stage: string
-}
-
-export interface CompilationStatus {
-    finished_executions: number
-    total_executions: number
-    status: string
-    progresses: Progress[]
 }
 
 export class Client {
@@ -294,13 +281,13 @@ export class Client {
         })
     }
 
-    private getExecutionStatus({
+    getExecutionStatus({
         experimentId,
         workspaceId,
     }: {
         experimentId: string
         workspaceId: string
-    }): Promise<CompilationStatus> {
+    }): Promise<ExecutionStatus> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -328,18 +315,37 @@ export class Client {
         })
         while (data.status !== 'done') {
             await sleep(1000)
-            try {
-                data = await this.getExecutionStatus({
-                    experimentId,
-                    workspaceId,
-                })
-            } catch (e) {
-                throw e
-            }
+            data = await this.getExecutionStatus({
+                experimentId,
+                workspaceId,
+            })
         }
     }
 
     async executeExperiment({
+        caseIds,
+        experiment,
+        workspaceId,
+    }: {
+        caseIds: string[]
+        experiment: ModelicaExperiment
+        workspaceId: string
+    }): Promise<ExperimentId> {
+        const experimentId = await this.setupExperiment({
+            experiment,
+            workspaceId,
+        })
+
+        await this.runExperiment({
+            cases: caseIds,
+            experimentId,
+            workspaceId,
+        })
+
+        return experimentId
+    }
+
+    async executeExperimentSync({
         caseIds,
         experiment,
         workspaceId,
