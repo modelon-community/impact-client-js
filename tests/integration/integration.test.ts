@@ -69,7 +69,7 @@ test(
         })
         expect(typeof cases).toBe('object')
 
-        let trajectories = await client.getTrajectories({
+        let trajectories = await client.getCaseTrajectories({
             caseId: 'case_1',
             experimentId,
             variableNames: ['inertia1.w', 'inertia1.a'],
@@ -79,7 +79,7 @@ test(
         expect(trajectories[0].length).toBe(502)
         expect(trajectories[1].length).toBe(502)
 
-        trajectories = await client.getTrajectories({
+        trajectories = await client.getCaseTrajectories({
             caseId: 'case_2',
             experimentId,
             variableNames: ['inertia1.w', 'inertia1.a'],
