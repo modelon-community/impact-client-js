@@ -56,7 +56,7 @@ test(
 
         const client = getClient()
 
-        const experimentId = await client.executeExperiment({
+        const experimentId = await client.executeExperimentSync({
             caseIds: ['case_1', 'case_2'],
             experiment,
             workspaceId,
@@ -76,8 +76,8 @@ test(
             workspaceId,
         })
         expect(trajectories.length).toBe(2)
-        expect(trajectories[0].length).toBe(502)
-        expect(trajectories[1].length).toBe(502)
+        expect(trajectories[0].trajectory.length).toBe(102)
+        expect(trajectories[1].trajectory.length).toBe(102)
 
         trajectories = await client.getCaseTrajectories({
             caseId: 'case_2',
@@ -86,8 +86,8 @@ test(
             workspaceId,
         })
         expect(trajectories.length).toBe(2)
-        expect(trajectories[0].length).toBe(502)
-        expect(trajectories[1].length).toBe(502)
+        expect(trajectories[0].trajectory.length).toBe(102)
+        expect(trajectories[1].trajectory.length).toBe(102)
     },
     20 * 1000
 )

@@ -461,7 +461,7 @@ export class Client {
                                 },
                             }
                         )
-                        .then((res) => resolve(res.data))
+                        .then((res) => resolve(res.data.data.items))
                         .catch((e) => reject(e))
                 })
                 .catch((e) => reject(e))
