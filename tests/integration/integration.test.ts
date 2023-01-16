@@ -88,6 +88,18 @@ test(
         expect(trajectories.length).toBe(2)
         expect(trajectories[0].trajectory.length).toBe(102)
         expect(trajectories[1].trajectory.length).toBe(102)
+
+        trajectories = await client.getExperimentTrajectories({
+            experimentId,
+            variableNames: ['inertia1.w', 'inertia1.a'],
+            workspaceId,
+        })
+        expect(trajectories[0].items.length).toBe(2)
+        expect(trajectories[0].items[0].trajectory.length).toBe(102)
+        expect(trajectories[0].items[0].trajectory.length).toBe(102)
+        expect(trajectories[1].items.length).toBe(2)
+        expect(trajectories[1].items[0].trajectory.length).toBe(102)
+        expect(trajectories[1].items[0].trajectory.length).toBe(102)
     },
     20 * 1000
 )
