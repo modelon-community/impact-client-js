@@ -73,7 +73,7 @@ export class Client {
         }
 
         if (jupyterHubUserPath) {
-            this.jhUserPath = jupyterHubUserPath + jupyterHubUserPath.endsWith('/') ? '' : '/'
+            this.jhUserPath = jupyterHubUserPath + (jupyterHubUserPath.endsWith('/') ? '' : '/')
         }
 
         this.jhToken = jupyterHubToken
