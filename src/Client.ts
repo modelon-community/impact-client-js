@@ -54,11 +54,13 @@ export class Client {
         impactToken,
         jupyterHubToken,
         serverAddress,
+        jupyterHubUserPath,
     }: {
         impactApiKey?: string
         impactToken?: string
         jupyterHubToken: string
         serverAddress: string
+        jupyterHubUserPath?: string
     }) {
         this.baseUrl = serverAddress
         this.impactApiKey = impactApiKey
@@ -68,6 +70,10 @@ export class Client {
             throw new Error(
                 'Impact client instantiation failed: The jupyterHubToken parameter is mandatory'
             )
+        }
+
+        if (jupyterHubUserPath) {
+            this.jhUserPath = jupyterHubUserPath + jupyterHubUserPath.endsWith('/') ? '' : '/'
         }
 
         this.jhToken = jupyterHubToken
@@ -84,15 +90,18 @@ export class Client {
     static fromImpactApiKey({
         impactApiKey,
         jupyterHubToken,
+        jupyterHubUserPath,
         serverAddress,
     }: {
         impactApiKey: string
         jupyterHubToken: string
+        jupyterHubUserPath?: string
         serverAddress: string
     }) {
         return new Client({
             impactApiKey,
             jupyterHubToken,
+            jupyterHubUserPath,
             serverAddress,
         })
     }
@@ -100,15 +109,18 @@ export class Client {
     static fromImpactToken({
         impactToken,
         jupyterHubToken,
+        jupyterHubUserPath,
         serverAddress,
     }: {
         impactToken: string
         jupyterHubToken: string
+        jupyterHubUserPath?: string
         serverAddress: string
     }) {
         return new Client({
             impactToken,
             jupyterHubToken,
+            jupyterHubUserPath,
             serverAddress,
         })
     }
@@ -179,7 +191,9 @@ export class Client {
         )
         const { server } = response.data
         if (!server) {
-            throw new Error('Server not started on JH')
+            throw new Error(
+                'Server not started on JH or missing JH token scope.'
+            )
         }
         this.jhUserPath = server
     }
@@ -193,7 +207,7 @@ export class Client {
         }
 
         await this.axios.post(
-            `${this.baseUrl}${this.jhUserPath}/impact/api/login`,
+            `${this.baseUrl}${this.jhUserPath}impact/api/login`,
             { secretKey: this.impactApiKey }
         )
         // extract cookie value, set cookie
@@ -264,7 +278,7 @@ export class Client {
                 .then(() => {
                     this.axios
                         .post(
-                            `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
                             {
                                 includeCases: {
                                     ids: cases,
@@ -293,7 +307,7 @@ export class Client {
                 .then(() => {
                     this.axios
                         .get(
-                            `${this.baseUrl}${this.jhUserPath}/impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
                         )
                         .then((response) => resolve(response.data))
                         .catch((e) => reject(e))
