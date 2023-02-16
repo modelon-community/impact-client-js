@@ -6,6 +6,9 @@ import {
     CustomFunction,
     ExperimentId,
     ExperimentTrajectories,
+    ModelicaExperimentExtensions,
+    ModelicaExperimentModifiers,
+    ModelicaExperimentParameters,
     Workspace,
 } from './types/index.d'
 
@@ -17,5 +20,8 @@ export {
     ExperimentId,
     ExperimentTrajectories,
     ModelicaExperiment,
+    ModelicaExperimentExtensions,
+    ModelicaExperimentModifiers,
+    ModelicaExperimentParameters,
     Workspace,
 }
