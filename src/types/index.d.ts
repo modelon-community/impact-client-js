@@ -21,9 +21,9 @@ export type ModelicaExperimentParameters =
 export type ModelicaExperimentModifiers = components['schemas']['Modifiers']
 
 export type CaseTrajectories =
-    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['items']
+    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
 
 export type ExperimentTrajectories =
-    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['items']
+    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
 
 export type ExperimentId = string
