@@ -1,14 +1,14 @@
-import { ModelicaExperiment } from '../../src/ModelicaExperiment'
+import ExperimentDefinition from '../../src/experiment-definition'
 
 test('Create experiment without modifiers and parameters', () => {
     const customFunction = 'dynamic'
     const modelName = 'Modelica.Blocks.Examples.PID_Controller'
-    const modelExperiment = ModelicaExperiment.from({
+    const modelExperiment = ExperimentDefinition.from({
         customFunction,
         modelName,
     })
 
-    expect(modelExperiment.toDefinition()).toEqual({
+    expect(modelExperiment.toModelicaExperimentDefinition()).toEqual({
         version: 2,
         base: {
             model: {
@@ -58,7 +58,7 @@ test('Create experiment with modifiers and parameters', () => {
         },
     ]
 
-    const modelExperiment = ModelicaExperiment.from({
+    const modelExperiment = ExperimentDefinition.from({
         customFunction,
         extensions,
         modelName,
@@ -69,7 +69,7 @@ test('Create experiment with modifiers and parameters', () => {
         },
     })
 
-    expect(modelExperiment.toDefinition()).toEqual({
+    expect(modelExperiment.toModelicaExperimentDefinition()).toEqual({
         version: 2,
         base: {
             model: {

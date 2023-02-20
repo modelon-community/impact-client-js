@@ -1,5 +1,5 @@
-import { Client } from './Client'
-import { ModelicaExperiment } from './ModelicaExperiment'
+import Client from './client'
+import ExperimentDefinition from './experiment-definition'
 import {
     Case,
     CaseTrajectories,
@@ -17,9 +17,9 @@ export {
     CaseTrajectories,
     Client,
     CustomFunction,
+    ExperimentDefinition,
     ExperimentId,
     ExperimentTrajectories,
-    ModelicaExperiment,
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
     ModelicaExperimentParameters,

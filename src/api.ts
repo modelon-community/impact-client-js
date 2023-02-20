@@ -1,22 +1,27 @@
-import Axios, { AxiosInstance } from 'axios'
+import Axios, { AxiosError, AxiosInstance } from 'axios'
+import ApiError, {
+    MissingAccessTokenCookie,
+    MissingJupyterHubToken,
+    ServerNotStarted,
+} from './api-error'
 import { Cookie, CookieJar } from 'tough-cookie'
-import { ModelicaExperiment } from './ModelicaExperiment'
+import ExperimentDefinition from './experiment-definition'
 import {
     Case,
+    CaseId,
     CaseTrajectories,
     CustomFunction,
     ExecutionStatus,
     ExperimentId,
     ExperimentTrajectories,
     Workspace,
+    WorkspaceId,
 } from './types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function importModule(moduleName: string): Promise<any> {
     return await import(moduleName)
 }
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 interface AxiosConfig {
     headers: Record<string, string>
@@ -35,12 +40,28 @@ const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
     const cookie = cookies.find((c) => c.key === key)
 
     if (!cookie) {
-        throw new Error('Access token cookie not found')
+        throw new ApiError({
+            errorCode: MissingAccessTokenCookie,
+            message: 'Access token cookie not found',
+        })
     }
     return cookie.value
 }
 
-export class Client {
+export const UnknownApiError = -1
+
+const toApiError = (e: AxiosError | Error) => {
+    if (e instanceof AxiosError) {
+        return new ApiError({
+            errorCode: e.response?.data?.error?.code || UnknownApiError,
+            httpCode: e.response?.status,
+            message: e.response?.data?.error?.message || 'Api Error',
+        })
+    }
+    return e
+}
+
+class Api {
     private axios: AxiosInstance
     private axiosConfig: AxiosConfig
     private baseUrl: string
@@ -67,13 +88,17 @@ export class Client {
         this.impactToken = impactToken
 
         if (!jupyterHubToken) {
-            throw new Error(
-                'Impact client instantiation failed: The jupyterHubToken parameter is mandatory'
-            )
+            throw new ApiError({
+                errorCode: MissingJupyterHubToken,
+                message:
+                    'Impact client instantiation failed: The jupyterHubToken parameter is mandatory',
+            })
         }
 
         if (jupyterHubUserPath) {
-            this.jhUserPath = jupyterHubUserPath + (jupyterHubUserPath.endsWith('/') ? '' : '/')
+            this.jhUserPath =
+                jupyterHubUserPath +
+                (jupyterHubUserPath.endsWith('/') ? '' : '/')
         }
 
         this.jhToken = jupyterHubToken
@@ -98,7 +123,7 @@ export class Client {
         jupyterHubUserPath?: string
         serverAddress: string
     }) {
-        return new Client({
+        return new Api({
             impactApiKey,
             jupyterHubToken,
             jupyterHubUserPath,
@@ -117,7 +142,7 @@ export class Client {
         jupyterHubUserPath?: string
         serverAddress: string
     }) {
-        return new Client({
+        return new Api({
             impactToken,
             jupyterHubToken,
             jupyterHubUserPath,
@@ -191,9 +216,10 @@ export class Client {
         )
         const { server } = response.data
         if (!server) {
-            throw new Error(
-                'Server not started on JH or missing JH token scope.'
-            )
+            throw new ApiError({
+                errorCode: ServerNotStarted,
+                message: 'Server not started on JH or missing JH token scope.',
+            })
         }
         this.jhUserPath = server
     }
@@ -234,18 +260,18 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`
                         )
                         .then((response) => resolve(response.data?.data?.items))
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
-    private setupExperiment({
-        experiment,
+    createExperiment({
+        experimentDefinition,
         workspaceId,
     }: {
-        experiment: ModelicaExperiment
-        workspaceId: string
+        experimentDefinition: ExperimentDefinition
+        workspaceId: WorkspaceId
     }): Promise<ExperimentId> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -253,25 +279,70 @@ export class Client {
                     this.axios
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
-                            { experiment: experiment.toDefinition() }
+                            {
+                                experiment:
+                                    experimentDefinition.toModelicaExperimentDefinition(),
+                            }
                         )
                         .then((response) =>
                             resolve(response.data.experiment_id)
                         )
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
-    private runExperiment({
+    createWorkspace({
+        description,
+        name,
+    }: {
+        description?: string
+        name: string
+    }): Promise<WorkspaceId> {
+        return new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .post(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`,
+                            {
+                                new: {
+                                    description,
+                                    name,
+                                },
+                            }
+                        )
+                        .then((response) => resolve(response.data.id))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+    }
+
+    deleteWorkspace(workspaceId: WorkspaceId): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .delete(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}`
+                        )
+                        .then(() => resolve())
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+    }
+
+    runExperiment({
         cases,
         experimentId,
         workspaceId,
     }: {
-        cases: string[]
-        experimentId: string
-        workspaceId: string
+        cases: CaseId[]
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
     }): Promise<void> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -289,9 +360,9 @@ export class Client {
                             }
                         )
                         .then(() => resolve())
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
@@ -299,8 +370,8 @@ export class Client {
         experimentId,
         workspaceId,
     }: {
-        experimentId: string
-        workspaceId: string
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
     }): Promise<ExecutionStatus> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -310,84 +381,13 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
                         )
                         .then((response) => resolve(response.data))
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
-    private async executionSuccess({
-        experimentId,
-        workspaceId,
-    }: {
-        experimentId: string
-        workspaceId: string
-    }) {
-        let data = await this.getExecutionStatus({
-            experimentId,
-            workspaceId,
-        })
-        while (data.status !== 'done') {
-            await sleep(1000)
-            data = await this.getExecutionStatus({
-                experimentId,
-                workspaceId,
-            })
-        }
-    }
-
-    async executeExperiment({
-        caseIds,
-        experiment,
-        workspaceId,
-    }: {
-        caseIds: string[]
-        experiment: ModelicaExperiment
-        workspaceId: string
-    }): Promise<ExperimentId> {
-        const experimentId = await this.setupExperiment({
-            experiment,
-            workspaceId,
-        })
-
-        await this.runExperiment({
-            cases: caseIds,
-            experimentId,
-            workspaceId,
-        })
-
-        return experimentId
-    }
-
-    async executeExperimentSync({
-        caseIds,
-        experiment,
-        workspaceId,
-    }: {
-        caseIds: string[]
-        experiment: ModelicaExperiment
-        workspaceId: string
-    }): Promise<ExperimentId> {
-        const experimentId = await this.setupExperiment({
-            experiment,
-            workspaceId,
-        })
-
-        await this.runExperiment({
-            cases: caseIds,
-            experimentId,
-            workspaceId,
-        })
-
-        await this.executionSuccess({
-            experimentId,
-            workspaceId,
-        })
-
-        return experimentId
-    }
-
-    getCustomFunctions(workspaceId: string): Promise<CustomFunction[]> {
+    getCustomFunctions(workspaceId: WorkspaceId): Promise<CustomFunction[]> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -396,9 +396,9 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/custom-functions`
                         )
                         .then((response) => resolve(response.data.data.items))
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
@@ -406,8 +406,8 @@ export class Client {
         experimentId,
         workspaceId,
     }: {
-        experimentId: string
-        workspaceId: string
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
     }): Promise<Case[] | undefined> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -417,9 +417,9 @@ export class Client {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases`
                         )
                         .then((response) => resolve(response.data?.data?.items))
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
@@ -428,9 +428,9 @@ export class Client {
         variableNames,
         workspaceId,
     }: {
-        experimentId: string
+        experimentId: ExperimentId
         variableNames: string[]
-        workspaceId: string
+        workspaceId: WorkspaceId
     }): Promise<ExperimentTrajectories> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -447,7 +447,30 @@ export class Client {
                         )
                         .then((res) => resolve(res.data.data.items))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
+        })
+    }
+
+    getCaseLog({
+        caseId,
+        experimentId,
+        workspaceId,
+    }: {
+        caseId: CaseId
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
+    }): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/${caseId}/log`
+                        )
+                        .then((res) => resolve(res.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
         })
     }
 
@@ -457,10 +480,10 @@ export class Client {
         variableNames,
         workspaceId,
     }: {
-        caseId: string
-        experimentId: string
+        caseId: CaseId
+        experimentId: ExperimentId
         variableNames: string[]
-        workspaceId: string
+        workspaceId: WorkspaceId
     }): Promise<CaseTrajectories> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -476,9 +499,11 @@ export class Client {
                             }
                         )
                         .then((res) => resolve(res.data.data.items))
-                        .catch((e) => reject(e))
+                        .catch((e) => reject(toApiError(e)))
                 })
-                .catch((e) => reject(e))
+                .catch((e) => reject(toApiError(e)))
         })
     }
 }
+
+export default Api

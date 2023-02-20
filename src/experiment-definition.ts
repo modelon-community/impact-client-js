@@ -5,7 +5,7 @@ import {
     ModelicaExperimentParameters,
 } from './types'
 
-export class ModelicaExperiment {
+class ExperimentDefinition {
     customFunction: string
     extensions?: ModelicaExperimentExtensions
     modelName: string
@@ -44,8 +44,8 @@ export class ModelicaExperiment {
         modelName: string
         modifiers?: ModelicaExperimentModifiers
         parameters?: ModelicaExperimentParameters
-    }): ModelicaExperiment {
-        return new ModelicaExperiment({
+    }): ExperimentDefinition {
+        return new ExperimentDefinition({
             customFunction,
             extensions,
             modelName,
@@ -59,7 +59,7 @@ export class ModelicaExperiment {
         final_time: 1,
     }
 
-    toDefinition(): ModelicaExperimentDefinition {
+    toModelicaExperimentDefinition(): ModelicaExperimentDefinition {
         return {
             version: 2,
             base: {
@@ -94,3 +94,5 @@ export class ModelicaExperiment {
         }
     }
 }
+
+export default ExperimentDefinition

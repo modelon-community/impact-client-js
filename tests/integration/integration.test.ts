@@ -1,105 +1,129 @@
 import * as dotenv from 'dotenv'
-import { Client } from '../..'
-import { ModelicaExperiment } from '../../src/ModelicaExperiment'
-import { Workspace } from '../../src/types'
+import Client from '../../src/client'
+import { InvalidApiKey } from '../../src/api-error'
+import ExperimentDefinition from '../../src/experiment-definition'
+import basicExperimentDefinition from './basicExperimentDefinition.json'
 
 dotenv.config()
 
-const getClient = () =>
+const getClient = (options?: { impactApiKey?: string }) =>
     Client.fromImpactApiKey({
-        impactApiKey: process.env.IMPACT_API_KEY as string,
+        impactApiKey:
+            options?.impactApiKey || (process.env.IMPACT_API_KEY as string),
         jupyterHubToken: process.env.JH_TOKEN as string,
         serverAddress: process.env.JHMI_SERVER as string,
     })
 
-test('get workspaces', () => {
-    getClient()
-        .getWorkspaces()
-        .then((workspaces: Workspace[]) =>
-            expect(workspaces.length).toBeGreaterThanOrEqual(0)
-        )
+test('Try to use invalid impact API key', (done) => {
+    const experimentDefinition = ExperimentDefinition.from(
+        basicExperimentDefinition
+    )
+    const client = getClient({ impactApiKey: 'invalid-api-key' })
+
+    client
+        .executeExperimentSync({
+            caseIds: ['case_1', 'case_2'],
+            experimentDefinition,
+            workspaceId: 'non-existing-workspace',
+        })
+        .then(() => {
+            throw new Error('Test should have caught error')
+        })
+        .catch((e) => {
+            // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
+            // ApiError has errorCode.
+            if ('errorCode' in e) {
+                expect(e.errorCode).toEqual(InvalidApiKey)
+                expect(e.httpCode).toEqual(400)
+                done()
+            }
+        })
 })
 
 test(
     'Setup and execute experiment',
     async () => {
-        const customFunction = 'dynamic'
-        const modelName = 'Modelica.Blocks.Examples.PID_Controller'
-        const experiment = ModelicaExperiment.from({
-            customFunction,
-            modelName,
-            parameters: {
-                start_time: 0,
-                final_time: 1,
-            },
-            extensions: [
-                {
-                    modifiers: {
-                        variables: {
-                            'inertia1.J': 1,
-                            'inertia2.J': 2,
-                        },
-                    },
-                },
-                {
-                    modifiers: {
-                        variables: {
-                            'inertia1.J': 2,
-                            'inertia2.J': 4,
-                        },
-                    },
-                },
-            ],
-        })
-
-        const workspaceId = 'friday0916'
+        const experimentDefinition = ExperimentDefinition.from(
+            basicExperimentDefinition
+        )
 
         const client = getClient()
+        const WorkspaceName = 'setup-and-exec'
 
-        const experimentId = await client.executeExperimentSync({
-            caseIds: ['case_1', 'case_2'],
-            experiment,
-            workspaceId,
-        })
-        expect(typeof experimentId).toBe('string')
+        try {
+            const workspaces = await client.getWorkspaces()
+            let workspaceId
+            const testWorkspace = workspaces.find(
+                (w) => w.definition.name === WorkspaceName
+            )
+            if (testWorkspace) {
+                workspaceId = testWorkspace.id
+            } else {
+                workspaceId = await client.createWorkspace({
+                    name: WorkspaceName,
+                })
+            }
+            const experiment = await client.executeExperimentSync({
+                caseIds: ['case_1', 'case_2'],
+                experimentDefinition,
+                workspaceId,
+            })
+            expect(typeof experiment).toBe('object')
 
-        const cases = await client.getCases({
-            experimentId,
-            workspaceId,
-        })
-        expect(typeof cases).toBe('object')
+            const cases = await experiment.getCases()
+            expect(typeof cases).toBe('object')
 
-        let trajectories = await client.getCaseTrajectories({
-            caseId: 'case_1',
-            experimentId,
-            variableNames: ['inertia1.w', 'inertia1.a'],
-            workspaceId,
-        })
-        expect(trajectories.length).toBe(2)
-        expect(trajectories[0].trajectory.length).toBe(102)
-        expect(trajectories[1].trajectory.length).toBe(102)
+            if (!cases || cases.length < 2) {
+                return
+            }
 
-        trajectories = await client.getCaseTrajectories({
-            caseId: 'case_2',
-            experimentId,
-            variableNames: ['inertia1.w', 'inertia1.a'],
-            workspaceId,
-        })
-        expect(trajectories.length).toBe(2)
-        expect(trajectories[0].trajectory.length).toBe(102)
-        expect(trajectories[1].trajectory.length).toBe(102)
+            expect(cases[0].runInfo).toMatchObject({ status: 'successful' })
 
-        trajectories = await client.getExperimentTrajectories({
-            experimentId,
-            variableNames: ['inertia1.w', 'inertia1.a'],
-            workspaceId,
-        })
-        expect(trajectories[0].items.length).toBe(2)
-        expect(trajectories[0].items[0].trajectory.length).toBe(102)
-        expect(trajectories[0].items[0].trajectory.length).toBe(102)
-        expect(trajectories[1].items.length).toBe(2)
-        expect(trajectories[1].items[0].trajectory.length).toBe(102)
-        expect(trajectories[1].items[0].trajectory.length).toBe(102)
+            const log = await cases[0].getLog()
+            expect(typeof log).toBe('string')
+
+            let trajectories = await cases[0].getTrajectories([
+                'inertia1.w',
+                'inertia1.a',
+            ])
+
+            expect(trajectories.length).toBe(2)
+            expect(trajectories[0].trajectory.length).toBe(102)
+            expect(trajectories[1].trajectory.length).toBe(102)
+
+            trajectories = await cases[1].getTrajectories([
+                'inertia1.w',
+                'inertia1.a',
+            ])
+            expect(trajectories.length).toBe(2)
+            expect(trajectories[0].trajectory.length).toBe(102)
+            expect(trajectories[1].trajectory.length).toBe(102)
+
+            trajectories = await experiment.getTrajectories([
+                'inertia1.w',
+                'inertia1.a',
+            ])
+            expect(trajectories[0].items.length).toBe(2)
+            expect(trajectories[0].items[0].trajectory.length).toBe(102)
+            expect(trajectories[0].items[0].trajectory.length).toBe(102)
+            expect(trajectories[1].items.length).toBe(2)
+            expect(trajectories[1].items[0].trajectory.length).toBe(102)
+            expect(trajectories[1].items[0].trajectory.length).toBe(102)
+
+            await client.deleteWorkspace(WorkspaceName)
+
+            const workspacesAfterDelete = await client.getWorkspaces()
+            expect(
+                workspacesAfterDelete.find(
+                    (w) => w.definition.name === WorkspaceName
+                )
+            ).toEqual(undefined)
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(e.toString())
+            }
+            throw new Error('Caught unexpected error while executing test')
+        }
     },
     20 * 1000
 )
