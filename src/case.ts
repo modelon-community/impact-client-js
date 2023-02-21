@@ -1,4 +1,10 @@
-import { CaseRunInfo, CaseId, ExperimentId, WorkspaceId } from './types'
+import {
+    CaseRunInfo,
+    CaseId,
+    CaseTrajectories,
+    ExperimentId,
+    WorkspaceId,
+} from './types'
 import Api from './api'
 
 class Case {
@@ -36,7 +42,7 @@ class Case {
         })
     }
 
-    getTrajectories(variableNames: string[]) {
+    getTrajectories(variableNames: string[]): Promise<CaseTrajectories> {
         return this.api.getCaseTrajectories({
             caseId: this.id,
             experimentId: this.experimentId,
