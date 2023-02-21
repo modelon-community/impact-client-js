@@ -1,7 +1,5 @@
 import * as dotenv from 'dotenv'
-import Client from '../../src/client'
-import { InvalidApiKey } from '../../src/api-error'
-import ExperimentDefinition from '../../src/experiment-definition'
+import { Client, ExperimentDefinition, InvalidApiKey } from '../../dist'
 import basicExperimentDefinition from './basicExperimentDefinition.json'
 
 dotenv.config()

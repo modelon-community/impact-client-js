@@ -3,6 +3,7 @@ import ApiError, {
     MissingAccessTokenCookie,
     MissingJupyterHubToken,
     ServerNotStarted,
+    UnknownApiError,
 } from './api-error'
 import { Cookie, CookieJar } from 'tough-cookie'
 import ExperimentDefinition from './experiment-definition'
@@ -47,8 +48,6 @@ const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
     }
     return cookie.value
 }
-
-export const UnknownApiError = -1
 
 const toApiError = (e: AxiosError | Error) => {
     if (e instanceof AxiosError) {
