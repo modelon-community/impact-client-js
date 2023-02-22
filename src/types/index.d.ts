@@ -24,7 +24,7 @@ export type CaseTrajectories =
     operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
 
 export type CaseRunInfo =
-    operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items']['run_info']
+    operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items'][0]['run_info']
 
 export type ExperimentTrajectories =
     operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
