@@ -1,5 +1,6 @@
 import Axios, { AxiosError, AxiosInstance } from 'axios'
 import ApiError, {
+    JhTokenError,
     MissingAccessTokenCookie,
     MissingJupyterHubToken,
     ServerNotStarted,
@@ -210,17 +211,30 @@ class Api {
         if (this.jhUserPath) {
             return
         }
-        const response = await this.axios.get(
-            `${this.baseUrl}/hub/api/authorizations/token/${this.jhToken}`
-        )
-        const { server } = response.data
-        if (!server) {
-            throw new ApiError({
-                errorCode: ServerNotStarted,
-                message: 'Server not started on JH or missing JH token scope.',
-            })
+        try {
+            const response = await this.axios.get(
+                `${this.baseUrl}/hub/api/authorizations/token/${this.jhToken}`
+            )
+            const { server } = response.data
+            if (!server) {
+                throw new ApiError({
+                    errorCode: ServerNotStarted,
+                    message:
+                        'Server not started on JH or missing JH token scope.',
+                })
+            }
+            this.jhUserPath = server
+        } catch (e) {
+            if (e instanceof AxiosError) {
+                throw new ApiError({
+                    errorCode: JhTokenError,
+                    httpCode: e.response?.status,
+                    message:
+                        'Failed to authorize with JupyterHub, invalid token?',
+                })
+            }
+            throw e
         }
-        this.jhUserPath = server
     }
 
     private async ensureImpactToken() {

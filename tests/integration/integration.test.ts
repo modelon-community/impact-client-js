@@ -1,14 +1,23 @@
 import * as dotenv from 'dotenv'
-import { Client, ExperimentDefinition, InvalidApiKey } from '../../dist'
+import {
+    Client,
+    ExperimentDefinition,
+    InvalidApiKey,
+    JhTokenError,
+} from '../../dist'
 import basicExperimentDefinition from './basicExperimentDefinition.json'
 
 dotenv.config()
 
-const getClient = (options?: { impactApiKey?: string }) =>
+const getClient = (options?: {
+    impactApiKey?: string
+    jupyterHubToken?: string
+}) =>
     Client.fromImpactApiKey({
         impactApiKey:
             options?.impactApiKey || (process.env.IMPACT_API_KEY as string),
-        jupyterHubToken: process.env.JH_TOKEN as string,
+        jupyterHubToken:
+            options?.jupyterHubToken || (process.env.JH_TOKEN as string),
         serverAddress: process.env.JHMI_SERVER as string,
     })
 
@@ -33,6 +42,32 @@ test('Try to use invalid impact API key', (done) => {
             if ('errorCode' in e) {
                 expect(e.errorCode).toEqual(InvalidApiKey)
                 expect(e.httpCode).toEqual(400)
+                done()
+            }
+        })
+})
+
+test('Try to use invalid jupyter hub token', (done) => {
+    const experimentDefinition = ExperimentDefinition.from(
+        basicExperimentDefinition
+    )
+    const client = getClient({ jupyterHubToken: 'invalid-jh-token' })
+
+    client
+        .executeExperimentSync({
+            caseIds: ['case_1', 'case_2'],
+            experimentDefinition,
+            workspaceId: 'non-existing-workspace',
+        })
+        .then(() => {
+            throw new Error('Test should have caught error')
+        })
+        .catch((e) => {
+            // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
+            // ApiError has errorCode.
+            if ('errorCode' in e) {
+                expect(e.errorCode).toEqual(JhTokenError)
+                expect(e.httpCode).toEqual(403)
                 done()
             }
         })

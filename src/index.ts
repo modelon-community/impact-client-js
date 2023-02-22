@@ -1,5 +1,6 @@
 import ApiError, {
     InvalidApiKey,
+    JhTokenError,
     MissingAccessTokenCookie,
     MissingJupyterHubToken,
     ServerNotStarted,
@@ -33,6 +34,7 @@ export {
     ExperimentId,
     ExperimentTrajectories,
     InvalidApiKey,
+    JhTokenError,
     MissingAccessTokenCookie,
     MissingJupyterHubToken,
     ModelicaExperimentExtensions,
