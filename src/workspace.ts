@@ -6,10 +6,20 @@ import ExperimentDefinition from './experiment-definition'
 class Workspace {
     private api: Api
     id: WorkspaceId
+    name: string
 
-    constructor({ api, id }: { api: Api; id: WorkspaceId }) {
+    constructor({
+        api,
+        id,
+        name,
+    }: {
+        api: Api
+        id: WorkspaceId
+        name: string
+    }) {
         this.api = api
         this.id = id
+        this.name = name
     }
 
     private async createExperiment(

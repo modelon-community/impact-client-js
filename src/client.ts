@@ -54,10 +54,17 @@ class Client {
     }
 
     async getWorkspace(workspaceId: WorkspaceId): Promise<Workspace> {
-        const workspaces = await this.getWorkspaces()
+        const workspaceDefinitions = await this.getWorkspaces()
 
-        if (workspaces.find((ws) => ws.id === workspaceId)) {
-            return new Workspace({ api: this.api, id: workspaceId })
+        const workspaceDefinition = workspaceDefinitions.find(
+            (ws) => ws.id === workspaceId
+        )
+        if (workspaceDefinition) {
+            return new Workspace({
+                api: this.api,
+                id: workspaceId,
+                name: workspaceDefinition.definition.name,
+            })
         }
         throw new Error(`Workspace "${workspaceId}" not found.`)
     }
@@ -74,7 +81,7 @@ class Client {
             name,
         })
 
-        return new Workspace({ api: this.api, id: workspaceId })
+        return new Workspace({ api: this.api, id: workspaceId, name })
     }
 
     async deleteWorkspace(workspaceId: WorkspaceId): Promise<void> {

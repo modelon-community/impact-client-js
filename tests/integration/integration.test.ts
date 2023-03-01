@@ -79,6 +79,8 @@ test(
             })
         }
 
+        expect(testWorkspace.name).toEqual(WorkspaceName)
+
         const customFunctions = await testWorkspace.getCustomFunctions()
         expect(customFunctions.length).toBeGreaterThanOrEqual(
             ['linearize', 'dynamic', 'steady state'].length
