@@ -4,6 +4,7 @@ import {
     ExperimentDefinition,
     InvalidApiKey,
     JhTokenError,
+    WorkspaceDefinition,
 } from '../../dist'
 import basicExperimentDefinition from './basicExperimentDefinition.json'
 
@@ -22,17 +23,10 @@ const getClient = (options?: {
     })
 
 test('Try to use invalid impact API key', (done) => {
-    const experimentDefinition = ExperimentDefinition.from(
-        basicExperimentDefinition
-    )
     const client = getClient({ impactApiKey: 'invalid-api-key' })
 
     client
-        .executeExperimentSync({
-            caseIds: ['case_1', 'case_2'],
-            experimentDefinition,
-            workspaceId: 'non-existing-workspace',
-        })
+        .getWorkspace('non-existing-workspace')
         .then(() => {
             throw new Error('Test should have caught error')
         })
@@ -48,17 +42,10 @@ test('Try to use invalid impact API key', (done) => {
 })
 
 test('Try to use invalid jupyter hub token', (done) => {
-    const experimentDefinition = ExperimentDefinition.from(
-        basicExperimentDefinition
-    )
     const client = getClient({ jupyterHubToken: 'invalid-jh-token' })
 
     client
-        .executeExperimentSync({
-            caseIds: ['case_1', 'case_2'],
-            experimentDefinition,
-            workspaceId: 'non-existing-workspace',
-        })
+        .getWorkspace('non-existing-workspace')
         .then(() => {
             throw new Error('Test should have caught error')
         })
@@ -83,23 +70,24 @@ test(
         const client = getClient()
         const WorkspaceName = 'setup-and-exec'
 
+        let testWorkspace
         try {
-            const workspaces = await client.getWorkspaces()
-            let workspaceId
-            const testWorkspace = workspaces.find(
-                (w) => w.definition.name === WorkspaceName
-            )
-            if (testWorkspace) {
-                workspaceId = testWorkspace.id
-            } else {
-                workspaceId = await client.createWorkspace({
-                    name: WorkspaceName,
-                })
-            }
-            const experiment = await client.executeExperimentSync({
+            testWorkspace = await client.getWorkspace(WorkspaceName)
+        } catch (e) {
+            testWorkspace = await client.createWorkspace({
+                name: WorkspaceName,
+            })
+        }
+
+        const customFunctions = await testWorkspace.getCustomFunctions()
+        expect(customFunctions.length).toBeGreaterThanOrEqual(
+            ['linearize', 'dynamic', 'steady state'].length
+        )
+
+        try {
+            const experiment = await testWorkspace.executeExperimentSync({
                 caseIds: ['case_1', 'case_2'],
                 experimentDefinition,
-                workspaceId,
             })
             expect(typeof experiment).toBe('object')
 
@@ -148,7 +136,8 @@ test(
             const workspacesAfterDelete = await client.getWorkspaces()
             expect(
                 workspacesAfterDelete.find(
-                    (w) => w.definition.name === WorkspaceName
+                    (w: WorkspaceDefinition) =>
+                        w.definition.name === WorkspaceName
                 )
             ).toEqual(undefined)
         } catch (e) {

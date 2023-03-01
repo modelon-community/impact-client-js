@@ -16,7 +16,7 @@ import {
     ExecutionStatus,
     ExperimentId,
     ExperimentTrajectories,
-    Workspace,
+    WorkspaceDefinition,
     WorkspaceId,
 } from './types'
 
@@ -264,7 +264,7 @@ class Api {
         await this.ensureAxiosConfig()
     }
 
-    getWorkspaces(): Promise<Workspace[]> {
+    getWorkspaces(): Promise<WorkspaceDefinition[]> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {

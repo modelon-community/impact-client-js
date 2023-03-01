@@ -1,7 +1,6 @@
-import { CaseId, CustomFunction, Workspace, WorkspaceId } from './types'
 import Api from './api'
-import Experiment from './experiment'
-import ExperimentDefinition from './experiment-definition'
+import Workspace from './workspace'
+import { WorkspaceDefinition, WorkspaceId } from './types'
 
 class Client {
     private api: Api
@@ -50,26 +49,17 @@ class Client {
         return new Client(api)
     }
 
-    getWorkspaces(): Promise<Workspace[]> {
+    getWorkspaces(): Promise<WorkspaceDefinition[]> {
         return this.api.getWorkspaces()
     }
 
-    private async createExperiment({
-        experimentDefinition,
-        workspaceId,
-    }: {
-        experimentDefinition: ExperimentDefinition
-        workspaceId: WorkspaceId
-    }): Promise<Experiment> {
-        const experimentId = await this.api.createExperiment({
-            experimentDefinition,
-            workspaceId,
-        })
-        return new Experiment({
-            api: this.api,
-            id: experimentId,
-            workspaceId,
-        })
+    async getWorkspace(workspaceId: WorkspaceId): Promise<Workspace> {
+        const workspaces = await this.getWorkspaces()
+
+        if (workspaces.find((ws) => ws.id === workspaceId)) {
+            return new Workspace({ api: this.api, id: workspaceId })
+        }
+        throw new Error(`Workspace "${workspaceId}" not found.`)
     }
 
     async createWorkspace({
@@ -78,66 +68,17 @@ class Client {
     }: {
         description?: string
         name: string
-    }): Promise<WorkspaceId> {
-        return await this.api.createWorkspace({
+    }): Promise<Workspace> {
+        const workspaceId = await this.api.createWorkspace({
             description,
             name,
         })
+
+        return new Workspace({ api: this.api, id: workspaceId })
     }
 
     async deleteWorkspace(workspaceId: WorkspaceId): Promise<void> {
         return await this.api.deleteWorkspace(workspaceId)
-    }
-
-    async executeExperiment({
-        caseIds,
-        experimentDefinition,
-        workspaceId,
-    }: {
-        caseIds: CaseId[]
-        experimentDefinition: ExperimentDefinition
-        workspaceId: WorkspaceId
-    }): Promise<Experiment> {
-        const experiment = await this.createExperiment({
-            experimentDefinition,
-            workspaceId,
-        })
-
-        await this.api.runExperiment({
-            cases: caseIds,
-            experimentId: experiment.id,
-            workspaceId,
-        })
-
-        return new Experiment({
-            api: this.api,
-            id: experiment.id,
-            workspaceId,
-        })
-    }
-
-    async executeExperimentSync({
-        caseIds,
-        experimentDefinition,
-        workspaceId,
-    }: {
-        caseIds: CaseId[]
-        experimentDefinition: ExperimentDefinition
-        workspaceId: WorkspaceId
-    }): Promise<Experiment> {
-        const experiment = await this.createExperiment({
-            experimentDefinition,
-            workspaceId,
-        })
-
-        await experiment.run(caseIds)
-        await experiment.executionDone()
-
-        return experiment
-    }
-
-    getCustomFunctions(workspaceId: WorkspaceId): Promise<CustomFunction[]> {
-        return this.api.getCustomFunctions(workspaceId)
     }
 }
 

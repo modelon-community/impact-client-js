@@ -19,8 +19,9 @@ import {
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
     ModelicaExperimentParameters,
-    Workspace,
+    WorkspaceDefinition,
 } from './types/index.d'
+import Workspace from './workspace'
 
 export {
     Api,
@@ -43,4 +44,5 @@ export {
     ServerNotStarted,
     UnknownApiError,
     Workspace,
+    WorkspaceDefinition,
 }
