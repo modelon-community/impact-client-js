@@ -13,7 +13,7 @@ import {
     CaseId,
     CaseTrajectories,
     CustomFunction,
-    ExecutionStatus,
+    ExecutionStatusType,
     ExperimentId,
     ExperimentTrajectories,
     WorkspaceDefinition,
@@ -385,7 +385,7 @@ class Api {
     }: {
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<ExecutionStatus> {
+    }): Promise<ExecutionStatusType> {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {

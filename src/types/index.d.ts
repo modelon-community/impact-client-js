@@ -5,7 +5,7 @@ export type Case = components['schemas']['Case']
 export type CustomFunction =
     operations['getCustomFunction']['responses']['200']['content']['application/json']
 
-export type ExecutionStatus =
+export type ExecutionStatusType =
     operations['getExecutionStatus']['responses']['200']['content']['application/json']
 
 export type WorkspaceDefinition = components['schemas']['Workspace']

@@ -6,6 +6,7 @@ import {
 } from './types'
 import Api from './api'
 import Case from './case'
+import ExecutionStatus from './executionStatus'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -81,10 +82,12 @@ class Experiment {
     }
 
     async getExecutionStatus() {
-        return await this.api.getExecutionStatus({
+        const status = await this.api.getExecutionStatus({
             experimentId: this.id,
             workspaceId: this.workspaceId,
         })
+
+        return new ExecutionStatus(status)
     }
 }
 

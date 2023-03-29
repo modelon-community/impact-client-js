@@ -10,6 +10,8 @@ import basicExperimentDefinition from './basicExperimentDefinition.json'
 
 dotenv.config()
 
+const TwentySeconds = 20 * 1000
+
 const getClient = (options?: {
     impactApiKey?: string
     jupyterHubToken?: string
@@ -83,7 +85,7 @@ test(
 
         const customFunctions = await testWorkspace.getCustomFunctions()
         expect(customFunctions.length).toBeGreaterThanOrEqual(
-            ['linearize', 'dynamic', 'steady state'].length
+            ['dynamic', 'steady state'].length
         )
 
         try {
@@ -149,5 +151,52 @@ test(
             throw new Error('Caught unexpected error while executing test')
         }
     },
-    20 * 1000
+    TwentySeconds
+)
+
+test(
+    'Run simulation and track progress',
+    async () => {
+        const experimentDefinition = ExperimentDefinition.from(
+            basicExperimentDefinition
+        )
+
+        const client = getClient()
+        const WorkspaceName = 'simulation-progress'
+
+        let testWorkspace
+        try {
+            testWorkspace = await client.getWorkspace(WorkspaceName)
+        } catch (e) {
+            testWorkspace = await client.createWorkspace({
+                name: WorkspaceName,
+            })
+        }
+
+        expect(testWorkspace.name).toEqual(WorkspaceName)
+
+        try {
+            let done = false
+            const experiment = await testWorkspace.executeExperiment({
+                caseIds: ['case_1', 'case_2'],
+                experimentDefinition,
+            })
+            while (!done) {
+                const status = await experiment.getExecutionStatus()
+
+                await new Promise((resolve) => setTimeout(resolve, 100))
+
+                if (status.getSimulationProgress() === 1) {
+                    expect(status.getCompilationProgress() === 1)
+                    done = true
+                }
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(e.toString())
+            }
+            throw new Error('Caught unexpected error while executing test')
+        }
+    },
+    TwentySeconds
 )

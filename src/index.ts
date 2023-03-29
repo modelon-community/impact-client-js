@@ -14,6 +14,7 @@ import ExperimentDefinition from './experiment-definition'
 import {
     CaseTrajectories,
     CustomFunction,
+    ExecutionStatusType,
     ExperimentId,
     ExperimentTrajectories,
     ModelicaExperimentExtensions,
@@ -30,6 +31,7 @@ export {
     CaseTrajectories,
     Client,
     CustomFunction,
+    ExecutionStatusType,
     ExperimentDefinition,
     Experiment,
     ExperimentId,
