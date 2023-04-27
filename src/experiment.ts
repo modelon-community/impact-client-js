@@ -59,6 +59,13 @@ class Experiment {
         })
     }
 
+    async cancel(): Promise<void> {
+        await this.api.cancelExperiment({
+            experimentId: this.id,
+            workspaceId: this.workspaceId,
+        })
+    }
+
     run(cases: CaseId[]): Promise<void> {
         return this.api.runExperiment({
             cases,

@@ -24,6 +24,34 @@ const getClient = (options?: {
         serverAddress: process.env.JHMI_SERVER as string,
     })
 
+const TestWorkspaceName = 'integration-test-ws'
+
+const getTestWorkspace = async (client: Client) => {
+    let testWorkspace
+    try {
+        testWorkspace = await client.getWorkspace(TestWorkspaceName)
+    } catch (e) {
+        testWorkspace = await client.createWorkspace({
+            name: TestWorkspaceName,
+        })
+    }
+
+    expect(testWorkspace.name).toEqual(TestWorkspaceName)
+
+    return testWorkspace
+}
+
+const deleteTestWorkspace = async (client: Client) => {
+    await client.deleteWorkspace(TestWorkspaceName)
+
+    const workspacesAfterDelete = await client.getWorkspaces()
+    expect(
+        workspacesAfterDelete.find(
+            (w: WorkspaceDefinition) => w.definition.name === TestWorkspaceName
+        )
+    ).toEqual(undefined)
+}
+
 test('Try to use invalid impact API key', (done) => {
     const client = getClient({ impactApiKey: 'invalid-api-key' })
 
@@ -70,18 +98,7 @@ test(
         )
 
         const client = getClient()
-        const WorkspaceName = 'setup-and-exec'
-
-        let testWorkspace
-        try {
-            testWorkspace = await client.getWorkspace(WorkspaceName)
-        } catch (e) {
-            testWorkspace = await client.createWorkspace({
-                name: WorkspaceName,
-            })
-        }
-
-        expect(testWorkspace.name).toEqual(WorkspaceName)
+        const testWorkspace = await getTestWorkspace(client)
 
         const customFunctions = await testWorkspace.getCustomFunctions()
         expect(customFunctions.length).toBeGreaterThanOrEqual(
@@ -135,15 +152,50 @@ test(
             expect(trajectories[1].items[0].trajectory.length).toBe(102)
             expect(trajectories[1].items[0].trajectory.length).toBe(102)
 
-            await client.deleteWorkspace(WorkspaceName)
+            await deleteTestWorkspace(client)
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(e.toString())
+            }
+            throw new Error('Caught unexpected error while executing test')
+        }
+    },
+    TwentySeconds
+)
 
-            const workspacesAfterDelete = await client.getWorkspaces()
-            expect(
-                workspacesAfterDelete.find(
-                    (w: WorkspaceDefinition) =>
-                        w.definition.name === WorkspaceName
-                )
-            ).toEqual(undefined)
+test(
+    'Cancel experiment',
+    async () => {
+        const experimentDefinition = ExperimentDefinition.from(
+            basicExperimentDefinition
+        )
+
+        const client = getClient()
+        const testWorkspace = await getTestWorkspace(client)
+
+        try {
+            const experiment = await testWorkspace.executeExperiment({
+                caseIds: ['case_1', 'case_2'],
+                experimentDefinition,
+            })
+            expect(typeof experiment).toBe('object')
+
+            await experiment.cancel()
+
+            let status = await experiment.getExecutionStatus()
+
+            let tries = 0
+            const MAX_TRIES = 5
+
+            while (status.status.status !== 'cancelled' && tries < MAX_TRIES) {
+                status = await experiment.getExecutionStatus()
+                await new Promise((resolve) => setTimeout(resolve, 100))
+
+                tries++
+            }
+            expect(tries).toBeLessThan(MAX_TRIES)
+
+            await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.toString())
@@ -162,18 +214,7 @@ test(
         )
 
         const client = getClient()
-        const WorkspaceName = 'simulation-progress'
-
-        let testWorkspace
-        try {
-            testWorkspace = await client.getWorkspace(WorkspaceName)
-        } catch (e) {
-            testWorkspace = await client.createWorkspace({
-                name: WorkspaceName,
-            })
-        }
-
-        expect(testWorkspace.name).toEqual(WorkspaceName)
+        const testWorkspace = await getTestWorkspace(client)
 
         try {
             let done = false
@@ -191,6 +232,8 @@ test(
                     done = true
                 }
             }
+
+            await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.toString())

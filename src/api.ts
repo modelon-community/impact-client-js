@@ -306,6 +306,27 @@ class Api {
         })
     }
 
+    cancelExperiment({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
+    }): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .delete(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`
+                        )
+                        .then(() => resolve())
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+    }
+
     createWorkspace({
         description,
         name,
