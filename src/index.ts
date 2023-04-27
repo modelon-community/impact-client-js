@@ -9,6 +9,7 @@ import ApiError, {
 import Api from './api'
 import Case from './case'
 import Client from './client'
+import ExecutionStatus from './executionStatus'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
 import {
@@ -31,6 +32,7 @@ export {
     CaseTrajectories,
     Client,
     CustomFunction,
+    ExecutionStatus,
     ExecutionStatusType,
     ExperimentDefinition,
     Experiment,
