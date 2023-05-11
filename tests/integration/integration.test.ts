@@ -152,6 +152,11 @@ test(
             expect(trajectories[1].items[0].trajectory.length).toBe(102)
             expect(trajectories[1].items[0].trajectory.length).toBe(102)
 
+            const experimentAfterwards = await testWorkspace.getExperiment(
+                experiment.id
+            )
+            expect(experimentAfterwards).not.toBeUndefined()
+
             await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {

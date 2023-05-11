@@ -7,6 +7,7 @@ import ApiError, {
     UnknownApiError,
 } from './api-error'
 import { Cookie, CookieJar } from 'tough-cookie'
+import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
 import {
     Case,
@@ -430,6 +431,40 @@ class Api {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/custom-functions`
                         )
                         .then((response) => resolve(response.data.data.items))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+    }
+
+    getExperiment({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
+    }): Promise<Experiment | undefined> {
+        return new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}`,
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                },
+                            }
+                        )
+                        .then(() =>
+                            resolve(
+                                new Experiment({
+                                    api: this,
+                                    id: experimentId,
+                                    workspaceId,
+                                })
+                            )
+                        )
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))

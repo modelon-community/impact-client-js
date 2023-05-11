@@ -1,4 +1,4 @@
-import { CaseId, CustomFunction, WorkspaceId } from './types'
+import { CaseId, CustomFunction, ExperimentId, WorkspaceId } from './types'
 import Api from './api'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
@@ -75,6 +75,13 @@ class Workspace {
 
     getCustomFunctions(): Promise<CustomFunction[]> {
         return this.api.getCustomFunctions(this.id)
+    }
+
+    getExperiment(experimentId: ExperimentId): Promise<Experiment | undefined> {
+        return this.api.getExperiment({
+            experimentId,
+            workspaceId: this.id,
+        })
     }
 }
 
