@@ -151,19 +151,14 @@ class Api {
         })
     }
 
-    private isConfiguredForNode() {
-        return !!this.axiosConfig.jar
-    }
+    private isConfiguredForNode = () => !!this.axiosConfig.jar
 
-    private isConfiguredForImpact() {
-        return !!this.axiosConfig.headers['Impact-Authorization']
-    }
+    private isConfiguredForImpact = () =>
+        !!this.axiosConfig.headers['Impact-Authorization']
 
-    private getNodeCookieJar() {
-        return this.axiosConfig.jar
-    }
+    private getNodeCookieJar = () => this.axiosConfig.jar
 
-    private async ensureAxiosConfig() {
+    private ensureAxiosConfig = async () => {
         if (isNode()) {
             if (
                 !this.isConfiguredForNode() ||
@@ -208,7 +203,7 @@ class Api {
         }
     }
 
-    private async ensureJhUserPath() {
+    private ensureJhUserPath = async () => {
         if (this.jhUserPath) {
             return
         }
@@ -238,7 +233,7 @@ class Api {
         }
     }
 
-    private async ensureImpactToken() {
+    private ensureImpactToken = async () => {
         await this.ensureAxiosConfig()
         await this.ensureJhUserPath()
 
@@ -265,7 +260,7 @@ class Api {
         await this.ensureAxiosConfig()
     }
 
-    getWorkspaces(): Promise<WorkspaceDefinition[]> {
+    getWorkspaces = async (): Promise<WorkspaceDefinition[]> => {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -280,13 +275,13 @@ class Api {
         })
     }
 
-    createExperiment({
+    createExperiment = async ({
         experimentDefinition,
         workspaceId,
     }: {
         experimentDefinition: ExperimentDefinition
         workspaceId: WorkspaceId
-    }): Promise<ExperimentId> {
+    }): Promise<ExperimentId> => {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -307,14 +302,14 @@ class Api {
         })
     }
 
-    cancelExperiment({
+    cancelExperiment = async ({
         experimentId,
         workspaceId,
     }: {
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<void> {
-        return new Promise((resolve, reject) => {
+    }): Promise<void> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -326,16 +321,15 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    createWorkspace({
+    createWorkspace = async ({
         description,
         name,
     }: {
         description?: string
         name: string
-    }): Promise<WorkspaceId> {
-        return new Promise((resolve, reject) => {
+    }): Promise<WorkspaceId> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -353,10 +347,9 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    deleteWorkspace(workspaceId: WorkspaceId): Promise<void> {
-        return new Promise((resolve, reject) => {
+    deleteWorkspace = async (workspaceId: WorkspaceId): Promise<void> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -368,9 +361,8 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    runExperiment({
+    runExperiment = async ({
         cases,
         experimentId,
         workspaceId,
@@ -378,8 +370,8 @@ class Api {
         cases: CaseId[]
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<void> {
-        return new Promise((resolve, reject) => {
+    }): Promise<void> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -399,16 +391,15 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getExecutionStatus({
+    getExecutionStatus = async ({
         experimentId,
         workspaceId,
     }: {
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<ExecutionStatusType> {
-        return new Promise((resolve, reject) => {
+    }): Promise<ExecutionStatusType> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -420,10 +411,11 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getCustomFunctions(workspaceId: WorkspaceId): Promise<CustomFunction[]> {
-        return new Promise((resolve, reject) => {
+    getCustomFunctions = (
+        workspaceId: WorkspaceId
+    ): Promise<CustomFunction[]> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -435,16 +427,15 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getExperiment({
+    getExperiment = ({
         experimentId,
         workspaceId,
     }: {
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<Experiment | undefined> {
-        return new Promise((resolve, reject) => {
+    }): Promise<Experiment | undefined> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -469,16 +460,15 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getCases({
+    getCases = ({
         experimentId,
         workspaceId,
     }: {
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<Case[] | undefined> {
-        return new Promise((resolve, reject) => {
+    }): Promise<Case[] | undefined> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -490,9 +480,8 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getExperimentTrajectories({
+    getExperimentTrajectories = ({
         experimentId,
         variableNames,
         workspaceId,
@@ -500,8 +489,8 @@ class Api {
         experimentId: ExperimentId
         variableNames: string[]
         workspaceId: WorkspaceId
-    }): Promise<ExperimentTrajectories> {
-        return new Promise((resolve, reject) => {
+    }): Promise<ExperimentTrajectories> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -518,9 +507,8 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getCaseLog({
+    getCaseLog = ({
         caseId,
         experimentId,
         workspaceId,
@@ -528,8 +516,8 @@ class Api {
         caseId: CaseId
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<string> {
-        return new Promise((resolve, reject) => {
+    }): Promise<string> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -541,9 +529,8 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 
-    getCaseTrajectories({
+    getCaseTrajectories = ({
         caseId,
         experimentId,
         variableNames,
@@ -553,8 +540,8 @@ class Api {
         experimentId: ExperimentId
         variableNames: string[]
         workspaceId: WorkspaceId
-    }): Promise<CaseTrajectories> {
-        return new Promise((resolve, reject) => {
+    }): Promise<CaseTrajectories> =>
+        new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -572,7 +559,6 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-    }
 }
 
 export default Api

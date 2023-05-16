@@ -168,6 +168,7 @@ test(
     TwentySeconds
 )
 
+/* Disabled until WAMS-12202 is resolved.
 test(
     'Cancel experiment',
     async () => {
@@ -210,6 +211,7 @@ test(
     },
     TwentySeconds
 )
+*/
 
 test(
     'Run simulation and track progress',

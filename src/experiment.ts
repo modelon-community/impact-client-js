@@ -29,7 +29,7 @@ class Experiment {
         this.workspaceId = workspaceId
     }
 
-    async getCases() {
+    getCases = async () => {
         const casesResponse = await this.api.getCases({
             experimentId: this.id,
             workspaceId: this.workspaceId,
@@ -51,30 +51,30 @@ class Experiment {
         )
     }
 
-    getTrajectories(variableNames: string[]): Promise<ExperimentTrajectories> {
-        return this.api.getExperimentTrajectories({
+    getTrajectories = async (
+        variableNames: string[]
+    ): Promise<ExperimentTrajectories> =>
+        this.api.getExperimentTrajectories({
             experimentId: this.id,
             variableNames,
             workspaceId: this.workspaceId,
         })
-    }
 
-    async cancel(): Promise<void> {
+    cancel = async (): Promise<void> => {
         await this.api.cancelExperiment({
             experimentId: this.id,
             workspaceId: this.workspaceId,
         })
     }
 
-    run(cases: CaseId[]): Promise<void> {
-        return this.api.runExperiment({
+    run = async (cases: CaseId[]): Promise<void> =>
+        this.api.runExperiment({
             cases,
             experimentId: this.id,
             workspaceId: this.workspaceId,
         })
-    }
 
-    async executionDone() {
+    executionDone = async () => {
         let data = await this.api.getExecutionStatus({
             experimentId: this.id,
             workspaceId: this.workspaceId,
@@ -88,7 +88,7 @@ class Experiment {
         }
     }
 
-    async getExecutionStatus() {
+    getExecutionStatus = async () => {
         const status = await this.api.getExecutionStatus({
             experimentId: this.id,
             workspaceId: this.workspaceId,

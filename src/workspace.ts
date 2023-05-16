@@ -22,9 +22,9 @@ class Workspace {
         this.name = name
     }
 
-    private async createExperiment(
+    private createExperiment = async (
         experimentDefinition: ExperimentDefinition
-    ): Promise<Experiment> {
+    ): Promise<Experiment> => {
         const experimentId = await this.api.createExperiment({
             experimentDefinition,
             workspaceId: this.id,
@@ -36,13 +36,13 @@ class Workspace {
         })
     }
 
-    async executeExperiment({
+    executeExperiment = async ({
         caseIds,
         experimentDefinition,
     }: {
         caseIds: CaseId[]
         experimentDefinition: ExperimentDefinition
-    }): Promise<Experiment> {
+    }): Promise<Experiment> => {
         const experiment = await this.createExperiment(experimentDefinition)
 
         await this.api.runExperiment({
@@ -58,13 +58,13 @@ class Workspace {
         })
     }
 
-    async executeExperimentSync({
+    executeExperimentSync = async ({
         caseIds,
         experimentDefinition,
     }: {
         caseIds: CaseId[]
         experimentDefinition: ExperimentDefinition
-    }): Promise<Experiment> {
+    }): Promise<Experiment> => {
         const experiment = await this.createExperiment(experimentDefinition)
 
         await experiment.run(caseIds)
@@ -73,11 +73,13 @@ class Workspace {
         return experiment
     }
 
-    getCustomFunctions(): Promise<CustomFunction[]> {
+    getCustomFunctions = async (): Promise<CustomFunction[]> => {
         return this.api.getCustomFunctions(this.id)
     }
 
-    getExperiment(experimentId: ExperimentId): Promise<Experiment | undefined> {
+    getExperiment = async (
+        experimentId: ExperimentId
+    ): Promise<Experiment | undefined> => {
         return this.api.getExperiment({
             experimentId,
             workspaceId: this.id,

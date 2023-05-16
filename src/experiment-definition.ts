@@ -59,40 +59,38 @@ class ExperimentDefinition {
         final_time: 1,
     }
 
-    toModelicaExperimentDefinition(): ModelicaExperimentDefinition {
-        return {
-            version: 2,
-            base: {
-                model: {
-                    modelica: {
-                        className: this.modelName,
-                        compilerOptions: {
-                            c_compiler: 'gcc',
-                            generate_html_diagnostics: false,
-                            include_protected_variables: false,
-                        },
-                        runtimeOptions: {},
-                        compilerLogLevel: 'warning',
-                        fmiTarget: 'me',
-                        fmiVersion: '2.0',
-                        platform: 'auto',
+    toModelicaExperimentDefinition = (): ModelicaExperimentDefinition => ({
+        version: 2,
+        base: {
+            model: {
+                modelica: {
+                    className: this.modelName,
+                    compilerOptions: {
+                        c_compiler: 'gcc',
+                        generate_html_diagnostics: false,
+                        include_protected_variables: false,
                     },
+                    runtimeOptions: {},
+                    compilerLogLevel: 'warning',
+                    fmiTarget: 'me',
+                    fmiVersion: '2.0',
+                    platform: 'auto',
                 },
-                analysis: {
-                    type: this.customFunction,
-                    parameters: this.parameters || this.DefaultParameters,
-                    simulationOptions: {
-                        ncp: 100,
-                        dynamic_diagnostics: false,
-                    },
-                    solverOptions: {},
-                    simulationLogLevel: 'WARNING',
-                },
-                modifiers: this.modifiers || {},
             },
-            extensions: this.extensions || [],
-        }
-    }
+            analysis: {
+                type: this.customFunction,
+                parameters: this.parameters || this.DefaultParameters,
+                simulationOptions: {
+                    ncp: 100,
+                    dynamic_diagnostics: false,
+                },
+                solverOptions: {},
+                simulationLogLevel: 'WARNING',
+            },
+            modifiers: this.modifiers || {},
+        },
+        extensions: this.extensions || [],
+    })
 }
 
 export default ExperimentDefinition
