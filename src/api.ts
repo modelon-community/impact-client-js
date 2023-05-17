@@ -63,13 +63,24 @@ const toApiError = (e: AxiosError | Error) => {
 }
 
 class Api {
-    private axios: AxiosInstance
-    private axiosConfig: AxiosConfig
+    private axios!: AxiosInstance
+    private axiosConfig!: AxiosConfig
     private baseUrl: string
     private impactApiKey?: string
     private impactToken?: string
     private jhToken: string
     private jhUserPath: string | undefined
+
+    private configureAxios() {
+        const headers: Record<string, string> = {
+            Authorization: `token ${this.jhToken}`,
+        }
+        if (this.impactToken) {
+            headers['Impact-Authorization'] = `Bearer ${this.impactToken}`
+        }
+        this.axiosConfig = { headers }
+        this.axios = Axios.create(this.axiosConfig)
+    }
 
     private constructor({
         impactApiKey,
@@ -103,14 +114,7 @@ class Api {
         }
 
         this.jhToken = jupyterHubToken
-        const headers: Record<string, string> = {
-            Authorization: `token ${jupyterHubToken}`,
-        }
-        if (this.impactToken) {
-            headers['Impact-Authorization'] = `Bearer ${impactToken}`
-        }
-        this.axiosConfig = { headers }
-        this.axios = Axios.create(this.axiosConfig)
+        this.configureAxios()
     }
 
     static fromImpactApiKey({
@@ -562,6 +566,7 @@ class Api {
 
     setImpactToken = (token: string) => {
         this.impactToken = token
+        this.configureAxios()
     }
 }
 
