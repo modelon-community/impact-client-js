@@ -87,6 +87,8 @@ class Client {
     deleteWorkspace = async (workspaceId: WorkspaceId): Promise<void> => {
         return await this.api.deleteWorkspace(workspaceId)
     }
+
+    setImpactToken = (token: string) => this.api.setImpactToken(token)
 }
 
 export default Client

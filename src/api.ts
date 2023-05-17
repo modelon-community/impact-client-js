@@ -559,6 +559,10 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
+
+    setImpactToken = (token: string) => {
+        this.impactToken = token
+    }
 }
 
 export default Api
