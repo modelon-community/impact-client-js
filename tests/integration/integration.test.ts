@@ -159,6 +159,10 @@ test(
             )
             expect(experimentAfterwards).not.toBeUndefined()
 
+            const experiments = await testWorkspace.getExperiments()
+
+            expect(experiments.length).toEqual(1)
+
             await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {

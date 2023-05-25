@@ -8,6 +8,8 @@ export type CustomFunction =
 export type ExecutionStatusType =
     operations['getExecutionStatus']['responses']['200']['content']['application/json']
 
+export type ExperimentItem = components['schemas']['ExperimentItemV2']
+
 export type WorkspaceDefinition = components['schemas']['Workspace']
 
 export type ModelicaExperimentDefinition =

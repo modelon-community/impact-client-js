@@ -85,6 +85,10 @@ class Workspace {
             workspaceId: this.id,
         })
     }
+
+    getExperiments = async (): Promise<Experiment[]> => {
+        return this.api.getExperiments(this.id)
+    }
 }
 
 export default Workspace

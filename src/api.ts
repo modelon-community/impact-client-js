@@ -16,6 +16,7 @@ import {
     CustomFunction,
     ExecutionStatusType,
     ExperimentId,
+    ExperimentItem,
     ExperimentTrajectories,
     WorkspaceDefinition,
     WorkspaceId,
@@ -470,6 +471,36 @@ class Api {
                                     id: experimentId,
                                     workspaceId,
                                 })
+                            )
+                        )
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getExperiments = (workspaceId: WorkspaceId): Promise<Experiment[]> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                },
+                            }
+                        )
+                        .then((result) =>
+                            resolve(
+                                result.data.data.items.map(
+                                    (experiment: ExperimentItem) =>
+                                        new Experiment({
+                                            api: this,
+                                            id: experiment.id || '',
+                                            workspaceId,
+                                        })
+                                )
                             )
                         )
                         .catch((e) => reject(toApiError(e)))
