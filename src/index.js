@@ -518,28 +518,8 @@ API.prototype.getCurrentModel = function() {
  * @throws {Error} If no workspace id is present
  * @throws {TypeError} If impactURL is not a valid URL
  */
-export function cloneWorkspace(workspaceId, bumpInterval, impactUrl='') {
-    let params = _getParams(impactUrl);
-
-    workspaceId = workspaceId || params.workspaceId;
-    bumpInterval = bumpInterval || params.bumpInterval || 10;
-
-    if (!workspaceId) {
-        throw _panic("Need to supply workspace id in parameter or querystring");
-    }
-
-    const requestWithRetry = _requestWithLoginRetry(impactUrl);
-    return requestWithRetry(`${impactUrl}/api/workspaces/${workspaceId}/clone`, "POST").then(
-        data => {
-            let intervalId = setInterval(() => {
-                requestWithRetry(`${impactUrl}/api/workspaces/${data.workspace_id}`, "PUT", {body: JSON.stringify({})});
-            }, bumpInterval * 1000);
-            return {
-                workspaceId: data.workspace_id,
-                intervalId
-            };
-        }
-    );
+export function cloneWorkspace(workspaceId, bumpInterval, impactUrl = "") {
+  throw _panic("cloneWorkspace was removed in Modelon Impact REST API 4.0.0 and is as a consequence not supported in impact-client-js from version 2.0.0.");
 }
 
 /**
