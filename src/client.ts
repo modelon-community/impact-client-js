@@ -16,7 +16,7 @@ class Client {
         serverAddress,
     }: {
         impactApiKey: string
-        jupyterHubToken: string
+        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress: string
     }) {
@@ -36,7 +36,7 @@ class Client {
         serverAddress,
     }: {
         impactToken: string
-        jupyterHubToken: string
+        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress: string
     }) {

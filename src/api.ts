@@ -91,7 +91,7 @@ class Api {
     }: {
         impactApiKey?: string
         impactToken?: string
-        jupyterHubToken: string
+        jupyterHubToken?: string
         serverAddress: string
         jupyterHubUserPath?: string
     }) {
@@ -99,12 +99,20 @@ class Api {
         this.impactApiKey = impactApiKey
         this.impactToken = impactToken
 
-        if (!jupyterHubToken) {
-            throw new ApiError({
-                errorCode: MissingJupyterHubToken,
-                message:
-                    'Impact client instantiation failed: The jupyterHubToken parameter is mandatory',
-            })
+        if (jupyterHubToken) {
+            this.jhToken = jupyterHubToken
+        } else {
+            // No provided JupyterHub token, to mimick impact-python-client we try to
+            // fallback on the environment variable available inside JupyterHub.
+            if (process.env.JUPYTERHUB_API_TOKEN) {
+                this.jhToken = process.env.JUPYTERHUB_API_TOKEN
+            } else {
+                throw new ApiError({
+                    errorCode: MissingJupyterHubToken,
+                    message:
+                        'Impact client instantiation failed: Missing JupyterHub token.',
+                })
+            }
         }
 
         if (jupyterHubUserPath) {
@@ -113,7 +121,6 @@ class Api {
                 (jupyterHubUserPath.endsWith('/') ? '' : '/')
         }
 
-        this.jhToken = jupyterHubToken
         this.configureAxios()
     }
 
@@ -124,7 +131,7 @@ class Api {
         serverAddress,
     }: {
         impactApiKey: string
-        jupyterHubToken: string
+        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress: string
     }) {
@@ -143,7 +150,7 @@ class Api {
         serverAddress,
     }: {
         impactToken: string
-        jupyterHubToken: string
+        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress: string
     }) {
