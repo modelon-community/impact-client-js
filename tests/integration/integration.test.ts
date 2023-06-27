@@ -170,7 +170,6 @@ test(
     TwentySeconds
 )
 
-/* Disabled until WAMS-12202 is resolved.
 test(
     'Cancel experiment',
     async () => {
@@ -193,11 +192,11 @@ test(
             let status = await experiment.getExecutionStatus()
 
             let tries = 0
-            const MAX_TRIES = 5
+            const MAX_TRIES = 10
 
             while (status.status.status !== 'cancelled' && tries < MAX_TRIES) {
                 status = await experiment.getExecutionStatus()
-                await new Promise((resolve) => setTimeout(resolve, 100))
+                await new Promise((resolve) => setTimeout(resolve, 1000))
 
                 tries++
             }
@@ -213,7 +212,6 @@ test(
     },
     TwentySeconds
 )
-*/
 
 test(
     'Run simulation and track progress',
