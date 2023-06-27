@@ -21,7 +21,8 @@ const getClient = (options?: {
             options?.impactApiKey ||
             (process.env.MODELON_IMPACT_CLIENT_API_KEY as string),
         jupyterHubToken:
-            options?.jupyterHubToken || (process.env.JH_TOKEN as string),
+            options?.jupyterHubToken ||
+            (process.env.JUPYTERHUB_API_TOKEN as string),
         serverAddress: process.env.JHMI_SERVER as string,
     })
 
