@@ -14,7 +14,7 @@ Put the following information in an `.env` file in your project root folder:
 ```bash
 MODELON_IMPACT_CLIENT_API_KEY=<your impact API key>
 JUPYTERHUB_API_TOKEN=<your JupyterHub API token>
-JHMI_SERVER=<jhmi server address>
+MODELON_IMPACT_SERVER=<Modelon Impact server address>
 ```
 
 ## Example usage
@@ -30,7 +30,7 @@ await (async () => {
   const client = Client.fromImpactApiKey({
     impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
     jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
-    serverAddress: process.env.JHMI_SERVER,
+    serverAddress: process.env.MODELON_IMPACT_SERVER,
   });
 
   const WorkspaceName = "setup-and-exec";

@@ -23,7 +23,7 @@ const getClient = (options?: {
         jupyterHubToken:
             options?.jupyterHubToken ||
             (process.env.JUPYTERHUB_API_TOKEN as string),
-        serverAddress: process.env.JHMI_SERVER as string,
+        serverAddress: process.env.MODELON_IMPACT_SERVER as string,
     })
 
 const TestWorkspaceName = 'integration-test-ws'
