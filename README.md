@@ -12,7 +12,7 @@ Usage and also execution of integration tests requires some environment variable
 Put the following information in an `.env` file in your project root folder:
 
 ```bash
-IMPACT_API_KEY=<your impact api key>
+MODELON_IMPACT_CLIENT_API_KEY=<your impact api key>
 JH_TOKEN=<your JH token>
 JHMI_SERVER=<jhmi server address>
 ```
@@ -28,7 +28,7 @@ dotenv.config();
 
 await (async () => {
   const client = Client.fromImpactApiKey({
-    impactApiKey: process.env.IMPACT_API_KEY,
+    impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
     jupyterHubToken: process.env.JH_TOKEN,
     serverAddress: process.env.JHMI_SERVER,
   });
