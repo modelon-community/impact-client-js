@@ -57,13 +57,13 @@ See [Authentication](#Authentication) for info on how to obtain the credentials.
 Create a file `index.js` and run it via `node index.js`.
 
 ```JavaScript
-import * as dotenv from "dotenv";
-import { Client, ExperimentDefinition } from "@modelon/impact-client-js";
+const dotenv = require("dotenv");
+const { Client, ExperimentDefinition } = require("@modelon/impact-client-js");
 
 // Load the .env file variables, install with: npm install dotenv
 dotenv.config();
 
-await (async () => {
+(async () => {
   const client = Client.fromImpactApiKey({
     impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
     jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
