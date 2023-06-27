@@ -216,14 +216,19 @@ class Api {
                 `${this.baseUrl}/hub/api/authorizations/token/${this.jhToken}`
             )
             const { server } = response.data
-            if (!server) {
+            if (server === null) {
                 throw new ApiError({
                     errorCode: ServerNotStarted,
-                    message:
-                        'Server not started on JH or missing JH token scope.',
+                    message: 'Server not started on JupyterHub.',
                 })
             }
-            this.jhUserPath = server
+            if (server === undefined) {
+                // Server missing in token scope, probably executing inside JupyterHub.
+                // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
+                this.jhUserPath = process.env.JUPYTERHUB_SERVICE_PREFIX
+            } else {
+                this.jhUserPath = server
+            }
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new ApiError({
