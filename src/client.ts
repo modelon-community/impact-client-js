@@ -82,8 +82,12 @@ class Client {
 
     setImpactToken = (token: string) => this.api.setImpactToken(token)
 
-    get = (path: string) => this.api.get(path)
-    post = (path: string, body: unknown) => this.api.post(path, body)
+    delete = (path: string) => this.api.delete(path)
+    get = (path: string, accept?: string) => this.api.get(path, accept)
+    post = (path: string, body: unknown, accept?: string) =>
+        this.api.post(path, body, accept)
+    put = (path: string, body: unknown, accept?: string) =>
+        this.api.put(path, body, accept)
 }
 
 export default Client

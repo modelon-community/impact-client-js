@@ -747,18 +747,13 @@ class Api {
         this.configureAxios()
     }
 
-    get = (path: string) =>
+    delete = (path: string) =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
-                        .get(
-                            `${this.baseUrl}${this.jhUserPath}impact/api${path}`,
-                            {
-                                headers: {
-                                    Accept: 'application/vnd.impact.experiment.v2+json',
-                                },
-                            }
+                        .delete(
+                            `${this.baseUrl}${this.jhUserPath}impact/api${path}`
                         )
                         .then((response) => resolve(response.data))
                         .catch((e) => reject(toApiError(e)))
@@ -766,7 +761,28 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
-    post = (path: string, body: unknown) =>
+    get = (path: string, accept?: string) =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api${path}`,
+                            accept
+                                ? {
+                                      headers: {
+                                          Accept: accept,
+                                      },
+                                  }
+                                : {}
+                        )
+                        .then((response) => resolve(response.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    post = (path: string, body: unknown, accept?: string) =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -774,11 +790,35 @@ class Api {
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api${path}`,
                             body,
-                            {
-                                headers: {
-                                    Accept: 'application/vnd.impact.experiment.v2+json',
-                                },
-                            }
+                            accept
+                                ? {
+                                      headers: {
+                                          Accept: accept,
+                                      },
+                                  }
+                                : {}
+                        )
+                        .then((response) => resolve(response.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    put = (path: string, body: unknown, accept?: string) =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .put(
+                            `${this.baseUrl}${this.jhUserPath}impact/api${path}`,
+                            body,
+                            accept
+                                ? {
+                                      headers: {
+                                          Accept: accept,
+                                      },
+                                  }
+                                : {}
                         )
                         .then((response) => resolve(response.data))
                         .catch((e) => reject(toApiError(e)))
