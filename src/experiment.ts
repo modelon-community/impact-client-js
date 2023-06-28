@@ -1,6 +1,7 @@
 import {
     CaseId,
     ExperimentId,
+    ExperimentMetaData,
     ExperimentTrajectories,
     WorkspaceId,
 } from './types'
@@ -14,6 +15,7 @@ class Experiment {
     private api: Api
     id: ExperimentId
     private workspaceId: WorkspaceId
+    private metaData: ExperimentMetaData | null
 
     constructor({
         api,
@@ -26,6 +28,7 @@ class Experiment {
     }) {
         this.api = api
         this.id = id
+        this.metaData = null
         this.workspaceId = workspaceId
     }
 
@@ -49,6 +52,17 @@ class Experiment {
                     workspaceId: this.workspaceId,
                 })
         )
+    }
+
+    getMetaData = async (): Promise<ExperimentMetaData | null> => {
+        if (this.metaData) {
+            return this.metaData
+        }
+        this.metaData = await this.api.getExperimentMetaData({
+            experimentId: this.id,
+            workspaceId: this.workspaceId,
+        })
+        return this.metaData
     }
 
     getTrajectories = async (

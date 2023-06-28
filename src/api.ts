@@ -17,6 +17,7 @@ import {
     ExecutionStatusType,
     ExperimentId,
     ExperimentItem,
+    ExperimentMetaData,
     ExperimentTrajectories,
     WorkspaceDefinition,
     WorkspaceId,
@@ -374,6 +375,31 @@ class Api {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}`
                         )
                         .then(() => resolve())
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getExperimentMetaData = async ({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
+    }): Promise<ExperimentMetaData> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}`,
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                },
+                            }
+                        )
+                        .then((response) => resolve(response.data.meta_data))
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))

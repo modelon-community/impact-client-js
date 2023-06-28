@@ -10,6 +10,8 @@ export type ExecutionStatusType =
 
 export type ExperimentItem = components['schemas']['ExperimentItemV2']
 
+export type ExperimentMetaData = components['schemas']['ExperimentMetaData']
+
 export type WorkspaceDefinition = components['schemas']['Workspace']
 
 export type ModelicaExperimentDefinition =
