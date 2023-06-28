@@ -89,6 +89,9 @@ class Client {
     }
 
     setImpactToken = (token: string) => this.api.setImpactToken(token)
+
+    get = (path: string) => this.api.get(path)
+    post = (path: string, body: unknown) => this.api.post(path, body)
 }
 
 export default Client

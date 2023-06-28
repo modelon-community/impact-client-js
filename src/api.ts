@@ -611,6 +611,45 @@ class Api {
         this.impactToken = token
         this.configureAxios()
     }
+
+    get = (path: string) =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api${path}`,
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                },
+                            }
+                        )
+                        .then((response) => resolve(response.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    post = (path: string, body: unknown) =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .post(
+                            `${this.baseUrl}${this.jhUserPath}impact/api${path}`,
+                            body,
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                },
+                            }
+                        )
+                        .then((response) => resolve(response.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
 }
 
 export default Api
