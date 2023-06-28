@@ -1,4 +1,10 @@
-import { CaseId, CustomFunction, ExperimentId, WorkspaceId } from './types'
+import {
+    CaseId,
+    CustomFunction,
+    ExperimentId,
+    WorkspaceDefinition,
+    WorkspaceId,
+} from './types'
 import Api from './api'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
@@ -7,20 +13,20 @@ import Project from './project'
 class Workspace {
     private api: Api
     id: WorkspaceId
-    name: string
+    definition: WorkspaceDefinition
 
     constructor({
         api,
+        definition,
         id,
-        name,
     }: {
         api: Api
+        definition: WorkspaceDefinition
         id: WorkspaceId
-        name: string
     }) {
         this.api = api
+        this.definition = definition
         this.id = id
-        this.name = name
     }
 
     private createExperiment = async (

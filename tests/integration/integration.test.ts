@@ -4,7 +4,7 @@ import {
     ExperimentDefinition,
     InvalidApiKey,
     JhTokenError,
-    WorkspaceDefinition,
+    Workspace,
 } from '../../dist'
 import basicExperimentDefinition from './basicExperimentDefinition.json'
 
@@ -38,7 +38,7 @@ const getTestWorkspace = async (client: Client) => {
         })
     }
 
-    expect(testWorkspace.name).toEqual(TestWorkspaceName)
+    expect(testWorkspace.definition.name).toEqual(TestWorkspaceName)
 
     return testWorkspace
 }
@@ -49,7 +49,7 @@ const deleteTestWorkspace = async (client: Client) => {
     const workspacesAfterDelete = await client.getWorkspaces()
     expect(
         workspacesAfterDelete.find(
-            (w: WorkspaceDefinition) => w.definition.name === TestWorkspaceName
+            (w: Workspace) => w.definition.name === TestWorkspaceName
         )
     ).toEqual(undefined)
 }

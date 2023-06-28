@@ -12,7 +12,9 @@ export type ExperimentItem = components['schemas']['ExperimentItemV2']
 
 export type ExperimentMetaData = components['schemas']['ExperimentMetaData']
 
-export type WorkspaceDefinition = components['schemas']['Workspace']
+export type WorkspaceProtocol = components['schemas']['Workspace']
+export type WorkspaceDefinition =
+    components['schemas']['WorkspaceDefinitionProtocol']
 
 export type ModelicaExperimentDefinition =
     components['schemas']['ExperimentDefinition']

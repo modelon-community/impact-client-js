@@ -10,6 +10,7 @@ import { Cookie, CookieJar } from 'tough-cookie'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
 import Project from './project'
+import Workspace from './workspace'
 import {
     Case,
     CaseId,
@@ -24,6 +25,7 @@ import {
     LocalProjectProtocol,
     ProjectId,
     WorkspaceDefinition,
+    WorkspaceProtocol,
     WorkspaceId,
 } from './types'
 
@@ -282,7 +284,7 @@ class Api {
         await this.ensureAxiosConfig()
     }
 
-    getWorkspaces = async (): Promise<WorkspaceDefinition[]> => {
+    getWorkspaces = async (): Promise<Workspace[]> => {
         return new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -290,7 +292,20 @@ class Api {
                         .get(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces`
                         )
-                        .then((response) => resolve(response.data?.data?.items))
+                        .then((result) =>
+                            resolve(
+                                result.data.data.items.map(
+                                    (workspace: WorkspaceProtocol) =>
+                                        new Workspace({
+                                            api: this,
+                                            definition: workspace.definition,
+                                            id: workspace.id,
+                                        })
+                                )
+                            )
+                        )
+
+                        //.then((response) => resolve(response.data?.data?.items))
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))
@@ -350,7 +365,7 @@ class Api {
     }: {
         description?: string
         name: string
-    }): Promise<WorkspaceId> =>
+    }): Promise<Workspace> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -364,7 +379,15 @@ class Api {
                                 },
                             }
                         )
-                        .then((response) => resolve(response.data.id))
+                        .then((response) =>
+                            resolve(
+                                new Workspace({
+                                    api: this,
+                                    definition: response.data.definition,
+                                    id: response.data.id,
+                                })
+                            )
+                        )
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))
