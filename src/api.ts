@@ -19,6 +19,7 @@ import {
     ExperimentItem,
     ExperimentMetaData,
     ExperimentTrajectories,
+    ExperimentVariables,
     WorkspaceDefinition,
     WorkspaceId,
 } from './types'
@@ -577,6 +578,25 @@ class Api {
                             }
                         )
                         .then((res) => resolve(res.data.data.items))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getExperimentVariables = ({
+        experimentId,
+        workspaceId,
+    }: {
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
+    }): Promise<ExperimentVariables> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/variables`
+                        )
+                        .then((res) => resolve(res.data))
                 })
                 .catch((e) => reject(toApiError(e)))
         })

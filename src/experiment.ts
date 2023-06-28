@@ -74,6 +74,12 @@ class Experiment {
             workspaceId: this.workspaceId,
         })
 
+    getVariables = async (): Promise<ExperimentTrajectories> =>
+        this.api.getExperimentVariables({
+            experimentId: this.id,
+            workspaceId: this.workspaceId,
+        })
+
     cancel = async (): Promise<void> => {
         await this.api.cancelExperiment({
             experimentId: this.id,

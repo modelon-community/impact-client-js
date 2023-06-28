@@ -162,6 +162,9 @@ test(
             const metaData = await experimentAfterwards?.getMetaData()
             expect(metaData).not.toBeUndefined()
 
+            const variables = await experimentAfterwards?.getVariables()
+            expect(variables).toContain('driveAngle')
+
             const experiments = await testWorkspace.getExperiments()
 
             expect(experiments.length).toEqual(1)

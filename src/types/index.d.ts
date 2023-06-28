@@ -33,6 +33,9 @@ export type CaseRunInfo =
 export type ExperimentTrajectories =
     operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
 
+export type ExperimentVariables =
+    operations['getVariables']['responses']['200']['content']['application/json']
+
 export type CaseId = string
 export type ExperimentId = string
 export type WorkspaceId = string
