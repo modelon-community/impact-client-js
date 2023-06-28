@@ -165,9 +165,12 @@ test(
             const variables = await experimentAfterwards?.getVariables()
             expect(variables).toContain('driveAngle')
 
-            const experiments = await testWorkspace.getExperiments()
+            const workspaceExperiments = await testWorkspace.getExperiments()
 
-            expect(experiments.length).toEqual(1)
+            expect(workspaceExperiments.length).toEqual(1)
+
+            const projects = await testWorkspace.getProjects()
+            expect(projects.length).toEqual(1)
 
             await deleteTestWorkspace(client)
         } catch (e) {

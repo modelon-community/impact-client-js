@@ -36,6 +36,9 @@ export type ExperimentTrajectories =
 export type ExperimentVariables =
     operations['getVariables']['responses']['200']['content']['application/json']
 
+export type LocalProjectProtocol = components['schemas']['LocalProjectProtocol']
+
 export type CaseId = string
 export type ExperimentId = string
+export type ProjectId = string
 export type WorkspaceId = string

@@ -9,6 +9,7 @@ import ApiError, {
 import { Cookie, CookieJar } from 'tough-cookie'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
+import Project from './project'
 import {
     Case,
     CaseId,
@@ -20,6 +21,8 @@ import {
     ExperimentMetaData,
     ExperimentTrajectories,
     ExperimentVariables,
+    LocalProjectProtocol,
+    ProjectId,
     WorkspaceDefinition,
     WorkspaceId,
 } from './types'
@@ -505,7 +508,45 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
-    getExperiments = (workspaceId: WorkspaceId): Promise<Experiment[]> =>
+    getProjectExperiments = ({
+        projectId,
+        workspaceId,
+    }: {
+        projectId: ProjectId
+        workspaceId: WorkspaceId
+    }): Promise<Experiment[]> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/projects/${projectId}/experiments`,
+                            {
+                                headers: {
+                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                },
+                            }
+                        )
+                        .then((result) =>
+                            resolve(
+                                result.data.data.items.map(
+                                    (experiment: ExperimentItem) =>
+                                        new Experiment({
+                                            api: this,
+                                            id: experiment.id || '',
+                                            workspaceId,
+                                        })
+                                )
+                            )
+                        )
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getWorkspaceExperiments = (
+        workspaceId: WorkspaceId
+    ): Promise<Experiment[]> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -525,6 +566,31 @@ class Api {
                                         new Experiment({
                                             api: this,
                                             id: experiment.id || '',
+                                            workspaceId,
+                                        })
+                                )
+                            )
+                        )
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getWorkspaceProjects = (workspaceId: WorkspaceId): Promise<Project[]> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/projects`
+                        )
+                        .then((result) =>
+                            resolve(
+                                result.data.data.items.map(
+                                    (project: LocalProjectProtocol) =>
+                                        new Project({
+                                            api: this,
+                                            id: project.id,
                                             workspaceId,
                                         })
                                 )

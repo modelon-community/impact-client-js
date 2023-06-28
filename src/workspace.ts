@@ -2,6 +2,7 @@ import { CaseId, CustomFunction, ExperimentId, WorkspaceId } from './types'
 import Api from './api'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
+import Project from './project'
 
 class Workspace {
     private api: Api
@@ -86,9 +87,11 @@ class Workspace {
         })
     }
 
-    getExperiments = async (): Promise<Experiment[]> => {
-        return this.api.getExperiments(this.id)
-    }
+    getExperiments = async (): Promise<Experiment[]> =>
+        this.api.getWorkspaceExperiments(this.id)
+
+    getProjects = async (): Promise<Project[]> =>
+        this.api.getWorkspaceProjects(this.id)
 }
 
 export default Workspace
