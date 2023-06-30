@@ -17,10 +17,17 @@ export interface paths {
      */
     get: operations["getAPIMetaData"];
   };
+  "/docs": {
+    /**
+     * Returns the HTML documentation page. 
+     * @description The HTML documentation page for all the Modelon Impact REST API's.
+     */
+    get: operations["getDocs"];
+  };
   "/login": {
     /**
      * Logs in a user 
-     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created <a class="visible-link" href="/admin/keys">in the API key manager</a>.
+     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created in the 'IMPACT API KEY' section of the <a class="visible-link" href="__IMPACT_SERVER_MANAGEMENT_URL__"> 'Server management'</a> page.
      */
     post: operations["login"];
   };
@@ -44,6 +51,13 @@ export interface paths {
         type?: string;
       };
     };
+  };
+  "/executions": {
+    /**
+     * Get all 'running' and 'pending' executions 
+     * @description Returns a list of all 'running' and 'pending' executions.
+     */
+    get: operations["getExecutions"];
   };
   "/project-imports": {
     /**
@@ -120,6 +134,22 @@ export interface paths {
     parameters: {
         /**
          * @description ID of the project the content is imported into. 
+         * @example 79sd8-3n2a4-e3t24
+         */
+      path: {
+        project: string;
+      };
+    };
+  };
+  "/projects/{project}/icon": {
+    /**
+     * Get the project icon. 
+     * @description Returns the icon(if it exists) for the project.
+     */
+    get: operations["getIcon"];
+    parameters: {
+        /**
+         * @description ID of the project. 
          * @example 79sd8-3n2a4-e3t24
          */
       path: {
@@ -260,53 +290,6 @@ export interface paths {
       };
     };
   };
-  "/projects/{project}/custom-functions/{custom-function}/options": {
-    /**
-     * Gets the execution options 
-     * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
-     */
-    get: operations["getExecutionOptionsProjects"];
-    /**
-     * Sets execution option values 
-     * @description The values for the options are saved for a specific custom function and project.
-     */
-    put: operations["putExecutionOptions"];
-    parameters: {
-        /**
-         * @description ID of the project execution options are located in. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description Name of the custom function. 
-         * @example steady state
-         */
-      path: {
-        project: string;
-        "custom-function": string;
-      };
-    };
-  };
-  "/projects/{project}/custom-functions/{custom-function}/default-options": {
-    /**
-     * Gets the default execution options 
-     * @description Gets the application level default options for a custom function. This includes: Options configured as defaults for the application and default options specified in the custom function. For options specified on both levels, the value is taken from the application default options.
-     */
-    get: operations["getDefaultExecutionOptionsProjects"];
-    parameters: {
-        /**
-         * @description ID of the project execution options are located in. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description Name of the custom function. 
-         * @example steady state
-         */
-      path: {
-        project: string;
-        "custom-function": string;
-      };
-    };
-  };
   "/workspace-template": {
     /**
      * Returns an object containing the template for the workspace. 
@@ -321,24 +304,19 @@ export interface paths {
      */
     get: operations["getWorkspaces"];
     /**
-     * Creates or imports a new workspace 
+     * Creates a new workspace 
      * @description Creates a new workspace with some name.
      */
     post: operations["createWorkspace"];
-    /**
-     * Deletes from the workspace collection 
-     * @description Used when not a specific workspace should be deleted but rather all workspaces with some attribute.
-     */
-    delete: operations["deleteWorkspaces"];
   };
   "/workspaces/{workspace}": {
     /** Returns an object containing the metadata of the specified ID */
     get: operations["getWorkspaceId"];
     /**
-     * Increase the timestamp of a cloned workspace 
-     * @description Can be called periodically on a cloned workspace a client is working against. This will inform the system that this workspace is not inactive and may not be deleted.
+     * This end-point can be used to update a workspace configuration. This can be used to modify the workspace definition. Only fields under 'definition' can be updated. Also, the fields 'createdAt', 'format' and 'guid' cannot be updated. The recomended way to update the workspace is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data. 
+     * @description Updates the configuration of the workspace.
      */
-    put: operations["increaseClonedWorkspaceTimestamp"];
+    put: operations["updateWorkspaceConfiguration"];
     /** Deletes a workspace with the specified ID */
     delete: operations["deleteWorkspace"];
     parameters: {
@@ -354,22 +332,6 @@ export interface paths {
   "/workspaces/{workspace}/conversion-check": {
     /** Returns what conversions are needed for a workspace and what potential issues there are */
     get: operations["getWorkspaceConversionCheckId"];
-    parameters: {
-        /**
-         * @description ID of the workspace. 
-         * @example MyWorkspace
-         */
-      path: {
-        workspace: string;
-      };
-    };
-  };
-  "/workspaces/{workspace}/clone": {
-    /**
-     * Creates a clone of a workspace 
-     * @description A created clone of a workspace is a temporary resource. It can be used executing some workload based on resources of a workspace without mutating or adding anything to it.
-     */
-    post: operations["cloneWorkspace"];
     parameters: {
         /**
          * @description ID of the workspace. 
@@ -486,6 +448,11 @@ export interface paths {
      * @description Get workspace projects.
      */
     get: operations["getWorkspaceProjects"];
+    /**
+     * Create and add a project to workspace. 
+     * @description Create an empty projects and adds it to workspace.
+     */
+    post: operations["createAndAddProjectsToWorkspace"];
     parameters: {
         /**
          * @description ID of the workspace. 
@@ -508,8 +475,8 @@ export interface paths {
          * @example MyWorkspace
          */
         /**
-         * @description Name of the project. 
-         * @example MyProject
+         * @description ID of the project. 
+         * @example 79sd8-3n2a4-e3t24
          */
       path: {
         workspace: string;
@@ -529,8 +496,8 @@ export interface paths {
          * @example MyWorkspace
          */
         /**
-         * @description Name of the project. 
-         * @example MyProject
+         * @description ID of the project. 
+         * @example 79sd8-3n2a4-e3t24
          */
       path: {
         workspace: string;
@@ -625,6 +592,37 @@ export interface paths {
          */
       path: {
         workspace: string;
+        "custom-function": string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/projects/{project}/custom-functions/{custom-function}/options": {
+    /**
+     * Gets the execution options 
+     * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
+     */
+    get: operations["getExecutionOptionsProjects"];
+    /**
+     * Sets execution option values 
+     * @description The values for the options are saved for a specific custom function and project.
+     */
+    put: operations["putProjectExecutionOptions"];
+    parameters: {
+        /**
+         * @description Name of the workspace. 
+         * @example workspace
+         */
+        /**
+         * @description ID of the project execution options are located in. 
+         * @example 79sd8-3n2a4-e3t24
+         */
+        /**
+         * @description Name of the custom function. 
+         * @example steady state
+         */
+      path: {
+        workspace: string;
+        project: string;
         "custom-function": string;
       };
     };
@@ -740,6 +738,24 @@ export interface paths {
   "/workspaces/{workspace}/model-executables/{fmuId}/compilation/log": {
     /** Downloads the model executable compilation log */
     get: operations["downloadCompilationLog"];
+    parameters: {
+        /**
+         * @description Name of the workspace. 
+         * @example workspace
+         */
+        /**
+         * @description Reference ID to the compiled model. 
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+      path: {
+        workspace: string;
+        fmuId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/model-executables/{fmuId}/model-description": {
+    /** Downloads the model description file for an FMU */
+    get: operations["downloadModelDescription"];
     parameters: {
         /**
          * @description Name of the workspace. 
@@ -1038,6 +1054,29 @@ export interface paths {
      * @description This end-point can be used to fetch trajectories from cases that have finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 from the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
      */
     post: operations["getCaseTrajectories"];
+    parameters: {
+        /**
+         * @description Name of the workspace. 
+         * @example workspace
+         */
+        /**
+         * @description The ID of the experiment. 
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        /**
+         * @description The ID of the case. 
+         * @example case_1
+         */
+      path: {
+        workspace: string;
+        experimentId: string;
+        caseId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts": {
+    /** Get the artifact metadata for a case. */
+    get: operations["getCustomArtifactMeta"];
     parameters: {
         /**
          * @description Name of the workspace. 
@@ -2131,6 +2170,25 @@ export interface components {
         code?: number;
       };
     };
+    TrajectoriesProtocol: {
+      /**
+       * @description The variable names trajectories should be fetched for. 
+       * @example [
+       *   "variable1",
+       *   "variable2"
+       * ]
+       */
+      variable_names: (string)[];
+      /** @description The filter options to apply on the trajectories. */
+      filter?: {
+        /**
+         * @description If true, only the last point in the trajectory is returned. 
+         * @default false 
+         * @example false
+         */
+        lastPointOnly: boolean;
+      };
+    };
     /** @description Workspace meta-data. */
     Workspace: {
       /**
@@ -2138,8 +2196,6 @@ export interface components {
        * @example my_workspace
        */
       id: string;
-      /** @description True, if the workspace is a clone. */
-      is_clone: boolean;
       conversion?: {
         /**
          * @description IS_REQUIRED, if the workspace is of an old version and needs to be converted, else UP_TO_DATE. 
@@ -2160,6 +2216,14 @@ export interface components {
          * @example my_workspace
          */
         workspaceId: string;
+      };
+      /** @description Total size(in bytes) of the workspace. The total size is computed as the sum of disk space taken by the workspace meta files, generated workspace resources (FMU's and experiments), and local workspace projects and dependencies. */
+      sizeInfo?: {
+        /**
+         * @description Total size of the workspace in bytes. 
+         * @example 7014
+         */
+        total: number;
       };
     };
     WorkspaceExportCreationProtocol: {
@@ -3129,6 +3193,61 @@ export interface components {
        */
       ignores?: (string)[];
     };
+    ExecutionDataProtocol: {
+      data: {
+        items: (OneOf<[{
+            /**
+             * @description The status of the execution. 
+             * @example running
+             */
+            status: string;
+            workspace: {
+              /**
+               * @description Workspace ID. 
+               * @example somemodel_1515we151fwe51w
+               */
+              id: string;
+            };
+            /**
+             * @default EXPERIMENT 
+             * @enum {string}
+             */
+            kind: "EXPERIMENT";
+            experiment: {
+              /**
+               * @description Experiment ID. 
+               * @example somemodel_1gghhjffffe51w
+               */
+              id: string;
+            };
+          }, {
+            /**
+             * @description The status of the execution. 
+             * @example running
+             */
+            status: string;
+            workspace: {
+              /**
+               * @description Workspace ID. 
+               * @example somemodel_1515we151fwe51w
+               */
+              id: string;
+            };
+            /**
+             * @default COMPILATION 
+             * @enum {string}
+             */
+            kind: "COMPILATION";
+            fmu: {
+              /**
+               * @description FMU ID. 
+               * @example somemodel_1gggwe151fwe51w
+               */
+              id: string;
+            };
+          }]>)[];
+      };
+    };
     ConversionsChecksProtocol: {
       /** @description List of all conversions that needs to be done for the workspace. */
       conversions: ({
@@ -3239,6 +3358,7 @@ export interface components {
         "application/json": components["schemas"]["Error"];
       };
     };
+    SecretUserProtocol: never;
   };
   parameters: never;
   requestBodies: never;
@@ -3268,10 +3388,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  getDocs: {
+    /**
+     * Returns the HTML documentation page. 
+     * @description The HTML documentation page for all the Modelon Impact REST API's.
+     */
+    responses: {
+      /** @description The HTML documentation page. */
+      200: {
+        content: {
+          "text/html": string;
+        };
+      };
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
   login: {
     /**
      * Logs in a user 
-     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created <a class="visible-link" href="/admin/keys">in the API key manager</a>.
+     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created in the 'IMPACT API KEY' section of the <a class="visible-link" href="__IMPACT_SERVER_MANAGEMENT_URL__"> 'Server management'</a> page.
      */
     parameters?: {
         /**
@@ -3335,6 +3470,24 @@ export interface operations {
               items?: (components["schemas"]["LocalProjectProtocol"])[];
             };
           };
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  getExecutions: {
+    /**
+     * Get all 'running' and 'pending' executions 
+     * @description Returns a list of all 'running' and 'pending' executions.
+     */
+    responses: {
+      /** @description OK: The active executions were returned. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ExecutionDataProtocol"];
         };
       };
       401: components["responses"]["Unauthenticated"];
@@ -3635,6 +3788,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["LocalProjectProtocol"];
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  getIcon: {
+    /**
+     * Get the project icon. 
+     * @description Returns the icon(if it exists) for the project.
+     */
+    responses: {
+      /** @description OK: The image was returned. */
+      200: {
+        content: {
+          "image/png": string;
         };
       };
       401: components["responses"]["Unauthenticated"];
@@ -3993,71 +4165,6 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
-  getExecutionOptionsProjects: {
-    /**
-     * Gets the execution options 
-     * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
-     */
-    responses: {
-      /** @description The aggregated execution option set for a custom function. */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CaseExecutionOptions"];
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  putExecutionOptions: {
-    /**
-     * Sets execution option values 
-     * @description The values for the options are saved for a specific custom function and workspace.
-     */
-    /** @description Execution options to set for custom function. */
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CaseExecutionOptions"];
-      };
-    };
-    responses: {
-      /** @description OK. */
-      200: never;
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  getDefaultExecutionOptionsProjects: {
-    /**
-     * Gets the default execution options 
-     * @description Gets the application level default options for a custom function. This includes: Options configured as defaults for the application and default options specified in the custom function. For options specified on both levels, the value is taken from the application default options.
-     */
-    responses: {
-      /** @description The application level default execution options for a custom function. */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CaseExecutionOptions"];
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
   getWorkspaceTemplate: {
     /**
      * Returns an object containing the template for the workspace. 
@@ -4084,7 +4191,7 @@ export interface operations {
      * @description The workspace ID in the returned object serve as unique IDs that can be used in other API calls to perform operations for a specific workspace.
      */
     responses: {
-      /** @description All workspaces meta-data and their IDs. The object meta-data contains the workspace id and if the workspace is a clone. */
+      /** @description All workspaces meta-data and their IDs. The object meta-data contains the workspace id. */
       200: {
         content: {
           "application/json": {
@@ -4103,7 +4210,7 @@ export interface operations {
   };
   createWorkspace: {
     /**
-     * Creates or imports a new workspace 
+     * Creates a new workspace 
      * @description Creates a new workspace with some name.
      */
     /** @description Specification for creating a new workspace. */
@@ -4140,35 +4247,19 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
-  deleteWorkspaces: {
-    /**
-     * Deletes from the workspace collection 
-     * @description Used when not a specific workspace should be deleted but rather all workspaces with some attribute.
-     */
+  getWorkspaceId: {
+    /** Returns an object containing the metadata of the specified ID */
     parameters?: {
         /**
-         * @description Filter clones. 
-         * @example true
+         * @description If true, returned workspace size field will be set. If false, size will not be set for the returned workspace. Default is false. 
+         * @example sizeInfo=true
          */
       query?: {
-        clones?: boolean;
+        sizeInfo?: string;
       };
     };
     responses: {
-      /** @description OK: The targeted workspaces have been deleted. */
-      200: never;
-      /** @description OK: The targeted workspaces have been marked for deletion. */
-      202: never;
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  getWorkspaceId: {
-    /** Returns an object containing the metadata of the specified ID */
-    responses: {
-      /** @description Workspace ID and its meta-data. The object meta-data contains the workspace id and if the workspace is a clone. */
+      /** @description Workspace ID and its meta-data. The object meta-data contains the workspace id. */
       200: {
         content: {
           "application/json": components["schemas"]["Workspace"];
@@ -4182,14 +4273,24 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
-  increaseClonedWorkspaceTimestamp: {
+  updateWorkspaceConfiguration: {
     /**
-     * Increase the timestamp of a cloned workspace 
-     * @description Can be called periodically on a cloned workspace a client is working against. This will inform the system that this workspace is not inactive and may not be deleted.
+     * This end-point can be used to update a workspace configuration. This can be used to modify the workspace definition. Only fields under 'definition' can be updated. Also, the fields 'createdAt', 'format' and 'guid' cannot be updated. The recomended way to update the workspace is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data. 
+     * @description Updates the configuration of the workspace.
      */
+    /** @description Workspace configuration. */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Workspace"];
+      };
+    };
     responses: {
-      /** @description OK: The timestamp was succesfully increased to the current time. */
-      200: never;
+      /** @description Workspace ID and its meta-data. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Workspace"];
+        };
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -4227,31 +4328,6 @@ export interface operations {
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
       409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  cloneWorkspace: {
-    /**
-     * Creates a clone of a workspace 
-     * @description A created clone of a workspace is a temporary resource. It can be used executing some workload based on resources of a workspace without mutating or adding anything to it.
-     */
-    responses: {
-      /** @description OK: The workspace was cloned and the ID of the clone was returned. */
-      200: {
-        content: {
-          "application/json": {
-            /**
-             * @description The name of the new cloned workspace. 
-             * @example MyClonedWorkspace
-             */
-            workspace_id?: string;
-          };
-        };
-      };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
       500: components["responses"]["UnexpectedError"];
     };
   };
@@ -4506,6 +4582,20 @@ export interface operations {
      * Get workspace projects 
      * @description Get workspace projects.
      */
+    parameters?: {
+        /**
+         * @description If true, returned projects vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for any returned project. Default is false. 
+         * @example vcsInfo=true
+         */
+        /**
+         * @description If true, projects disabled in the workspace are also lsited. Default is true. 
+         * @example includeDisabled=true
+         */
+      query?: {
+        vcsInfo?: string;
+        includeDisabled?: string;
+      };
+    };
     responses: {
       /** @description OK: The workspace projects were returned. */
       200: {
@@ -4522,6 +4612,39 @@ export interface operations {
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
       409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  createAndAddProjectsToWorkspace: {
+    /**
+     * Create and add a project to workspace. 
+     * @description Create an empty projects and adds it to workspace.
+     */
+    /** @description Specification for the new content entry. */
+    requestBody: {
+      content: {
+        "application/json": {
+          new: {
+            /**
+             * @description Project name. 
+             * @example MyProject
+             */
+            name?: string;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description Project is created, added to workspace. The created project is returned. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LocalProjectProtocol"];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
       500: components["responses"]["UnexpectedError"];
     };
   };
@@ -4684,6 +4807,29 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  putExecutionOptions: {
+    /**
+     * Sets execution option values 
+     * @description The values for the options are saved for a specific custom function and workspace.
+     */
+    /** @description Execution options to set for custom function. */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CaseExecutionOptions"];
+      };
+    };
+    responses: {
+      /** @description OK. */
+      200: never;
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
   getDefaultExecutionOptions: {
     /**
      * Gets the default execution options 
@@ -4696,6 +4842,50 @@ export interface operations {
           "application/json": components["schemas"]["CaseExecutionOptions"];
         };
       };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  getExecutionOptionsProjects: {
+    /**
+     * Gets the execution options 
+     * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
+     */
+    responses: {
+      /** @description The aggregated execution option set for a custom function. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CaseExecutionOptions"];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  putProjectExecutionOptions: {
+    /**
+     * Sets execution option values 
+     * @description The values for the options are saved for a specific custom function and project.
+     */
+    /** @description Execution options to set for custom function. */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CaseExecutionOptions"];
+      };
+    };
+    responses: {
+      /** @description OK. */
+      200: never;
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5115,6 +5305,24 @@ export interface operations {
       200: {
         content: {
           "text/plain": string;
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  downloadModelDescription: {
+    /** Downloads the model description file for an FMU */
+    responses: {
+      /** @description A model description XML file. */
+      200: {
+        content: {
+          "application/xml": string;
         };
       };
       400: components["responses"]["BadRequest"];
@@ -5906,16 +6114,7 @@ export interface operations {
     /** @description A list of variable names for which the trajectories should be returned. */
     requestBody: {
       content: {
-        "application/json": {
-          /**
-           * @description The variable names trajectories should be fetched for. 
-           * @example [
-           *   "variable1",
-           *   "variable2"
-           * ]
-           */
-          variable_names: (string)[];
-        };
+        "application/json": components["schemas"]["TrajectoriesProtocol"];
       };
     };
     responses: {
@@ -5944,6 +6143,39 @@ export interface operations {
             };
           };
           "application/vnd.impact.trajectories.v1+json": ((number | string)[])[];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  getCustomArtifactMeta: {
+    /** Get the artifact metadata for a case. */
+    responses: {
+      /** @description The case information as JSON. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              items?: ({
+                  /**
+                   * @description Artifact ID. 
+                   * @example ABCD
+                   */
+                  id?: string;
+                  /**
+                   * @description File name for the downloaded artifact. 
+                   * @example result.mat
+                   */
+                  downloadAs?: string;
+                })[];
+            };
+          };
         };
       };
       400: components["responses"]["BadRequest"];
@@ -6008,16 +6240,7 @@ export interface operations {
     /** @description A list of variable names for which the trajectories should be returned. */
     requestBody: {
       content: {
-        "application/json": {
-          /**
-           * @description The variable names trajectories should be fetched for. 
-           * @example [
-           *   "variable1",
-           *   "variable2"
-           * ]
-           */
-          variable_names: (string)[];
-        };
+        "application/json": components["schemas"]["TrajectoriesProtocol"];
       };
     };
     responses: {
@@ -6503,7 +6726,20 @@ export interface operations {
       /** @description OK. The result has been uploaded to the workspace. */
       201: {
         content: {
-          "application/json": components["schemas"]["ExternalResultUploadStatus"];
+          "application/json": {
+            data?: {
+              /**
+               * @description The ID of the result import. 
+               * @example 2f036b9fab6f45c788cc466da327cc78workspace
+               */
+              id?: string;
+              /**
+               * @description The location of the project import. 
+               * @example api/uploads/results/fd90-4gkl-vf89
+               */
+              location?: string;
+            };
+          };
         };
       };
       400: components["responses"]["BadRequest"];
@@ -6606,29 +6842,7 @@ export interface operations {
       /** @description . */
       200: {
         content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description The user ID. 
-               * @example 2bb76154701c47c38d1950ea60d2c025
-               */
-              id: string;
-              /** @description List of external IDs that are connected to this user ID. */
-              externalUsers?: ({
-                  /**
-                   * @description ExternalID. 
-                   * @example name@company.com
-                   */
-                  id?: string;
-                })[];
-              /**
-               * @description The users license. If field is missing the user does not have a license. 
-               * @example impact-pro 
-               * @enum {string}
-               */
-              license?: "impact-pro" | "impact-base" | "impact-deployment";
-            };
-          };
+          "application/json": components["responses"]["SecretUserProtocol"];
         };
       };
       400: components["responses"]["BadRequest"];
