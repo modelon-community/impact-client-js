@@ -1,6 +1,6 @@
 import Api from './api'
 import Workspace from './workspace'
-import { WorkspaceDefinition, WorkspaceId } from './types'
+import { WorkspaceId } from './types'
 
 class Client {
     private api: Api
@@ -9,6 +9,16 @@ class Client {
         this.api = api
     }
 
+    /**
+     * Creates an instance from an Impact API key.
+     *
+     * @static
+     * @param {Object} options - The options for creating an instance.
+     * @param {string} options.impactApiKey - The Impact API key.
+     * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
+     * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path. Optional.
+     * @param {string} [options.serverAddress] - The server address. Optiona. Should only be set for non-browser environments outside jupyter lab. For other environments outside JupyterLab the server address must be configured in a proxy.
+     */
     static fromImpactApiKey({
         impactApiKey,
         jupyterHubToken,
@@ -18,7 +28,7 @@ class Client {
         impactApiKey: string
         jupyterHubToken?: string
         jupyterHubUserPath?: string
-        serverAddress: string
+        serverAddress?: string
     }) {
         const api = Api.fromImpactApiKey({
             impactApiKey,
@@ -29,6 +39,16 @@ class Client {
         return new Client(api)
     }
 
+    /**
+     * Creates an instance from an Impact token.
+     *
+     * @static
+     * @param {Object} options - The options for creating an instance.
+     * @param {string} options.impactToken - The Impact token.
+     * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
+     * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path. Optional.
+     * @param {string} [options.serverAddress] - The server address. Optiona. Should only be set for non-browser environments outside jupyter lab. For other environments outside JupyterLab the server address must be configured in a proxy.
+     */
     static fromImpactToken({
         impactToken,
         jupyterHubToken,
@@ -38,7 +58,7 @@ class Client {
         impactToken: string
         jupyterHubToken?: string
         jupyterHubUserPath?: string
-        serverAddress: string
+        serverAddress?: string
     }) {
         const api = Api.fromImpactToken({
             impactToken,

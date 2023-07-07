@@ -24,7 +24,6 @@ import {
     ExperimentVariables,
     LocalProjectProtocol,
     ProjectId,
-    WorkspaceDefinition,
     WorkspaceProtocol,
     WorkspaceId,
 } from './types'
@@ -100,10 +99,10 @@ class Api {
         impactApiKey?: string
         impactToken?: string
         jupyterHubToken?: string
-        serverAddress: string
+        serverAddress?: string
         jupyterHubUserPath?: string
     }) {
-        this.baseUrl = serverAddress
+        this.baseUrl = serverAddress || ''
         this.impactApiKey = impactApiKey
         this.impactToken = impactToken
 
@@ -144,7 +143,7 @@ class Api {
         impactApiKey: string
         jupyterHubToken?: string
         jupyterHubUserPath?: string
-        serverAddress: string
+        serverAddress?: string
     }) {
         return new Api({
             impactApiKey,
@@ -163,7 +162,7 @@ class Api {
         impactToken: string
         jupyterHubToken?: string
         jupyterHubUserPath?: string
-        serverAddress: string
+        serverAddress?: string
     }) {
         return new Api({
             impactToken,
