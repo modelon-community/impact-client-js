@@ -3,7 +3,7 @@
     "version": "2.0.0-alpha.39",
     "description": "Modelon Impact Client for Javascript",
     "scripts": {
-        "build": "tsup --dts",
+        "build": "tsup --dts --format cjs,esm",
         "lint": "eslint src/",
         "test": "jest tests",
         "unit-test": "jest tests/unit",
