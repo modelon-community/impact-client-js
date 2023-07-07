@@ -112,7 +112,10 @@ class Api {
         } else {
             // No provided JupyterHub token, to mimick impact-python-client we try to
             // fallback on the environment variable available inside JupyterHub.
-            if (process.env.JUPYTERHUB_API_TOKEN) {
+            if (
+                typeof process !== 'undefined' &&
+                process?.env?.JUPYTERHUB_API_TOKEN
+            ) {
                 this.jhToken = process.env.JUPYTERHUB_API_TOKEN
             } else {
                 throw new ApiError({
@@ -240,7 +243,10 @@ class Api {
             if (server === undefined) {
                 // Server missing in token scope, probably executing inside JupyterHub.
                 // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
-                this.jhUserPath = process.env.JUPYTERHUB_SERVICE_PREFIX
+                this.jhUserPath =
+                    typeof process !== 'undefined'
+                        ? process.env?.JUPYTERHUB_SERVICE_PREFIX
+                        : undefined
             } else {
                 this.jhUserPath = server
             }
