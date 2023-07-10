@@ -2,6 +2,7 @@ import {
     CaseId,
     CustomFunction,
     ExperimentId,
+    ExperimentItem,
     WorkspaceDefinition,
     WorkspaceId,
 } from './types'
@@ -33,11 +34,13 @@ class Workspace {
         experimentDefinition: ExperimentDefinition
     ): Promise<Experiment> => {
         const experimentId = await this.api.createExperiment({
-            experimentDefinition,
+            modelicaExperimentDefinition:
+                experimentDefinition.toModelicaExperimentDefinition(),
             workspaceId: this.id,
         })
         return new Experiment({
             api: this.api,
+            definition: experimentDefinition,
             id: experimentId,
             workspaceId: this.id,
         })
@@ -60,6 +63,7 @@ class Workspace {
 
         return new Experiment({
             api: this.api,
+            definition: experimentDefinition,
             id: experiment.id,
             workspaceId: this.id,
         })
@@ -87,14 +91,50 @@ class Workspace {
     getExperiment = async (
         experimentId: ExperimentId
     ): Promise<Experiment | undefined> => {
-        return this.api.getExperiment({
+        const experimentItem = await this.api.getExperiment({
             experimentId,
+            workspaceId: this.id,
+        })
+
+        if (!experimentItem) {
+            return undefined
+        }
+
+        return new Experiment({
+            api: this.api,
+            definition: experimentItem['experiment']
+                ? ExperimentDefinition.fromModelicaExperimentDefinition(
+                      experimentItem['experiment']
+                  )
+                : undefined,
+            id: experimentId,
+            metaData: experimentItem['meta_data'],
             workspaceId: this.id,
         })
     }
 
-    getExperiments = async (): Promise<Experiment[]> =>
-        this.api.getWorkspaceExperiments(this.id)
+    getExperiments = async (): Promise<Experiment[]> => {
+        const experimentItems = await this.api.getWorkspaceExperiments(this.id)
+
+        if (!experimentItems) {
+            return []
+        }
+
+        return experimentItems.map(
+            (experimentItem: ExperimentItem) =>
+                new Experiment({
+                    api: this.api,
+                    definition: experimentItem['experiment']
+                        ? ExperimentDefinition.fromModelicaExperimentDefinition(
+                              experimentItem['experiment']
+                          )
+                        : undefined,
+                    id: experimentItem.id ?? '',
+                    metaData: experimentItem['meta_data'],
+                    workspaceId: this.id,
+                })
+        )
+    }
 
     getProjects = async (): Promise<Project[]> =>
         this.api.getWorkspaceProjects(this.id)

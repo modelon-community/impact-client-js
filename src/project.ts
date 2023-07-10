@@ -1,6 +1,7 @@
-import { ProjectId, WorkspaceId } from './types'
+import { ExperimentItem, ProjectId, WorkspaceId } from './types'
 import Api from './api'
 import Experiment from './experiment'
+import ExperimentDefinition from './experiment-definition'
 
 class Project {
     private api: Api
@@ -22,20 +23,26 @@ class Project {
     }
 
     getExperiments = async () => {
-        const experimentsResponse = await this.api.getProjectExperiments({
+        const experimentItems = await this.api.getProjectExperiments({
             projectId: this.id,
             workspaceId: this.workspaceId,
         })
-        if (!experimentsResponse) {
+        if (!experimentItems) {
             // TODO: Throw error
             return []
         }
 
-        return experimentsResponse.map(
-            (experiment: Experiment) =>
+        return experimentItems.map(
+            (experimentItem: ExperimentItem) =>
                 new Experiment({
                     api: this.api,
-                    id: experiment.id,
+                    definition: experimentItem['experiment']
+                        ? ExperimentDefinition.fromModelicaExperimentDefinition(
+                              experimentItem['experiment']
+                          )
+                        : undefined,
+                    id: experimentItem.id ?? '',
+                    metaData: experimentItem['meta_data'],
                     workspaceId: this.workspaceId,
                 })
         )

@@ -7,8 +7,6 @@ import ApiError, {
     UnknownApiError,
 } from './api-error'
 import { Cookie, CookieJar } from 'tough-cookie'
-import Experiment from './experiment'
-import ExperimentDefinition from './experiment-definition'
 import Project from './project'
 import Workspace from './workspace'
 import {
@@ -19,10 +17,10 @@ import {
     ExecutionStatusType,
     ExperimentId,
     ExperimentItem,
-    ExperimentMetaData,
     ExperimentTrajectories,
     ExperimentVariables,
     LocalProjectProtocol,
+    ModelicaExperimentDefinition,
     ProjectId,
     WorkspaceProtocol,
     WorkspaceId,
@@ -318,10 +316,10 @@ class Api {
     }
 
     createExperiment = async ({
-        experimentDefinition,
+        modelicaExperimentDefinition,
         workspaceId,
     }: {
-        experimentDefinition: ExperimentDefinition
+        modelicaExperimentDefinition: ModelicaExperimentDefinition
         workspaceId: WorkspaceId
     }): Promise<ExperimentId> => {
         return new Promise((resolve, reject) => {
@@ -331,8 +329,7 @@ class Api {
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
                             {
-                                experiment:
-                                    experimentDefinition.toModelicaExperimentDefinition(),
+                                experiment: modelicaExperimentDefinition,
                             }
                         )
                         .then((response) =>
@@ -412,31 +409,6 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
-    getExperimentMetaData = async ({
-        experimentId,
-        workspaceId,
-    }: {
-        experimentId: ExperimentId
-        workspaceId: WorkspaceId
-    }): Promise<ExperimentMetaData> =>
-        new Promise((resolve, reject) => {
-            this.ensureImpactToken()
-                .then(() => {
-                    this.axios
-                        .get(
-                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}`,
-                            {
-                                headers: {
-                                    Accept: 'application/vnd.impact.experiment.v2+json',
-                                },
-                            }
-                        )
-                        .then((response) => resolve(response.data.meta_data))
-                        .catch((e) => reject(toApiError(e)))
-                })
-                .catch((e) => reject(toApiError(e)))
-        })
-
     runExperiment = async ({
         cases,
         experimentId,
@@ -509,7 +481,7 @@ class Api {
     }: {
         experimentId: ExperimentId
         workspaceId: WorkspaceId
-    }): Promise<Experiment | undefined> =>
+    }): Promise<ExperimentItem | undefined> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -522,15 +494,7 @@ class Api {
                                 },
                             }
                         )
-                        .then(() =>
-                            resolve(
-                                new Experiment({
-                                    api: this,
-                                    id: experimentId,
-                                    workspaceId,
-                                })
-                            )
-                        )
+                        .then((result) => resolve(result.data))
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))
@@ -542,7 +506,7 @@ class Api {
     }: {
         projectId: ProjectId
         workspaceId: WorkspaceId
-    }): Promise<Experiment[]> =>
+    }): Promise<ExperimentItem[]> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -555,18 +519,7 @@ class Api {
                                 },
                             }
                         )
-                        .then((result) =>
-                            resolve(
-                                result.data.data.items.map(
-                                    (experiment: ExperimentItem) =>
-                                        new Experiment({
-                                            api: this,
-                                            id: experiment.id || '',
-                                            workspaceId,
-                                        })
-                                )
-                            )
-                        )
+                        .then((result) => resolve(result.data.data.items))
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))
@@ -574,7 +527,7 @@ class Api {
 
     getWorkspaceExperiments = (
         workspaceId: WorkspaceId
-    ): Promise<Experiment[]> =>
+    ): Promise<ExperimentItem[]> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
                 .then(() => {
@@ -587,18 +540,7 @@ class Api {
                                 },
                             }
                         )
-                        .then((result) =>
-                            resolve(
-                                result.data.data.items.map(
-                                    (experiment: ExperimentItem) =>
-                                        new Experiment({
-                                            api: this,
-                                            id: experiment.id || '',
-                                            workspaceId,
-                                        })
-                                )
-                            )
-                        )
+                        .then((result) => resolve(result.data.data.items))
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))

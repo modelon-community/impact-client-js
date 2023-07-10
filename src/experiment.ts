@@ -2,12 +2,14 @@ import {
     CaseId,
     ExperimentId,
     ExperimentMetaData,
+    ExperimentRunInfo,
     ExperimentTrajectories,
     WorkspaceId,
 } from './types'
 import Api from './api'
 import Case from './case'
 import ExecutionStatus from './executionStatus'
+import ExperimentDefinition from './experiment-definition'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -15,20 +17,26 @@ class Experiment {
     private api: Api
     id: ExperimentId
     private workspaceId: WorkspaceId
+    private definition: ExperimentDefinition | null
     private metaData: ExperimentMetaData | null
 
     constructor({
         api,
+        definition,
         id,
+        metaData,
         workspaceId,
     }: {
         api: Api
+        definition?: ExperimentDefinition
         id: ExperimentId
+        metaData?: ExperimentMetaData
         workspaceId: WorkspaceId
     }) {
         this.api = api
+        this.definition = definition ?? null
         this.id = id
-        this.metaData = null
+        this.metaData = metaData ?? null
         this.workspaceId = workspaceId
     }
 
@@ -58,11 +66,45 @@ class Experiment {
         if (this.metaData) {
             return this.metaData
         }
-        this.metaData = await this.api.getExperimentMetaData({
+        const experimentItem = await this.api.getExperiment({
             experimentId: this.id,
             workspaceId: this.workspaceId,
         })
+
+        this.metaData = experimentItem?.meta_data ?? null
+
         return this.metaData
+    }
+
+    getDefinition = async (): Promise<ExperimentDefinition | null> => {
+        if (this.definition) {
+            return this.definition
+        }
+        const experimentItem = await this.api.getExperiment({
+            experimentId: this.id,
+            workspaceId: this.workspaceId,
+        })
+
+        if (!experimentItem || !experimentItem.experiment) {
+            return null
+        }
+
+        this.definition = ExperimentDefinition.fromModelicaExperimentDefinition(
+            experimentItem.experiment
+        )
+
+        return this.definition
+
+        return this.definition
+    }
+
+    getRunInfo = async (): Promise<ExperimentRunInfo | null> => {
+        const experimentItem = await this.api.getExperiment({
+            experimentId: this.id,
+            workspaceId: this.workspaceId,
+        })
+
+        return experimentItem?.run_info
     }
 
     getTrajectories = async (

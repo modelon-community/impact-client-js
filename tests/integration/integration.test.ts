@@ -157,10 +157,23 @@ test(
             const experimentAfterwards = await testWorkspace.getExperiment(
                 experiment.id
             )
-            expect(experimentAfterwards).not.toBeUndefined()
 
             const metaData = await experimentAfterwards?.getMetaData()
-            expect(metaData).not.toBeUndefined()
+            expect(metaData?.label).not.toBeUndefined()
+            const definition = await experimentAfterwards?.getDefinition()
+            expect(definition?.modelName).toEqual(
+                'Modelica.Blocks.Examples.PID_Controller'
+            )
+
+            const runInfo = await experimentAfterwards?.getRunInfo()
+            if (runInfo) {
+                const someExpectedProps = ['status', 'datetime_started']
+                someExpectedProps.forEach((propName) => {
+                    expect(Object.keys(runInfo).includes(propName)).toEqual(
+                        true
+                    )
+                })
+            }
 
             const variables = await experimentAfterwards?.getVariables()
             expect(variables).toContain('driveAngle')
@@ -168,6 +181,14 @@ test(
             const workspaceExperiments = await testWorkspace.getExperiments()
 
             expect(workspaceExperiments.length).toEqual(1)
+            if (metaData) {
+                const someExpectedProps = ['model_names', 'experiment_hash']
+                someExpectedProps.forEach((propName) => {
+                    expect(Object.keys(metaData).includes(propName)).toEqual(
+                        true
+                    )
+                })
+            }
 
             const projects = await testWorkspace.getProjects()
             expect(projects.length).toEqual(1)

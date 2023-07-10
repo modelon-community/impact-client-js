@@ -54,6 +54,26 @@ class ExperimentDefinition {
         })
     }
 
+    static fromModelicaExperimentDefinition(
+        modelicaDefinition: ModelicaExperimentDefinition
+    ): ExperimentDefinition {
+        let className = ''
+        if (
+            modelicaDefinition.base?.model &&
+            'modelica' in modelicaDefinition.base.model
+        ) {
+            className = modelicaDefinition.base.model.modelica.className
+        }
+
+        return ExperimentDefinition.from({
+            customFunction: modelicaDefinition.base.analysis.type ?? '',
+            extensions: modelicaDefinition.extensions,
+            modelName: className,
+            modifiers: modelicaDefinition.base.modifiers,
+            parameters: modelicaDefinition.base.analysis.parameters,
+        })
+    }
+
     DefaultParameters = {
         start_time: 0,
         final_time: 1,
