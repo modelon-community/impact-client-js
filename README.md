@@ -103,9 +103,10 @@ dotenv.config();
     ],
   });
 
-  const experiment = await workspace.executeExperimentSync({
+  const experiment = await workspace.executeExperimentUntilDone({
     caseIds: ["case_1", "case_2"],
     experimentDefinition,
+    timeoutMs: 60*1000
   });
 
   const trajectories = await experiment.getTrajectories([

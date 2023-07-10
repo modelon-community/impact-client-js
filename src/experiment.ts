@@ -136,18 +136,19 @@ class Experiment {
             workspaceId: this.workspaceId,
         })
 
-    executionDone = async () => {
-        let data = await this.api.getExecutionStatus({
-            experimentId: this.id,
-            workspaceId: this.workspaceId,
-        })
-        while (data.status !== 'done') {
-            await sleep(1000)
+    executionDone = async (timeout: number): Promise<void> => {
+        const startTime = Date.now()
+        let data
+        do {
+            if (Date.now() - startTime > timeout) {
+                throw new Error('Timeout')
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1000))
             data = await this.api.getExecutionStatus({
                 experimentId: this.id,
                 workspaceId: this.workspaceId,
             })
-        }
+        } while (data && data.status !== 'done')
     }
 
     getExecutionStatus = async () => {

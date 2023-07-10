@@ -108,9 +108,10 @@ test(
         )
 
         try {
-            const experiment = await testWorkspace.executeExperimentSync({
+            const experiment = await testWorkspace.executeExperimentUntilDone({
                 caseIds: ['case_1', 'case_2'],
                 experimentDefinition,
+                timeoutMs: 60 * 1000,
             })
             expect(typeof experiment).toBe('object')
 
@@ -242,6 +243,29 @@ test(
                 console.log(e.toString())
             }
             throw new Error('Caught unexpected error while executing test')
+        }
+    },
+    TwentySeconds
+)
+
+test(
+    'Timeout execution',
+    async () => {
+        const experimentDefinition = ExperimentDefinition.from(
+            basicExperimentDefinition
+        )
+
+        const client = getClient()
+        const testWorkspace = await getTestWorkspace(client)
+        expect.hasAssertions()
+        try {
+            await testWorkspace.executeExperimentUntilDone({
+                caseIds: ['case_1', 'case_2'],
+                experimentDefinition,
+                timeoutMs: 10,
+            })
+        } catch (e) {
+            expect(e).toEqual(new Error('Timeout'))
         }
     },
     TwentySeconds

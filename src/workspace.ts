@@ -69,17 +69,19 @@ class Workspace {
         })
     }
 
-    executeExperimentSync = async ({
+    executeExperimentUntilDone = async ({
         caseIds,
         experimentDefinition,
+        timeoutMs,
     }: {
         caseIds: CaseId[]
         experimentDefinition: ExperimentDefinition
+        timeoutMs: number
     }): Promise<Experiment> => {
         const experiment = await this.createExperiment(experimentDefinition)
 
         await experiment.run(caseIds)
-        await experiment.executionDone()
+        await experiment.executionDone(timeoutMs)
 
         return experiment
     }
