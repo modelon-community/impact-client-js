@@ -1,11 +1,14 @@
 import * as dotenv from 'dotenv'
 import {
+    Analysis,
     Client,
     ExperimentDefinition,
     InvalidApiKey,
     JhTokenError,
+    Model,
     Workspace,
 } from '../../dist'
+import { ModelicaExperimentDefinition, ModelicaModel } from '../../src/types'
 import basicExperimentDefinition from './basicExperimentDefinition.json'
 
 dotenv.config()
@@ -93,11 +96,12 @@ test('Try to use invalid jupyter hub token', (done) => {
 })
 
 test(
-    'Setup and execute experiment',
+    'Setup and execute experiment from json experiment definition',
     async () => {
-        const experimentDefinition = ExperimentDefinition.from(
-            basicExperimentDefinition
-        )
+        const experimentDefinition =
+            ExperimentDefinition.fromModelicaExperimentDefinition(
+                basicExperimentDefinition as unknown as ModelicaExperimentDefinition
+            )
 
         const client = getClient()
         const testWorkspace = await getTestWorkspace(client)
@@ -118,8 +122,8 @@ test(
             const cases = await experiment.getCases()
             expect(typeof cases).toBe('object')
 
-            if (!cases || cases.length < 2) {
-                return
+            if (!cases || cases.length < 1) {
+                throw new Error('No cases returned')
             }
 
             expect(cases[0].runInfo).toMatchObject({ status: 'successful' })
@@ -133,27 +137,27 @@ test(
             ])
 
             expect(trajectories.length).toBe(2)
-            expect(trajectories[0].trajectory.length).toBe(102)
-            expect(trajectories[1].trajectory.length).toBe(102)
+            expect(trajectories[0].trajectory.length).toBe(502)
+            expect(trajectories[1].trajectory.length).toBe(502)
 
             trajectories = await cases[1].getTrajectories([
                 'inertia1.w',
                 'inertia1.a',
             ])
             expect(trajectories.length).toBe(2)
-            expect(trajectories[0].trajectory.length).toBe(102)
-            expect(trajectories[1].trajectory.length).toBe(102)
+            expect(trajectories[0].trajectory.length).toBe(502)
+            expect(trajectories[1].trajectory.length).toBe(502)
 
             trajectories = await experiment.getTrajectories([
                 'inertia1.w',
                 'inertia1.a',
             ])
             expect(trajectories[0].items.length).toBe(2)
-            expect(trajectories[0].items[0].trajectory.length).toBe(102)
-            expect(trajectories[0].items[0].trajectory.length).toBe(102)
+            expect(trajectories[0].items[0].trajectory.length).toBe(502)
+            expect(trajectories[0].items[0].trajectory.length).toBe(502)
             expect(trajectories[1].items.length).toBe(2)
-            expect(trajectories[1].items[0].trajectory.length).toBe(102)
-            expect(trajectories[1].items[0].trajectory.length).toBe(102)
+            expect(trajectories[1].items[0].trajectory.length).toBe(502)
+            expect(trajectories[1].items[0].trajectory.length).toBe(502)
 
             const experimentAfterwards = await testWorkspace.getExperiment(
                 experiment.id
@@ -162,7 +166,10 @@ test(
             const metaData = await experimentAfterwards?.getMetaData()
             expect(metaData?.label).not.toBeUndefined()
             const definition = await experimentAfterwards?.getDefinition()
-            expect(definition?.modelName).toEqual(
+
+            const modelicaModel =
+                definition?.model.toModelDefinition() as ModelicaModel
+            expect(modelicaModel.modelica.className).toEqual(
                 'Modelica.Blocks.Examples.PID_Controller'
             )
 
@@ -206,11 +213,54 @@ test(
 )
 
 test(
+    'Setup and execute experiment via convenience classes',
+    async () => {
+        const client = getClient()
+        const testWorkspace = await getTestWorkspace(client)
+
+        const customFunction = 'dynamic'
+        const customFunctionOptions =
+            await testWorkspace.getCustomFunctionOptions(customFunction)
+        const analysis = Analysis.from({
+            customFunctionOptions: customFunctionOptions,
+            type: customFunction,
+        })
+        const model = Model.from({
+            className: 'Modelica.Blocks.Examples.PID_Controller',
+            customFunctionOptions,
+        })
+
+        const experimentDefinition = ExperimentDefinition.from({
+            analysis,
+            model,
+        })
+
+        try {
+            const experiment = await testWorkspace.executeExperimentUntilDone({
+                caseIds: ['case_1', 'case_2'],
+                experimentDefinition,
+                timeoutMs: 60 * 1000,
+            })
+            expect(typeof experiment).toBe('object')
+
+            await deleteTestWorkspace(client)
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(e.toString())
+            }
+            throw new Error('Caught unexpected error while executing test')
+        }
+    },
+    TwentySeconds
+)
+
+test(
     'Cancel experiment',
     async () => {
-        const experimentDefinition = ExperimentDefinition.from(
-            basicExperimentDefinition
-        )
+        const experimentDefinition =
+            ExperimentDefinition.fromModelicaExperimentDefinition(
+                basicExperimentDefinition as unknown as ModelicaExperimentDefinition
+            )
 
         const client = getClient()
         const testWorkspace = await getTestWorkspace(client)
@@ -251,9 +301,10 @@ test(
 test(
     'Timeout execution',
     async () => {
-        const experimentDefinition = ExperimentDefinition.from(
-            basicExperimentDefinition
-        )
+        const experimentDefinition =
+            ExperimentDefinition.fromModelicaExperimentDefinition(
+                basicExperimentDefinition as unknown as ModelicaExperimentDefinition
+            )
 
         const client = getClient()
         const testWorkspace = await getTestWorkspace(client)
@@ -274,9 +325,10 @@ test(
 test(
     'Run simulation and track progress',
     async () => {
-        const experimentDefinition = ExperimentDefinition.from(
-            basicExperimentDefinition
-        )
+        const experimentDefinition =
+            ExperimentDefinition.fromModelicaExperimentDefinition(
+                basicExperimentDefinition as unknown as ModelicaExperimentDefinition
+            )
 
         const client = getClient()
         const testWorkspace = await getTestWorkspace(client)

@@ -1,6 +1,8 @@
 import { components, operations } from '../schema/impact-api'
 
 export type Case = components['schemas']['Case']
+export type CustomFunctionOptions =
+    components['schemas']['CaseExecutionOptions']
 
 export type CustomFunction =
     operations['getCustomFunction']['responses']['200']['content']['application/json']
@@ -18,11 +20,19 @@ export type WorkspaceDefinition =
 
 export type ModelicaExperimentDefinition =
     components['schemas']['ExperimentDefinition']
+export type ModelDefinition = components['schemas']['Model']
 
 export type ModelicaExperimentExtensions = components['schemas']['Extensions']
 
-export type ModelicaExperimentParameters =
+export type ModelicaExperimentAnalysisParameters =
     components['schemas']['Analysis']['parameters']
+export type ModelicaExperimentSimulationOptions =
+    components['schemas']['Analysis']['simulationOptions']
+export type ModelicaExperimentSolverOptions =
+    components['schemas']['Analysis']['solverOptions']
+export type ModelicaExperimentSimulationLogLevel =
+    components['schemas']['Analysis']['simulationLogLevel']
+export type ModelicaExperimentAnalysis = components['schemas']['Analysis']
 
 export type ModelicaExperimentModifiers = components['schemas']['Modifiers']
 
@@ -42,6 +52,12 @@ export type ExperimentVariables =
     operations['getVariables']['responses']['200']['content']['application/json']
 
 export type LocalProjectProtocol = components['schemas']['LocalProjectProtocol']
+
+export type FmuModel = components['schemas']['FmuModel']
+export type ModelicaModel = components['schemas']['ModelicaModel']
+
+const modelTypes = ['fmuModel', 'modelicaModel'] as const
+export type ModelType = typeof modelTypes[number]
 
 export type CaseId = string
 export type ExperimentId = string

@@ -10,7 +10,7 @@
                     "include_protected_variables": false
                 },
                 "runtimeOptions": {},
-                "compilerLogLevel": "w",
+                "compilerLogLevel": "warning",
                 "fmiTarget": "me",
                 "fmiVersion": "2.0",
                 "platform": "auto"
@@ -20,49 +20,31 @@
             "type": "dynamic",
             "parameters": {
                 "start_time": 0,
-                "final_time": 1
+                "final_time": 4
             },
             "simulationOptions": {
-                "ncp": 500,
+                "ncp": 100,
                 "dynamic_diagnostics": false
             },
-            "solverOptions": {
-                "rtol": "0.000001"
-            },
+            "solverOptions": {},
             "simulationLogLevel": "WARNING"
         },
-        "modifiers": {
-            "variables": {}
-        }
+        "modifiers": {}
     },
     "extensions": [
         {
-            "analysis": {
-                "parameters": {
-                    "start_time": 0,
-                    "final_time": 1
-                },
-                "simulationLogLevel": "ERROR"
-            },
             "modifiers": {
                 "variables": {
-                    "inertia1.J": 1,
-                    "inertia2.J": 2
+                    "inertia1.w": 1,
+                    "inertia2.w": 2
                 }
             }
         },
         {
-            "analysis": {
-                "parameters": {
-                    "start_time": 0,
-                    "final_time": 1
-                },
-                "simulationLogLevel": "ERROR"
-            },
             "modifiers": {
                 "variables": {
-                    "inertia1.J": 2,
-                    "inertia2.J": 4
+                    "inertia1.w": 2,
+                    "inertia2.w": 3
                 }
             }
         }

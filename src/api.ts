@@ -14,6 +14,7 @@ import {
     CaseId,
     CaseTrajectories,
     CustomFunction,
+    CustomFunctionOptions,
     ExecutionStatusType,
     ExperimentId,
     ExperimentItem,
@@ -321,8 +322,8 @@ class Api {
     }: {
         modelicaExperimentDefinition: ModelicaExperimentDefinition
         workspaceId: WorkspaceId
-    }): Promise<ExperimentId> => {
-        return new Promise((resolve, reject) => {
+    }): Promise<ExperimentId> =>
+        new Promise((resolve, reject) =>
             this.ensureImpactToken()
                 .then(() => {
                     this.axios
@@ -338,8 +339,7 @@ class Api {
                         .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))
-        })
-    }
+        )
 
     cancelExperiment = async ({
         experimentId,
@@ -420,7 +420,7 @@ class Api {
     }): Promise<void> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
-                .then(() => {
+                .then(() =>
                     this.axios
                         .post(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/execution`,
@@ -435,7 +435,7 @@ class Api {
                         )
                         .then(() => resolve())
                         .catch((e) => reject(toApiError(e)))
-                })
+                )
                 .catch((e) => reject(toApiError(e)))
         })
 
@@ -652,6 +652,26 @@ class Api {
                     this.axios
                         .get(
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/${caseId}/log`
+                        )
+                        .then((res) => resolve(res.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getCustomFunctionOptions = ({
+        customFunction,
+        workspaceId,
+    }: {
+        customFunction: string
+        workspaceId: WorkspaceId
+    }): Promise<CustomFunctionOptions> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/custom-functions/${customFunction}/options`
                         )
                         .then((res) => resolve(res.data))
                         .catch((e) => reject(toApiError(e)))

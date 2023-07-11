@@ -7,6 +7,7 @@ import ApiError, {
     UnknownApiError,
 } from './api-error'
 import Api from './api'
+import Analysis from './analysis'
 import Case from './case'
 import Client from './client'
 import ExecutionStatus from './executionStatus'
@@ -19,14 +20,19 @@ import {
     ExperimentId,
     ExperimentRunInfo,
     ExperimentTrajectories,
+    FmuModel,
+    ModelDefinition,
+    ModelicaExperimentAnalysisParameters,
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
-    ModelicaExperimentParameters,
+    ModelicaModel,
     WorkspaceDefinition,
 } from './types/index.d'
+import Model from './model'
 import Workspace from './workspace'
 
 export {
+    Analysis,
     Api,
     ApiError,
     Case,
@@ -40,13 +46,17 @@ export {
     ExperimentId,
     ExperimentRunInfo,
     ExperimentTrajectories,
+    FmuModel,
     InvalidApiKey,
     JhTokenError,
     MissingAccessTokenCookie,
     MissingJupyterHubToken,
+    Model,
+    ModelDefinition,
+    ModelicaExperimentAnalysisParameters,
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
-    ModelicaExperimentParameters,
+    ModelicaModel,
     ServerNotStarted,
     UnknownApiError,
     Workspace,

@@ -70,38 +70,24 @@ dotenv.config();
     serverAddress: process.env.MODELON_IMPACT_SERVER,
   });
 
-  const WorkspaceName = "setup-and-exec";
+  const WorkspaceName = "test";
 
   const workspace = await client.createWorkspace({
     name: WorkspaceName,
   });
 
+  const customFunction = 'dynamic'
+  const analysis = Analysis.from({
+    type: customFunction,
+  })
+  const model = Model.from({
+    className: 'Modelica.Blocks.Examples.PID_Controller',
+  })
+
   const experimentDefinition = ExperimentDefinition.from({
-    customFunction: "dynamic",
-    modelName: "Modelica.Blocks.Examples.PID_Controller",
-    parameters: {
-      start_time: 0,
-      final_time: 1,
-    },
-    extensions: [
-      {
-        modifiers: {
-          variables: {
-            "inertia1.J": 1,
-            "inertia2.J": 2,
-          },
-        },
-      },
-      {
-        modifiers: {
-          variables: {
-            "inertia1.J": 2,
-            "inertia2.J": 4,
-          },
-        },
-      },
-    ],
-  });
+    analysis,
+    model,
+  })
 
   const experiment = await workspace.executeExperimentUntilDone({
     caseIds: ["case_1", "case_2"],

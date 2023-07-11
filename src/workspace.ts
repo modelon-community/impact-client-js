@@ -1,6 +1,7 @@
 import {
     CaseId,
     CustomFunction,
+    CustomFunctionOptions,
     ExperimentId,
     ExperimentItem,
     WorkspaceDefinition,
@@ -88,6 +89,15 @@ class Workspace {
 
     getCustomFunctions = async (): Promise<CustomFunction[]> => {
         return this.api.getCustomFunctions(this.id)
+    }
+
+    getCustomFunctionOptions = async (
+        name: string
+    ): Promise<CustomFunctionOptions> => {
+        return await this.api.getCustomFunctionOptions({
+            customFunction: name,
+            workspaceId: this.id,
+        })
     }
 
     getExperiment = async (

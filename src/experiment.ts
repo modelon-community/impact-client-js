@@ -11,8 +11,6 @@ import Case from './case'
 import ExecutionStatus from './executionStatus'
 import ExperimentDefinition from './experiment-definition'
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
 class Experiment {
     private api: Api
     id: ExperimentId
@@ -46,7 +44,6 @@ class Experiment {
             workspaceId: this.workspaceId,
         })
         if (!casesResponse) {
-            // TODO: Throw error
             return []
         }
 
@@ -92,8 +89,6 @@ class Experiment {
         this.definition = ExperimentDefinition.fromModelicaExperimentDefinition(
             experimentItem.experiment
         )
-
-        return this.definition
 
         return this.definition
     }

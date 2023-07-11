@@ -2,111 +2,70 @@ import {
     ModelicaExperimentDefinition,
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
-    ModelicaExperimentParameters,
 } from './types'
+import Analysis from './analysis'
+import Model from './model'
 
 class ExperimentDefinition {
-    customFunction: string
+    analysis?: Analysis
     extensions?: ModelicaExperimentExtensions
-    modelName: string
+    model: Model
     modifiers?: ModelicaExperimentModifiers
-    parameters?: ModelicaExperimentParameters
 
     private constructor({
-        customFunction,
+        analysis,
         extensions,
-        modelName,
+        model,
         modifiers,
-        parameters,
     }: {
-        customFunction: string
+        analysis: Analysis
         extensions?: ModelicaExperimentExtensions
-        modelName: string
+        model: Model
         modifiers?: ModelicaExperimentModifiers
-        parameters?: ModelicaExperimentParameters
     }) {
-        this.customFunction = customFunction
+        this.analysis = analysis
         this.extensions = extensions
-        this.modelName = modelName
+        this.model = model
         this.modifiers = modifiers
-        this.parameters = parameters
     }
 
     static from({
-        customFunction,
+        analysis,
         extensions,
-        modelName,
+        model,
         modifiers,
-        parameters,
     }: {
-        customFunction: string
+        analysis: Analysis
         extensions?: ModelicaExperimentExtensions
-        modelName: string
+        model: Model
         modifiers?: ModelicaExperimentModifiers
-        parameters?: ModelicaExperimentParameters
     }): ExperimentDefinition {
         return new ExperimentDefinition({
-            customFunction,
+            analysis,
             extensions,
-            modelName,
+            model,
             modifiers,
-            parameters,
         })
     }
 
     static fromModelicaExperimentDefinition(
         modelicaDefinition: ModelicaExperimentDefinition
     ): ExperimentDefinition {
-        let className = ''
-        if (
-            modelicaDefinition.base?.model &&
-            'modelica' in modelicaDefinition.base.model
-        ) {
-            className = modelicaDefinition.base.model.modelica.className
-        }
-
-        return ExperimentDefinition.from({
-            customFunction: modelicaDefinition.base.analysis.type ?? '',
+        return new ExperimentDefinition({
+            analysis: Analysis.from(modelicaDefinition.base.analysis),
             extensions: modelicaDefinition.extensions,
-            modelName: className,
+            model: Model.fromModelDefinition(modelicaDefinition.base.model),
             modifiers: modelicaDefinition.base.modifiers,
-            parameters: modelicaDefinition.base.analysis.parameters,
         })
-    }
-
-    DefaultParameters = {
-        start_time: 0,
-        final_time: 1,
     }
 
     toModelicaExperimentDefinition = (): ModelicaExperimentDefinition => ({
         version: 2,
         base: {
-            model: {
-                modelica: {
-                    className: this.modelName,
-                    compilerOptions: {
-                        c_compiler: 'gcc',
-                        generate_html_diagnostics: false,
-                        include_protected_variables: false,
-                    },
-                    runtimeOptions: {},
-                    compilerLogLevel: 'warning',
-                    fmiTarget: 'me',
-                    fmiVersion: '2.0',
-                    platform: 'auto',
-                },
-            },
-            analysis: {
-                type: this.customFunction,
-                parameters: this.parameters || this.DefaultParameters,
-                simulationOptions: {
-                    ncp: 100,
-                    dynamic_diagnostics: false,
-                },
-                solverOptions: {},
-                simulationLogLevel: 'WARNING',
-            },
+            model: this.model.toModelDefinition(),
+            analysis:
+                this.analysis?.toModelicaExperimentAnalysis() ??
+                Analysis.DefaultAnalysis,
             modifiers: this.modifiers || {},
         },
         extensions: this.extensions || [],
