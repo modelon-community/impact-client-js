@@ -2,7 +2,7 @@ import { components, operations } from '../schema/impact-api'
 
 export type Case = components['schemas']['Case']
 export type CustomFunctionOptions =
-    components['schemas']['CaseExecutionOptions']
+    components['schemas']['CaseExecutionOptions']['options']
 
 export type CustomFunction =
     operations['getCustomFunction']['responses']['200']['content']['application/json']

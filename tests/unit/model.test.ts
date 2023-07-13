@@ -32,10 +32,8 @@ test('Model with custom function options should override default values', () => 
     const model = Model.from({
         className: 'PIDController',
         customFunctionOptions: {
-            options: {
-                compiler: { c_compiler: 'clang' },
-                runtime: { key: 'customValue' },
-            },
+            compiler: { c_compiler: 'clang' },
+            runtime: { key: 'customValue' },
         },
     })
 

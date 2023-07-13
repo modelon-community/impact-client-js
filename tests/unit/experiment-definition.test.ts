@@ -111,9 +111,118 @@ test('From ModelicaExperimentDefinition and back should produce original Modelic
 })
 
 test('Validate that a ModelicaExperimentDefinition with explicit model options are not overwritten by customFunction options', () => {
-    // Options such as compilerLogLevel, runtimeOptions, compilerOptions, platform, fmiVersion, fmiTarget
+    const customFunctionOptions = {
+        compiler: {
+            c_compiler: 'gcc',
+            generate_html_diagnostics: false,
+            include_protected_variables: false,
+        },
+        runtime: {},
+        simulation: { ncp: 500, dynamic_diagnostics: false },
+        solver: {},
+    }
+    const analysis = Analysis.from({
+        customFunctionOptions,
+        parameters: {
+            start_time: 0,
+            final_time: 10,
+        },
+        simulationOptions: { ncp: 250 },
+        type: 'dynamic',
+    })
+    const model = Model.from({
+        className: 'PIDController',
+        customFunctionOptions,
+    })
+    const experimentDefinition = ExperimentDefinition.from({
+        analysis,
+        extensions: [
+            {
+                modifiers: {},
+            },
+        ],
+        model,
+    })
+
+    const modelicaExperimentDefinition =
+        experimentDefinition.toModelicaExperimentDefinition()
+
+    expect(
+        modelicaExperimentDefinition.base.analysis.simulationOptions?.ncp
+    ).toBe(250)
 })
 
 test('Validate that a ModelicaExperimentDefinition with customFunction options are not overwritten by DefaultRuntimeOptions, DefaultCompilerOptions', () => {
-    // Options such as compilerLogLevel, runtimeOptions, compilerOptions, platform, fmiVersion, fmiTarget
+    const customFunctionOptions = {
+        compiler: {
+            c_compiler: 'gcc',
+            generate_html_diagnostics: false,
+            include_protected_variables: false,
+        },
+        runtime: {},
+        simulation: { ncp: 500, dynamic_diagnostics: false },
+        solver: {},
+    }
+
+    const analysis = Analysis.from({
+        customFunctionOptions,
+        parameters: {
+            start_time: 0,
+            final_time: 10,
+        },
+        type: 'dynamic',
+    })
+    const model = Model.from({
+        className: 'PIDController',
+        customFunctionOptions,
+    })
+    const experimentDefinition = ExperimentDefinition.from({
+        analysis,
+        extensions: [
+            {
+                modifiers: {},
+            },
+        ],
+        model,
+    })
+
+    expect(experimentDefinition.toModelicaExperimentDefinition()).toEqual({
+        base: {
+            analysis: {
+                parameters: {
+                    final_time: 10,
+                    start_time: 0,
+                },
+                simulationLogLevel: 'WARNING',
+                simulationOptions: {
+                    dynamic_diagnostics: false,
+                    ncp: 500,
+                },
+                solverOptions: {},
+                type: 'dynamic',
+            },
+            model: {
+                modelica: {
+                    className: 'PIDController',
+                    compilerLogLevel: 'warning',
+                    compilerOptions: {
+                        c_compiler: 'gcc',
+                        generate_html_diagnostics: false,
+                        include_protected_variables: false,
+                    },
+                    fmiTarget: 'me',
+                    fmiVersion: '2.0',
+                    platform: 'auto',
+                    runtimeOptions: {},
+                },
+            },
+            modifiers: {},
+        },
+        extensions: [
+            {
+                modifiers: {},
+            },
+        ],
+        version: 2,
+    })
 })

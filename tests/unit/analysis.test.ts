@@ -30,12 +30,10 @@ test('Analysis with only custom function name and solver options should get defa
 test('Analysis with custom function options should not override explicitly set values', () => {
     const analysis = Analysis.from({
         customFunctionOptions: {
-            options: {
-                compiler: {},
-                runtime: {},
-                simulation: { ncp: 500 },
-                solver: { key: 'customFunctionValue' },
-            },
+            compiler: {},
+            runtime: {},
+            simulation: { ncp: 500 },
+            solver: { key: 'customFunctionValue' },
         },
         simulationOptions: { ncp: 250 },
         solverOptions: { key: 'explicitlySpecifiedValue' },
@@ -54,12 +52,10 @@ test('Analysis with custom function options should not override explicitly set v
 test('Analysis with custom function options should override default values', () => {
     const analysis = Analysis.from({
         customFunctionOptions: {
-            options: {
-                compiler: {},
-                runtime: {},
-                simulation: { ncp: 500 },
-                solver: { key: 'customFunctionValue' },
-            },
+            compiler: {},
+            runtime: {},
+            simulation: { ncp: 500 },
+            solver: { key: 'customFunctionValue' },
         },
         type: 'dynamic',
     })

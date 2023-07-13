@@ -105,16 +105,16 @@ class Analysis {
         }
 
         // Apply custom function options if provided
-        if (this.customFunctionOptions?.options?.simulation) {
+        if (this.customFunctionOptions?.simulation) {
             analysisDefinition.simulationOptions = Object.assign(
                 analysisDefinition.simulationOptions,
-                this.customFunctionOptions.options.simulation
+                this.customFunctionOptions.simulation
             )
         }
-        if (this.customFunctionOptions?.options?.solver) {
+        if (this.customFunctionOptions?.solver) {
             analysisDefinition.solverOptions = Object.assign(
                 analysisDefinition.solverOptions,
-                this.customFunctionOptions.options.solver
+                this.customFunctionOptions.solver
             )
         }
         // Apply any user provided options if provided

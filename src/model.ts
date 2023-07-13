@@ -53,16 +53,16 @@ class Model {
         )
 
         // Then apply custom function options if available
-        if (this.customFunctionOptions?.options?.compiler) {
+        if (this.customFunctionOptions?.compiler) {
             modelDefinition.compilerOptions = Object.assign(
                 modelDefinition.compilerOptions,
-                this.customFunctionOptions.options.compiler
+                this.customFunctionOptions.compiler
             )
         }
-        if (this.customFunctionOptions?.options?.runtime) {
+        if (this.customFunctionOptions?.runtime) {
             modelDefinition.runtimeOptions = Object.assign(
                 modelDefinition.runtimeOptions,
-                this.customFunctionOptions.options.runtime
+                this.customFunctionOptions.runtime
             )
         }
 
