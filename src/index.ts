@@ -14,6 +14,7 @@ import ExecutionStatus from './executionStatus'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
 import {
+    CaseDefinition,
     CaseTrajectories,
     CustomFunction,
     ExecutionStatusType,
@@ -36,6 +37,7 @@ export {
     Api,
     ApiError,
     Case,
+    CaseDefinition,
     CaseTrajectories,
     Client,
     CustomFunction,

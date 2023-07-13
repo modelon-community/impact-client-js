@@ -111,9 +111,13 @@ test(
             ['dynamic', 'steady state'].length
         )
 
+        const caseIds = experimentDefinition
+            .getCaseDefinitions()
+            .map((def) => def.caseId)
+
         try {
             const experiment = await testWorkspace.executeExperimentUntilDone({
-                caseIds: ['case_1', 'case_2'],
+                caseIds,
                 experimentDefinition,
                 timeoutMs: 60 * 1000,
             })

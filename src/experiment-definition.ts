@@ -1,4 +1,5 @@
 import {
+    CaseDefinition,
     ModelicaExperimentDefinition,
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
@@ -58,6 +59,13 @@ class ExperimentDefinition {
             modifiers: modelicaDefinition.base.modifiers,
         })
     }
+
+    getCaseDefinitions = (): CaseDefinition[] =>
+        (this.extensions ?? []).map((ext, index) => ({
+            analysis: ext.analysis,
+            caseId: `case_${index + 1}`,
+            modifiers: ext.modifiers,
+        }))
 
     toModelicaExperimentDefinition = (): ModelicaExperimentDefinition => ({
         version: 2,

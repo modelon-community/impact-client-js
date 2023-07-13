@@ -88,9 +88,12 @@ dotenv.config();
     analysis,
     model,
   })
+  const caseIds = experimentDefinition
+    .getCaseDefinitions()
+    .map((def) => def.caseId)
 
   const experiment = await workspace.executeExperimentUntilDone({
-    caseIds: ["case_1", "case_2"],
+    caseIds,
     experimentDefinition,
     timeoutMs: 60*1000
   });

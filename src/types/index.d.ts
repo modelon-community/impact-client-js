@@ -59,6 +59,10 @@ export type ModelicaModel = components['schemas']['ModelicaModel']
 const modelTypes = ['fmuModel', 'modelicaModel'] as const
 export type ModelType = typeof modelTypes[number]
 
+export type CaseDefinition = components['schemas']['Extensions'][0] & {
+    caseId: string
+}
+
 export type CaseId = string
 export type ExperimentId = string
 export type ProjectId = string
