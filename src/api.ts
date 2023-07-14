@@ -124,7 +124,7 @@ class Api {
             }
         }
 
-        if (jupyterHubUserPath) {
+        if (typeof jupyterHubUserPath === 'string') {
             this.jhUserPath =
                 jupyterHubUserPath +
                 (jupyterHubUserPath.endsWith('/') ? '' : '/')
