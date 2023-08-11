@@ -12,7 +12,7 @@ If your app is running inside the Modelon Impact JupyterHub environment you only
 
 #### Obtaining and setting the Impact API key
 
-An API key is needed for authentication in order to utilize the client with the Modelon Impact server. To generate the key, go to the Server Management on Modelon Impact. Click on the IMPACT API KEY tab drop-down and click Regenerate and replace key` to generate a new one.
+An API key is needed for authentication in order to utilize the client with the Modelon Impact server. To generate the key, go to the Server Management on Modelon Impact. Click on the IMPACT API KEY tab drop-down and click Regenerate and replace key to generate a new one.
 
 Remember that this is the only time you will see the secret. Make sure to store it safely.
 
@@ -31,6 +31,10 @@ Remember that this is the only time you will see the secret. Make sure to store 
 If the token is lost, you can always generate a new one by clicking the “Request new API token” button. While initializing the client, you will be asked to enter the JupyterHub API token in a prompt.
 
 ## Quick start
+
+This quick start gives an example of how to setup a very basic node.js project that leverages impact-client-js. The more likely usage
+is perhaps to use impact-client-js in a browser environment, an example of this is in the works but the basics are similar to how it
+is done in node.js.
 
 Create a new empty node.js project
 
