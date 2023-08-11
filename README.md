@@ -1,71 +1,139 @@
-# Modelon Impact Client for Javascript
+# impact-client-js
 
-## Synopsis
-
-This is a Javascript client library for interfacing with the API of Modelon Impact.
-
-## Background
-
-In order to create custom interfaces to workspaces in Impact, we have introduced the
-concept of webapps. This presents a web-based, model-centric view of a workspace and
-will allow the creation of specialized tools for non-domain specialists.
-
-## Overview
-
-A webapp is a static HTML/Javascript/CSS artifact that will call into the Impact API
-via the client library and present a specialized view of a model contained in a
-workspace.
-
-These webapps are usually served from Impact as customizations of a workspace, but can
-be deployed separately as long as it follows the Same-Origin policy. (See the Modelon
-Impact Webapp Example for an example on how to develop webapps with a custom proxy.)
-
-In order to maintain the integrity of a workspace, and to ease the cleanup of compiled
-FMUs and experiment data, it is highly recommended that it is cloned before performing
-any operations on it.
-
-You as the user or developer need not worry about credentials, since the client will
-automatically preform an anonymous login when there are no active session present.
-The auhorization of an anonymous login is a subset of that of any other user in the
-system, and will always be guaranteed to be able to call into the API.
+impact-client-js is a library created to simplify interaction with the Modelon Impact simulation platform.
 
 ## Installation
 
-Via NPM:
+`npm install @modelon/impact-client-js@alpha`
 
-    npm install @modelon/impact-client-js
+### Authentication
 
-## Reference
+If your app is running inside the Modelon Impact JupyterHub environment you only need to provide an Impact API key to authenticate. If your app runs outside the JupyterHub environment it will also need to authenticate towards JupyterHub using a token.
 
-See `index.js`.
+#### Obtaining and setting the Impact API key
 
-## Copyright and Terms
+An API key is needed for authentication in order to utilize the client with the Modelon Impact server. To generate the key, go to the Server Management on Modelon Impact. Click on the IMPACT API KEY tab drop-down and click Regenerate and replace key to generate a new one.
 
-    Copyright 2020 Modelon AB
+Remember that this is the only time you will see the secret. Make sure to store it safely.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+Copy the key and keep it safe. If the key is lost or compromised, you can generate a new one by clicking the Regenerate and replace key button. This will delete the old key, so any application that uses it must have their keys updated to work. The API key is personal and each user may have one single key at a time, so do not share one key between several persons.
 
-     1. Redistributions of source code must retain the above copyright
-        notice, this list of conditions and the following disclaimer.
+#### Obtaining and setting the JupyterHub token
 
-     2. Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
+Note that this is only required if you are running your app outside the Modelon Impact JupyterHub environment.
 
-     3. Neither the name of the copyright holder nor the names of its
-        contributors may be used to endorse or promote products derived from
-        this software without specific prior written permission.
+The token can be acquired using the token page at https://impact.modelon.cloud/hub/token or the corresponding address for on-premise installations.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+You can get a secret token by choosing the “Request new API token” option. These are fully functional access tokens for the JupyterHub API. Everything that can be done with JupyterHub can be done with these tokens.
+
+Remember that this is the only time you will see the secret. Make sure to store it safely.
+
+If the token is lost, you can always generate a new one by clicking the “Request new API token” button. While initializing the client, you will be asked to enter the JupyterHub API token in a prompt.
+
+## Quick start
+
+This quick start gives an example of how to setup a very basic node.js project that leverages impact-client-js. The more likely usage
+is perhaps to use impact-client-js in a browser environment, an example of this is in the works but the basics are similar to how it
+is done in node.js.
+
+Create a new empty node.js project
+
+`npm init -y`
+
+Install impact-client-js
+
+`npm install @modelon-community/impact-client-js@alpha`
+
+Install dotenv to manage authentication credentials:
+
+`npm install dotenv`
+
+Create a `.env` file in the root of your project with the following content:
+
+```bash
+MODELON_IMPACT_CLIENT_API_KEY=<your impact API key>
+JUPYTERHUB_API_TOKEN=<your JupyterHub API token>
+MODELON_IMPACT_SERVER=<Modelon Impact server address>
+```
+
+See [Authentication](#Authentication) for info on how to obtain the credentials.
+
+Create a file `index.js` and run it via `node index.js`.
+
+```JavaScript
+const dotenv = require("dotenv");
+const { Client, ExperimentDefinition } = require("@modelon/impact-client-js");
+
+// Load the .env file variables, install with: npm install dotenv
+dotenv.config();
+
+(async () => {
+  const client = Client.fromImpactApiKey({
+    impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
+    jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
+    serverAddress: process.env.MODELON_IMPACT_SERVER,
+  });
+
+  const WorkspaceName = "test";
+
+  const workspace = await client.createWorkspace({
+    name: WorkspaceName,
+  });
+
+  const customFunction = 'dynamic'
+  const analysis = Analysis.from({
+    type: customFunction,
+  })
+  const model = Model.from({
+    className: 'Modelica.Blocks.Examples.PID_Controller',
+  })
+
+  const experimentDefinition = ExperimentDefinition.from({
+    analysis,
+    model,
+  })
+  const caseIds = experimentDefinition
+    .getCaseDefinitions()
+    .map((def) => def.caseId)
+
+  const experiment = await workspace.executeExperimentUntilDone({
+    caseIds,
+    experimentDefinition,
+    timeoutMs: 60*1000
+  });
+
+  const trajectories = await experiment.getTrajectories([
+    "inertia1.w",
+    "inertia1.a",
+  ]);
+
+  // Print a data point from the experiment result
+  console.log(Math.max(...trajectories[0].items[0].trajectory));
+
+  await client.deleteWorkspace(WorkspaceName);
+})();
+```
+
+## Development
+
+Clone this repository then:
+
+`npm install`
+
+to install the impact-client-js dependencies.
+
+The integration tests manage credentials using [dotenv](https://github.com/motdotla/dotenv). Create a `.env` file in the root of the repository by copying .env.example and filling out the values. See [Authentication](#Authentication) to see how to obtain the required credentials.
+
+### Tests
+
+With the repo cloned and after running `npm install` tests can be executed with one of:
+
+```
+npm run test
+npm run unit-test
+npm run integration-test
+```
+
+### Schema
+
+The impact-client-js API schema is based on the Modelon Impact openapi REST specification, converted to typescript type using openapi-typescript.
