@@ -4,7 +4,7 @@ impact-client-js is a library created to simplify interaction with the Modelon I
 
 ## Installation
 
-`npm install @modelon/impact-client-js@alpha`
+`npm install @modelon/impact-client-js`
 
 ### Authentication
 
@@ -42,7 +42,7 @@ Create a new empty node.js project
 
 Install impact-client-js
 
-`npm install @modelon-community/impact-client-js@alpha`
+`npm install @modelon-community/impact-client-js`
 
 Install dotenv to manage authentication credentials:
 
