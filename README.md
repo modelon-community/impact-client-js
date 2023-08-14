@@ -66,7 +66,12 @@ Create a file `index.js` and run it via `node index.js`.
 
 ```JavaScript
 const dotenv = require("dotenv");
-const { Client, ExperimentDefinition } = require("@modelon/impact-client-js");
+const {
+  Analysis,
+  Client,
+  ExperimentDefinition,
+  Model,
+} = require("@modelon/impact-client-js");
 
 // Load the .env file variables, install with: npm install dotenv
 dotenv.config();
@@ -84,26 +89,45 @@ dotenv.config();
     name: WorkspaceName,
   });
 
-  const customFunction = 'dynamic'
+  const extensions = [
+    {
+      modifiers: {
+        variables: {
+          "inertia1.J": 1,
+          "inertia2.J": 2,
+        },
+      },
+    },
+    {
+      modifiers: {
+        variables: {
+          "inertia1.J": 2,
+          "inertia2.J": 4,
+        },
+      },
+    },
+  ];
+
+  const customFunction = "dynamic";
   const analysis = Analysis.from({
     type: customFunction,
-  })
+  });
   const model = Model.from({
-    className: 'Modelica.Blocks.Examples.PID_Controller',
-  })
-
+    className: "Modelica.Blocks.Examples.PID_Controller",
+  });
   const experimentDefinition = ExperimentDefinition.from({
     analysis,
+    extensions,
     model,
-  })
+  });
   const caseIds = experimentDefinition
     .getCaseDefinitions()
-    .map((def) => def.caseId)
+    .map((def) => def.caseId);
 
   const experiment = await workspace.executeExperimentUntilDone({
     caseIds,
     experimentDefinition,
-    timeoutMs: 60*1000
+    timeoutMs: 60 * 1000,
   });
 
   const trajectories = await experiment.getTrajectories([
