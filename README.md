@@ -1,6 +1,10 @@
 # impact-client-js
 
-impact-client-js is a library created to simplify interaction with the Modelon Impact simulation platform.
+This library was created to simplify interaction with the Modelon Impact simulation platform. Currently it is best suited for smaller web applications and
+examples to demonstrate Modelon Impact features. For more advanced or larger applications interacting with Modelon Impact it is better to use the REST API directly
+since impact-client-js only exposes a small subset of the features available in the REST API.
+
+For non-browser scripting purposes the best alternative is to use [impact-client-python](https://github.com/modelon-community/impact-client-python) if Python is an option.
 
 ## Installation
 
@@ -116,11 +120,9 @@ dotenv.config();
 
 ## Development
 
-Clone this repository then:
+Clone this repository then install the impact-client-js dependencies:
 
 `npm install`
-
-to install the impact-client-js dependencies.
 
 The integration tests manage credentials using [dotenv](https://github.com/motdotla/dotenv). Create a `.env` file in the root of the repository by copying .env.example and filling out the values. See [Authentication](#Authentication) to see how to obtain the required credentials.
 
@@ -136,4 +138,4 @@ npm run integration-test
 
 ### Schema
 
-The impact-client-js API schema is based on the Modelon Impact openapi REST specification, converted to typescript type using openapi-typescript.
+The impact-client-js API schema is based on the Modelon Impact openapi REST specification, converted to typescript type using [openapi-typescript](https://github.com/drwpow/openapi-typescript).
