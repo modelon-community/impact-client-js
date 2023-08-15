@@ -31,6 +31,7 @@ import {
     WorkspaceDefinition,
 } from './types/index.d'
 import Model from './model'
+import Range from './range'
 import Workspace from './workspace'
 
 export {
@@ -61,6 +62,7 @@ export {
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
     ModelicaModel,
+    Range,
     ServerNotStarted,
     UnknownApiError,
     Workspace,

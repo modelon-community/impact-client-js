@@ -6,7 +6,14 @@ since impact-client-js only exposes a small subset of the features available in 
 
 For non-browser scripting purposes the best alternative is to use [impact-client-python](https://github.com/modelon-community/impact-client-python) if Python is an option.
 
-## Installation
+## Table of contents
+
+-   [Installation](#installation)
+-   [Quick start](#quick-start)
+-   [Examples](#examples)
+-   [Development](#development)
+
+# Installation
 
 `npm install @modelon/impact-client-js`
 
@@ -141,6 +148,10 @@ dotenv.config();
   await client.deleteWorkspace(WorkspaceName);
 })();
 ```
+
+## Examples
+
+See [examples](./examples).
 
 ## Development
 

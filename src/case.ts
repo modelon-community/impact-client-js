@@ -34,6 +34,13 @@ class Case {
         this.workspaceId = workspaceId
     }
 
+    getInput = () =>
+        this.api.getCaseInput({
+            caseId: this.id,
+            experimentId: this.experimentId,
+            workspaceId: this.workspaceId,
+        })
+
     getLog = () =>
         this.api.getCaseLog({
             caseId: this.id,

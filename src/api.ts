@@ -12,6 +12,7 @@ import Workspace from './workspace'
 import {
     Case,
     CaseId,
+    CaseInput,
     CaseTrajectories,
     CustomFunction,
     CustomFunctionOptions,
@@ -633,6 +634,28 @@ class Api {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/variables`
                         )
                         .then((res) => resolve(res.data))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getCaseInput = ({
+        caseId,
+        experimentId,
+        workspaceId,
+    }: {
+        caseId: CaseId
+        experimentId: ExperimentId
+        workspaceId: WorkspaceId
+    }): Promise<CaseInput> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}/cases/${caseId}`
+                        )
+                        .then((res) => resolve(res.data.input))
+                        .catch((e) => reject(toApiError(e)))
                 })
                 .catch((e) => reject(toApiError(e)))
         })
