@@ -69,84 +69,50 @@ MODELON_IMPACT_SERVER=<Modelon Impact server address>
 
 See [Authentication](#Authentication) for info on how to obtain the credentials.
 
-Create a file `index.js` and run it via `node index.js`.
+Create a file `index.mjs` and run it via `node index.mjs`.
 
 ```JavaScript
-const dotenv = require("dotenv");
-const {
+import {
   Analysis,
   Client,
   ExperimentDefinition,
   Model,
-} = require("@modelon/impact-client-js");
+} from "@modelon/impact-client-js";
+import dotenv from "dotenv";
 
-// Load the .env file variables, install with: npm install dotenv
 dotenv.config();
 
-(async () => {
-  const client = Client.fromImpactApiKey({
-    impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
-    jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
-    serverAddress: process.env.MODELON_IMPACT_SERVER,
-  });
+const client = Client.fromImpactApiKey({
+  impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
+  jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
+  serverAddress: process.env.MODELON_IMPACT_SERVER,
+});
 
-  const WorkspaceName = "test";
+const WorkspaceName = "test";
 
-  const workspace = await client.createWorkspace({
-    name: WorkspaceName,
-  });
+const workspace = await client.createWorkspace({
+  name: WorkspaceName,
+});
 
-  const extensions = [
-    {
-      modifiers: {
-        variables: {
-          "inertia1.J": 1,
-          "inertia2.J": 2,
-        },
-      },
-    },
-    {
-      modifiers: {
-        variables: {
-          "inertia1.J": 2,
-          "inertia2.J": 4,
-        },
-      },
-    },
-  ];
+const experimentDefinition = ExperimentDefinition.from({
+  analysis: Analysis.from(Analysis.DefaultAnalysis),
+  model: Model.from({ className: "Modelica.Blocks.Examples.PID_Controller" }),
+});
 
-  const customFunction = "dynamic";
-  const analysis = Analysis.from({
-    type: customFunction,
-  });
-  const model = Model.from({
-    className: "Modelica.Blocks.Examples.PID_Controller",
-  });
-  const experimentDefinition = ExperimentDefinition.from({
-    analysis,
-    extensions,
-    model,
-  });
-  const caseIds = experimentDefinition
-    .getCaseDefinitions()
-    .map((def) => def.caseId);
+const experiment = await workspace.executeExperimentUntilDone({
+  caseIds: ["case_1", "case_2"],
+  experimentDefinition,
+});
 
-  const experiment = await workspace.executeExperimentUntilDone({
-    caseIds,
-    experimentDefinition,
-    timeoutMs: 60 * 1000,
-  });
+const trajectories = await experiment.getTrajectories([
+  "inertia1.w",
+  "inertia1.a",
+]);
 
-  const trajectories = await experiment.getTrajectories([
-    "inertia1.w",
-    "inertia1.a",
-  ]);
+// Print a data point from the experiment result
+console.log(Math.max(...trajectories[0].items[0].trajectory));
 
-  // Print a data point from the experiment result
-  console.log(Math.max(...trajectories[0].items[0].trajectory));
-
-  await client.deleteWorkspace(WorkspaceName);
-})();
+await client.deleteWorkspace(WorkspaceName);
 ```
 
 ## Examples
