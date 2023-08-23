@@ -6,7 +6,6 @@ import ApiError, {
     ServerNotStarted,
     UnknownApiError,
 } from './api-error'
-import Api from './api'
 import Analysis from './analysis'
 import Case from './case'
 import Client from './client'
@@ -36,7 +35,6 @@ import Workspace from './workspace'
 
 export {
     Analysis,
-    Api,
     ApiError,
     Case,
     CaseDefinition,
