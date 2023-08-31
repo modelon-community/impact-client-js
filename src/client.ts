@@ -16,8 +16,20 @@ class Client {
      * @param {Object} options - The options for creating an instance.
      * @param {string} options.impactApiKey - The Impact API key.
      * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
-     * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path. Optional.
-     * @param {string} [options.serverAddress] - The server address. Optiona. Should only be set for non-browser environments outside jupyter lab. For other environments outside JupyterLab the server address must be configured in a proxy.
+     * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
+     *                 from the URL when using the Modelon Impact main UI. Optional.
+     * @param {string} [options.serverAddress] - The server address. Optional.
+     *                 Should only be set for non-browser environments outside jupyter lab.
+     *                 For other environments outside JupyterLab the server address
+     *                 must be configured in a proxy.
+     * @example
+     *          Client.fromImpactApiKey({
+     *              impactApiKey: "tKQqbeEh6QEVPWe60LCu4nN5fJbkvGYsWM-hcLEH",
+     *              jupyterHubToken: "d4cff74746ddf3d3c78bc653c303717b",
+     *              jupyterHubUserPath: "/user/username@company.com/",
+     *              serverAddress: "https://impact.modelon.cloud",
+     *          })
+     *
      */
     static fromImpactApiKey({
         impactApiKey,
@@ -46,8 +58,20 @@ class Client {
      * @param {Object} options - The options for creating an instance.
      * @param {string} options.impactToken - The Impact token.
      * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
-     * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path. Optional.
-     * @param {string} [options.serverAddress] - The server address. Optiona. Should only be set for non-browser environments outside jupyter lab. For other environments outside JupyterLab the server address must be configured in a proxy.
+     * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
+     *                 from the URL when using the Modelon Impact main UI. Optional.
+     * @param {string} [options.serverAddress] - The server address. Optional.
+     *                 Should only be set for non-browser environments outside jupyter lab.
+     *                 For other environments outside JupyterLab the server address
+     *                 must be configured in a proxy.
+     *
+     * @example
+     *          Client.fromImpactToken({
+     *              impactToken: "eyBmYWtlUGF5bG9hZDogIkxvcmVtIGlwc3VtIGRvbG9yIHNpdCBhbWV0IiB9",
+     *              jupyterHubToken: "d4cff74746ddf3d3c78bc653c303717b",
+     *              jupyterHubUserPath: "/user/username@company.com/",
+     *              serverAddress: "https://impact.modelon.cloud",
+     *          })
      */
     static fromImpactToken({
         impactToken,
