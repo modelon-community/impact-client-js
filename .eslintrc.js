@@ -10,6 +10,8 @@ module.exports = {
         ecmaVersion: 'latest',
         sourceType: 'module',
     },
-    rules: {},
+    rules: {
+        '@typescript-eslint/ban-ts-comment': 'off',
+    },
     ignorePatterns: ['impact-api.ts'],
 }

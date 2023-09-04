@@ -1,6 +1,7 @@
 import Model from '../../src/model'
 import { ModelDefinition } from '../../src/types'
 import TestDefinition from './test-definition.json'
+import { expect, test } from 'vitest'
 
 test('From Model and back should produce original Model', () => {
     const model = Model.fromModelDefinition(

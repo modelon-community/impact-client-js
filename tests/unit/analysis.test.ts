@@ -1,6 +1,7 @@
 import Analysis from '../../src/analysis'
 import TestDefinition from './test-definition.json'
 import { ModelicaExperimentAnalysis } from '../../src/types'
+import { test, expect } from 'vitest'
 
 test('From complete ModelicaExperimentAnalysis and back should produce original complete ModelicaExperimentAnalysis', () => {
     const analysis = Analysis.fromModelicaExperimentAnalysis(

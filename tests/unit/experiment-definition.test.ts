@@ -3,6 +3,7 @@ import Analysis from '../../src/analysis'
 import Model from '../../src/model'
 import TestDefinition from './test-definition.json'
 import { ModelicaModel, ModelicaExperimentDefinition } from '../../src/types'
+import { expect, test } from 'vitest'
 
 test('Create experiment definition without modifiers and parameters', () => {
     const customFunction = 'dynamic'
