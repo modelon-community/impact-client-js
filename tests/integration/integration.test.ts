@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv'
 import {
     Analysis,
+    ApiError,
     Client,
     ExperimentDefinition,
     InvalidApiKey,
@@ -9,7 +10,7 @@ import {
     Workspace,
 } from '../../dist'
 import { ModelicaExperimentDefinition, ModelicaModel } from '../../src/types'
-import { expect, test } from 'vitest'
+import { beforeEach, expect, test } from 'vitest'
 import basicExperimentDefinition from './basicExperimentDefinition.json'
 
 dotenv.config()
@@ -32,15 +33,15 @@ const getClient = (options?: {
 
 const TestWorkspaceName = 'integration-test-ws'
 
+beforeEach(async () => {
+    const client = getClient()
+    await deleteTestWorkspace(client)
+})
+
 const getTestWorkspace = async (client: Client) => {
-    let testWorkspace
-    try {
-        testWorkspace = await client.getWorkspace(TestWorkspaceName)
-    } catch (e) {
-        testWorkspace = await client.createWorkspace({
-            name: TestWorkspaceName,
-        })
-    }
+    const testWorkspace = await client.createWorkspace({
+        name: TestWorkspaceName,
+    })
 
     expect(testWorkspace.definition.name).toEqual(TestWorkspaceName)
 
@@ -48,14 +49,15 @@ const getTestWorkspace = async (client: Client) => {
 }
 
 const deleteTestWorkspace = async (client: Client) => {
-    await client.deleteWorkspace(TestWorkspaceName)
+    const workspaces = await client.getWorkspaces()
 
-    const workspacesAfterDelete = await client.getWorkspaces()
-    expect(
-        workspacesAfterDelete.find(
-            (w: Workspace) => w.definition.name === TestWorkspaceName
-        )
-    ).toEqual(undefined)
+    const deletePromises = await workspaces
+        .filter((ws) => ws.definition.name === TestWorkspaceName)
+        .map((ws) => {
+            client.deleteWorkspace(ws.id)
+        })
+
+    await Promise.all(deletePromises)
 }
 
 test('Try to use invalid impact API key', () =>
@@ -67,7 +69,7 @@ test('Try to use invalid impact API key', () =>
             .then(() => {
                 throw new Error('Test should have caught error')
             })
-            .catch((e) => {
+            .catch((e: ApiError) => {
                 // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
                 // ApiError has errorCode.
                 if ('errorCode' in e) {
@@ -87,7 +89,7 @@ test('Try to use invalid jupyter hub token', () =>
             .then(() => {
                 throw new Error('Test should have caught error')
             })
-            .catch((e) => {
+            .catch((e: ApiError) => {
                 // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
                 // ApiError has errorCode.
                 if ('errorCode' in e) {
@@ -116,7 +118,7 @@ test(
 
         const caseIds = experimentDefinition
             .getCaseDefinitions()
-            .map((def) => def.caseId)
+            .map((def: { caseId: string }) => def.caseId)
 
         try {
             const experiment = await testWorkspace.executeExperimentUntilDone({
@@ -207,11 +209,11 @@ test(
 
             const projects = await testWorkspace.getProjects()
             expect(projects.length).toEqual(1)
-
-            await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.toString())
+            } else {
+                console.log(e)
             }
             throw new Error('Caught unexpected error while executing test')
         }
@@ -249,11 +251,11 @@ test(
                 timeoutMs: 60 * 1000,
             })
             expect(typeof experiment).toBe('object')
-
-            await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.toString())
+            } else {
+                console.log(e)
             }
             throw new Error('Caught unexpected error while executing test')
         }
@@ -293,11 +295,11 @@ test(
                 tries++
             }
             expect(tries).toBeLessThan(MAX_TRIES)
-
-            await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.toString())
+            } else {
+                console.log(e)
             }
             throw new Error('Caught unexpected error while executing test')
         }
@@ -356,11 +358,64 @@ test(
                     done = true
                 }
             }
-
-            await deleteTestWorkspace(client)
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.toString())
+            } else {
+                console.log(e)
+            }
+            throw new Error('Caught unexpected error while executing test')
+        }
+    },
+    TwentySeconds
+)
+
+test(
+    'Run simulation then examine ModelExecutable and ModelDescription',
+    async () => {
+        const experimentDefinition =
+            ExperimentDefinition.fromModelicaExperimentDefinition(
+                basicExperimentDefinition as unknown as ModelicaExperimentDefinition
+            )
+
+        const client = getClient()
+        const testWorkspace = await getTestWorkspace(client)
+
+        try {
+            const experiment = await testWorkspace.executeExperimentUntilDone({
+                caseIds: ['case_1', 'case_2'],
+                experimentDefinition,
+                timeoutMs: TwentySeconds,
+            })
+
+            const cases = await experiment.getCases()
+            const modelExecutable = await cases[0].getModelExecutable()
+            expect(modelExecutable).not.toBeNull()
+            if (modelExecutable) {
+                const caseModelExecutableInfo =
+                    await modelExecutable.getModelExecutableInfo()
+                expect(caseModelExecutableInfo.input.class_name).toEqual(
+                    'Modelica.Blocks.Examples.PID_Controller'
+                )
+            }
+
+            const modelExecutables = await testWorkspace.getModelExecutables()
+            expect(modelExecutables.length).toEqual(1)
+            const modelDescription =
+                await modelExecutables[0].getModelDescription()
+            expect(modelDescription.getModelName()).toEqual(
+                'Modelica.Blocks.Examples.PID_Controller'
+            )
+            const modelExecutableInfo =
+                await modelExecutables[0].getModelExecutableInfo()
+            expect(modelExecutableInfo.input.class_name).toEqual(
+                'Modelica.Blocks.Examples.PID_Controller'
+            )
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(e.toString())
+            } else {
+                console.log(e)
             }
             throw new Error('Caught unexpected error while executing test')
         }

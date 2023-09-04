@@ -52,6 +52,7 @@ class Experiment {
                 new Case({
                     api: this.api,
                     experimentId: this.id,
+                    fmuId: caseResponse.input.fmu_id,
                     id: caseResponse.id || i.toString(),
                     runInfo: caseResponse.run_info,
                     workspaceId: this.workspaceId,

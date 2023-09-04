@@ -21,7 +21,9 @@ import {
     ExperimentItem,
     ExperimentTrajectories,
     ExperimentVariables,
+    FmuId,
     LocalProjectProtocol,
+    ModelExecutableInfo,
     ModelicaExperimentDefinition,
     ProjectId,
     WorkspaceProtocol,
@@ -682,6 +684,26 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
+    getModelDescription = ({
+        fmuId,
+        workspaceId,
+    }: {
+        fmuId: FmuId
+        workspaceId: WorkspaceId
+    }): Promise<string> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/model-executables/${fmuId}/model-description`
+                        )
+                        .then((res) => resolve(res.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
     getCustomFunctionOptions = ({
         customFunction,
         workspaceId,
@@ -736,6 +758,42 @@ class Api {
         this.impactToken = token
         this.configureAxios()
     }
+
+    getModelExecutableInfo = ({
+        fmuId,
+        workspaceId,
+    }: {
+        fmuId: FmuId
+        workspaceId: WorkspaceId
+    }): Promise<ModelExecutableInfo> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/model-executables/${fmuId}`
+                        )
+                        .then((response) => resolve(response.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
+    getModelExecutableInfos = (
+        workspaceId: WorkspaceId
+    ): Promise<ModelExecutableInfo[]> =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactToken()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/model-executables`
+                        )
+                        .then((response) => resolve(response.data?.data?.items))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
 
     delete = (path: string) =>
         new Promise((resolve, reject) => {

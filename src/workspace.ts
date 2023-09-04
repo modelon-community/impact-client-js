@@ -10,6 +10,7 @@ import {
 import Api from './api'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
+import ModelExecutable from './model-executable'
 import Project from './project'
 
 class Workspace {
@@ -146,6 +147,24 @@ class Workspace {
                     workspaceId: this.id,
                 })
         )
+    }
+
+    getModelExecutables = async (): Promise<ModelExecutable[]> => {
+        const modelExecutableInfos = await this.api.getModelExecutableInfos(
+            this.id
+        )
+
+        if (!modelExecutableInfos) {
+            return []
+        }
+
+        return modelExecutableInfos.map((info) => {
+            return ModelExecutable.from({
+                api: this.api,
+                fmuId: info.id,
+                workspaceId: this.id,
+            })
+        })
     }
 
     getProjects = async (): Promise<Project[]> =>

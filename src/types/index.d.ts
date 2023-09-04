@@ -59,6 +59,9 @@ export type LocalProjectProtocol = components['schemas']['LocalProjectProtocol']
 export type FmuModel = components['schemas']['FmuModel']
 export type ModelicaModel = components['schemas']['ModelicaModel']
 
+export type ModelExecutableInfo =
+    components['schemas']['ModelExecutableListV2'][0]
+
 const modelTypes = ['fmuModel', 'modelicaModel'] as const
 export type ModelType = typeof modelTypes[number]
 
@@ -68,5 +71,45 @@ export type CaseDefinition = components['schemas']['Extensions'][0] & {
 
 export type CaseId = string
 export type ExperimentId = string
+export type FmuId = string
 export type ProjectId = string
 export type WorkspaceId = string
+
+export type BaseUnitAttribute =
+    | 'kg'
+    | 'm'
+    | 's'
+    | 'A'
+    | 'K'
+    | 'mol'
+    | 'cd'
+    | 'rad'
+    | 'factor'
+    | 'offset'
+
+export type BaseUnit = { [key in BaseUnitAttribute]: string }
+export type UnitDefinition = { name: string; factor?: string; offset?: string }
+export type Unit = {
+    BaseUnit: string | BaseUnit
+    DisplayUnit: UnitDefinition[]
+    name: string
+}
+
+export type VariableValueType =
+    | 'Real'
+    | 'Integer'
+    | 'Boolean'
+    | 'String'
+    | 'Enumeration'
+
+export type Variable = {
+    [key in VariableValueType]: Record<string, string>
+} & {
+    name: string
+    valueReference: string
+    description: string
+    causality: string
+    variability: string
+    initial?: string
+    canHandleMultipleSetPerTimeInstant?: string
+}

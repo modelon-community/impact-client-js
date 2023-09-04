@@ -30,6 +30,7 @@
     "dependencies": {
         "axios": "^0.27.2",
         "axios-cookiejar-support": "^4.0.3",
+        "fast-xml-parser": "^4.2.7",
         "tough-cookie": "^4.0.0"
     },
     "devDependencies": {
