@@ -1,11 +1,7 @@
 import { ExecutionStatusType } from './types'
 
 class ExecutionStatus {
-    status: ExecutionStatusType
-
-    constructor(status: ExecutionStatusType) {
-        this.status = status
-    }
+    constructor(public status: ExecutionStatusType) {}
 
     getNbrCompilationDone = () =>
         this.status?.progresses?.filter(

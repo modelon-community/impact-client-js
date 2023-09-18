@@ -11,11 +11,7 @@ type ModelDescriptionData = {
 }
 
 class ModelDescription {
-    private data: ModelDescriptionData
-
-    constructor(data: ModelDescriptionData) {
-        this.data = data
-    }
+    constructor(private data: ModelDescriptionData) {}
 
     getDefaultExperiment() {
         const defaultExperiment = this.data.DefaultExperiment

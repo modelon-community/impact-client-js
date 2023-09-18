@@ -14,23 +14,11 @@ import ModelExecutable from './model-executable'
 import Project from './project'
 
 class Workspace {
-    private api: Api
-    id: WorkspaceId
-    definition: WorkspaceDefinition
-
-    constructor({
-        api,
-        definition,
-        id,
-    }: {
-        api: Api
-        definition: WorkspaceDefinition
-        id: WorkspaceId
-    }) {
-        this.api = api
-        this.definition = definition
-        this.id = id
-    }
+    constructor(
+        private api: Api,
+        public definition: WorkspaceDefinition,
+        public id: WorkspaceId
+    ) {}
 
     private createExperiment = async (
         experimentDefinition: ExperimentDefinition

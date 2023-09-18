@@ -303,11 +303,11 @@ class Api {
                             resolve(
                                 result.data.data.items.map(
                                     (workspace: WorkspaceProtocol) =>
-                                        new Workspace({
-                                            api: this,
-                                            definition: workspace.definition,
-                                            id: workspace.id,
-                                        })
+                                        new Workspace(
+                                            this,
+                                            workspace.definition,
+                                            workspace.id
+                                        )
                                 )
                             )
                         )
@@ -386,11 +386,11 @@ class Api {
                         )
                         .then((response) =>
                             resolve(
-                                new Workspace({
-                                    api: this,
-                                    definition: response.data.definition,
-                                    id: response.data.id,
-                                })
+                                new Workspace(
+                                    this,
+                                    response.data.definition,
+                                    response.data.id
+                                )
                             )
                         )
                         .catch((e) => reject(toApiError(e)))
@@ -561,11 +561,11 @@ class Api {
                             resolve(
                                 result.data.data.items.map(
                                     (project: LocalProjectProtocol) =>
-                                        new Project({
-                                            api: this,
-                                            id: project.id,
-                                            workspaceId,
-                                        })
+                                        new Project(
+                                            this,
+                                            project.id,
+                                            workspaceId
+                                        )
                                 )
                             )
                         )

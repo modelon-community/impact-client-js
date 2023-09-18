@@ -4,23 +4,11 @@ import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
 
 class Project {
-    private api: Api
-    id: ProjectId
-    private workspaceId: WorkspaceId
-
-    constructor({
-        api,
-        id,
-        workspaceId,
-    }: {
-        api: Api
-        id: ProjectId
-        workspaceId: WorkspaceId
-    }) {
-        this.api = api
-        this.id = id
-        this.workspaceId = workspaceId
-    }
+    constructor(
+        private api: Api,
+        public id: ProjectId,
+        private workspaceId: WorkspaceId
+    ) {}
 
     getExperiments = async () => {
         const experimentItems = await this.api.getProjectExperiments({
