@@ -9,7 +9,6 @@ import { FmuId, ModelExecutableInfo, WorkspaceId } from './types'
 
 class ModelExecutable {
     private api: Api
-    private defaultExperiment?: DefaultExperiment
     private info?: ModelExecutableInfo
     fmuId: FmuId
     private modelDescription?: ModelDescription
@@ -17,23 +16,18 @@ class ModelExecutable {
 
     private constructor({
         api,
-        defaultExperiment,
         fmuId,
         info,
         modelDescription,
         workspaceId,
     }: {
         api: Api
-        defaultExperiment?: DefaultExperiment
         fmuId: FmuId
         info?: ModelExecutableInfo
         modelDescription?: ModelDescription
         workspaceId: WorkspaceId
     }) {
         this.api = api
-        if (defaultExperiment) {
-            this.defaultExperiment = defaultExperiment
-        }
         this.fmuId = fmuId
         if (info) {
             this.info = info
