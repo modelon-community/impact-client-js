@@ -8,7 +8,7 @@ import {
 } from './types'
 import Api from './api'
 import Case from './case'
-import ExecutionStatus from './executionStatus'
+import ExecutionStatus from './execution-status'
 import ExperimentDefinition from './experiment-definition'
 
 class Experiment {

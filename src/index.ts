@@ -9,7 +9,7 @@ import ApiError, {
 import Analysis from './analysis'
 import Case from './case'
 import Client from './client'
-import ExecutionStatus from './executionStatus'
+import ExecutionStatus from './execution-status'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
 import {
