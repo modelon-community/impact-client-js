@@ -7,7 +7,12 @@
 //
 // Then run the example with: node modelDescription.mjs
 
-import { Analysis, Client, ExperimentDefinition, Model } from '../dist/index.js'
+import {
+    Analysis,
+    Client,
+    ExperimentDefinition,
+    Model,
+} from '@modelon/impact-client-js'
 import dotenv from 'dotenv'
 
 // Load the .env file variables, install with: npm install dotenv
@@ -33,6 +38,7 @@ const experimentDefinition = ExperimentDefinition.from({
 const experiment = await workspace.executeExperimentUntilDone({
     caseIds: ['case_1'],
     experimentDefinition,
+    timeoutMs: 10_000,
 })
 
 const cases = await experiment.getCases()

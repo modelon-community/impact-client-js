@@ -15,7 +15,7 @@ import {
     ExperimentDefinition,
     Model,
     Range,
-} from '../dist/index.js'
+} from '@modelon/impact-client-js'
 
 // Load the .env file variables, install with: npm install dotenv
 dotenv.config({ path: '../.env' })
