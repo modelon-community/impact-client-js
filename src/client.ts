@@ -14,7 +14,7 @@ class Client {
      *
      * @static
      * @param {Object} options - The options for creating an instance.
-     * @param {string} options.impactApiKey - The Impact API key.
+     * @param {string} options.impactApiKey - The Impact API key. Optional.
      * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
      * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
      *                 from the URL when using the Modelon Impact main UI. Optional.
@@ -37,7 +37,7 @@ class Client {
         jupyterHubUserPath,
         serverAddress,
     }: {
-        impactApiKey: string
+        impactApiKey?: string
         jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress?: string

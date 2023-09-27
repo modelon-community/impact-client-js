@@ -142,7 +142,7 @@ class Api {
         jupyterHubUserPath,
         serverAddress,
     }: {
-        impactApiKey: string
+        impactApiKey?: string
         jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress?: string
