@@ -1,6 +1,9 @@
 import { CustomFunctionOptions, ModelDefinition } from './types'
 
 class Model {
+    customFunctionOptions?: CustomFunctionOptions
+    private model: ModelDefinition
+
     private static DefaultModelicaModelContent = {
         compilerLogLevel: 'warning',
         compilerOptions: {
@@ -12,10 +15,16 @@ class Model {
         runtimeOptions: {},
     }
 
-    private constructor(
-        private model: ModelDefinition,
-        public customFunctionOptions?: CustomFunctionOptions
-    ) {}
+    private constructor({
+        customFunctionOptions,
+        model,
+    }: {
+        customFunctionOptions?: CustomFunctionOptions
+        model: ModelDefinition
+    }) {
+        this.customFunctionOptions = customFunctionOptions
+        this.model = model
+    }
 
     static from({
         className,
@@ -24,14 +33,14 @@ class Model {
         className: string
         customFunctionOptions?: CustomFunctionOptions
     }) {
-        return new Model(
-            { modelica: { className } } as ModelDefinition,
-            customFunctionOptions
-        )
+        return new Model({
+            customFunctionOptions,
+            model: { modelica: { className } } as ModelDefinition,
+        })
     }
 
     static fromModelDefinition(model: ModelDefinition) {
-        return new Model(model)
+        return new Model({ model })
     }
 
     toModelDefinition() {

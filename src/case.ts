@@ -10,14 +10,35 @@ import Api from './api'
 import ModelExecutable from './model-executable'
 
 class Case {
-    constructor(
-        private api: Api,
-        public id: CaseId,
-        private experimentId: ExperimentId,
-        public runInfo: CaseRunInfo,
-        private workspaceId: WorkspaceId,
-        private fmuId?: FmuId
-    ) {}
+    private api: Api
+    private experimentId: ExperimentId
+    private fmuId?: FmuId
+    id: CaseId
+    runInfo: CaseRunInfo
+    private workspaceId: WorkspaceId
+
+    constructor({
+        api,
+        experimentId,
+        fmuId,
+        id,
+        runInfo,
+        workspaceId,
+    }: {
+        api: Api
+        id: CaseId
+        fmuId?: FmuId
+        experimentId: ExperimentId
+        runInfo: CaseRunInfo
+        workspaceId: WorkspaceId
+    }) {
+        this.api = api
+        this.fmuId = fmuId
+        this.id = id
+        this.runInfo = runInfo
+        this.experimentId = experimentId
+        this.workspaceId = workspaceId
+    }
 
     getInput = () =>
         this.api.getCaseInput({

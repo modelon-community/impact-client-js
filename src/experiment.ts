@@ -49,14 +49,14 @@ class Experiment {
 
         return casesResponse.map(
             (caseResponse, i) =>
-                new Case(
-                    this.api,
-                    caseResponse.id || i.toString(),
-                    this.id,
-                    caseResponse.run_info,
-                    this.workspaceId,
-                    caseResponse.input.fmu_id
-                )
+                new Case({
+                    api: this.api,
+                    experimentId: this.id,
+                    fmuId: caseResponse.input.fmu_id,
+                    id: caseResponse.id || i.toString(),
+                    runInfo: caseResponse.run_info,
+                    workspaceId: this.workspaceId,
+                })
         )
     }
 
