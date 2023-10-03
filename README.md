@@ -53,7 +53,7 @@ Create a new empty node.js project
 
 Install impact-client-js
 
-`npm install @modelon-community/impact-client-js`
+`npm install @modelon/impact-client-js`
 
 Install dotenv to manage authentication credentials:
 
