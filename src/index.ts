@@ -33,6 +33,7 @@ import {
 import Model from './model'
 import Range from './range'
 import Workspace from './workspace'
+import ModelDescription from './model-description'
 
 export {
     Analysis,
@@ -58,6 +59,7 @@ export {
     MissingJupyterHubToken,
     Model,
     ModelDefinition,
+    ModelDescription,
     ModelicaExperimentAnalysisParameters,
     ModelicaExperimentExtensions,
     ModelicaExperimentModifiers,
