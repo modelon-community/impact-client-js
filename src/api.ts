@@ -6,7 +6,7 @@ import ApiError, {
     ServerNotStarted,
     UnknownApiError,
 } from './api-error'
-import { Cookie, CookieJar } from 'tough-cookie'
+import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie'
 import Project from './project'
 import Workspace from './workspace'
 import {
@@ -30,10 +30,7 @@ import {
     WorkspaceId,
 } from './types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function importModule(moduleName: string): Promise<any> {
-    return await import(moduleName)
-}
+import { wrapper as axiosCookieWrapper } from 'axios-cookiejar-support'
 
 interface AxiosConfig {
     headers: Record<string, string>
@@ -187,18 +184,10 @@ class Api {
                 !this.isConfiguredForNode() ||
                 (this.impactToken && !this.isConfiguredForImpact())
             ) {
-                const AxiosCookieSupport = await importModule(
-                    'axios-cookiejar-support'
-                )
-                const ToughCookie = await importModule('tough-cookie')
-
-                const jar = new ToughCookie.CookieJar(
-                    new ToughCookie.MemoryCookieStore(),
-                    {
-                        allowSpecialUseDomain: true,
-                        rejectPublicSuffixes: false,
-                    }
-                )
+                const jar = new CookieJar(new MemoryCookieStore(), {
+                    allowSpecialUseDomain: true,
+                    rejectPublicSuffixes: false,
+                })
                 const headers: Record<string, string> = {
                     Authorization: `token ${this.jhToken}`,
                 }
@@ -210,9 +199,7 @@ class Api {
 
                 this.axiosConfig = { headers, jar }
 
-                this.axios = AxiosCookieSupport.wrapper(
-                    Axios.create(this.axiosConfig)
-                )
+                this.axios = axiosCookieWrapper(Axios.create(this.axiosConfig))
             }
         } else {
             if (this.impactToken && !this.isConfiguredForImpact()) {
