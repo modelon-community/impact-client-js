@@ -40,7 +40,7 @@ export type CaseInput =
     operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items'][0]['input']
 
 export type CaseTrajectories =
-    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
+    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items'][0]['items']
 
 export type CaseRunInfo =
     operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items'][0]['run_info']
