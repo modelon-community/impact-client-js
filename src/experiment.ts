@@ -1,5 +1,6 @@
 import {
     CaseId,
+    ExecutionOptions,
     ExperimentId,
     ExperimentMetaData,
     ExperimentRunInfo,
@@ -125,11 +126,12 @@ class Experiment {
         })
     }
 
-    run = async (cases: CaseId[]): Promise<void> =>
+    run = async (cases: CaseId[], options?: ExecutionOptions): Promise<void> =>
         this.api.runExperiment({
             cases,
             experimentId: this.id,
             workspaceId: this.workspaceId,
+            options,
         })
 
     executionDone = async (timeout: number): Promise<void> => {

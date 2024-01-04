@@ -7,6 +7,9 @@ export type CustomFunctionOptions =
 export type CustomFunction =
     operations['getCustomFunction']['responses']['200']['content']['application/json']
 
+export type ExecutionOptions = 
+    NonNullable<NonNullable<operations['execute']['requestBody']>['content']['application/json']['options']>
+
 export type ExecutionStatusType =
     operations['getExecutionStatus']['responses']['200']['content']['application/json']
 

@@ -28,6 +28,7 @@ import {
     ProjectId,
     WorkspaceProtocol,
     WorkspaceId,
+    ExecutionOptions,
 } from './types'
 
 import { wrapper as axiosCookieWrapper } from 'axios-cookiejar-support'
@@ -403,10 +404,12 @@ class Api {
         cases,
         experimentId,
         workspaceId,
+        options,
     }: {
         cases: CaseId[]
         experimentId: ExperimentId
         workspaceId: WorkspaceId
+        options?: ExecutionOptions
     }): Promise<void> =>
         new Promise((resolve, reject) => {
             this.ensureImpactToken()
@@ -418,9 +421,7 @@ class Api {
                                 includeCases: {
                                     ids: cases,
                                 },
-                                options: {
-                                    forceCompilation: true,
-                                },
+                                options
                             }
                         )
                         .then(() => resolve())
