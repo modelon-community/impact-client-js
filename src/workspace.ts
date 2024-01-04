@@ -2,6 +2,7 @@ import {
     CaseId,
     CustomFunction,
     CustomFunctionOptions,
+    ExecutionOptions,
     ExperimentId,
     ExperimentItem,
     WorkspaceDefinition,
@@ -51,9 +52,11 @@ class Workspace {
     executeExperiment = async ({
         caseIds,
         experimentDefinition,
+        options,
     }: {
         caseIds: CaseId[]
         experimentDefinition: ExperimentDefinition
+        options?: ExecutionOptions
     }): Promise<Experiment> => {
         const experiment = await this.createExperiment(experimentDefinition)
 
@@ -61,6 +64,7 @@ class Workspace {
             cases: caseIds,
             experimentId: experiment.id,
             workspaceId: this.id,
+            options
         })
 
         return new Experiment({
