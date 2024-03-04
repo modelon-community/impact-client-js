@@ -14,7 +14,6 @@ class Client {
      *
      * @static
      * @param {Object} options - The options for creating an instance.
-     * @param {string} options.impactApiKey - The Impact API key. Optional.
      * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
      * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
      *                 from the URL when using the Modelon Impact main UI. Optional.
@@ -25,7 +24,6 @@ class Client {
      * @example
      *          Client.fromImpactApiKey({
      *              impactApiKey: "tKQqbeEh6QEVPWe60LCu4nN5fJbkvGYsWM-hcLEH",
-     *              jupyterHubToken: "d4cff74746ddf3d3c78bc653c303717b",
      *              jupyterHubUserPath: "/user/username@company.com/",
      *              serverAddress: "https://impact.modelon.cloud",
      *          })
@@ -33,18 +31,15 @@ class Client {
      */
     static fromImpactApiKey({
         impactApiKey,
-        jupyterHubToken,
         jupyterHubUserPath,
         serverAddress,
     }: {
         impactApiKey?: string
-        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress?: string
     }) {
         const api = Api.fromImpactApiKey({
             impactApiKey,
-            jupyterHubToken,
             jupyterHubUserPath,
             serverAddress,
         })
@@ -52,11 +47,10 @@ class Client {
     }
 
     /**
-     * Creates an instance from an Impact token.
+     * Creates an instance from an Impact Session Cookie.
      *
      * @static
      * @param {Object} options - The options for creating an instance.
-     * @param {string} options.impactToken - The Impact token.
      * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
      * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
      *                 from the URL when using the Modelon Impact main UI. Optional.
@@ -73,24 +67,20 @@ class Client {
      *              serverAddress: "https://impact.modelon.cloud",
      *          })
      */
-    static fromImpactToken({
-        impactToken,
-        jupyterHubToken,
+    static fromImpactSession({
         jupyterHubUserPath,
         serverAddress,
     }: {
-        impactToken: string
-        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress?: string
     }) {
+        /*
         const api = Api.fromImpactToken({
-            impactToken,
-            jupyterHubToken,
             jupyterHubUserPath,
             serverAddress,
         })
         return new Client(api)
+        */
     }
 
     getWorkspaces = (): Promise<Workspace[]> => this.api.getWorkspaces()
@@ -124,7 +114,7 @@ class Client {
         return await this.api.deleteWorkspace(workspaceId)
     }
 
-    setImpactToken = (token: string) => this.api.setImpactToken(token)
+    setImpactToken = (token: string) => this.api.setImpactSession(token)
 
     delete = (path: string) => this.api.delete(path)
     get = (path: string, accept?: string) => this.api.get(path, accept)
