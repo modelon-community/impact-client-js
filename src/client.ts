@@ -109,6 +109,8 @@ class Client {
         return await this.api.deleteWorkspace(workspaceId)
     }
 
+    setImpactApiKey = (apiKey: string) =>  this.api.setImpactApiKey(apiKey);
+
     delete = (path: string) => this.api.delete(path)
     get = (path: string, accept?: string) => this.api.get(path, accept)
     post = (path: string, body: unknown, accept?: string) =>

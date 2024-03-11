@@ -745,6 +745,11 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
+    setImpactApiKey = (apiKey: string) => {
+        this.impactApiKey = apiKey;
+        this.configureAxios();
+    }
+
     delete = (path: string) =>
         new Promise((resolve, reject) => {
             this.ensureImpactAuth()
