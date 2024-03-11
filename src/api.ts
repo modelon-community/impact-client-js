@@ -77,7 +77,6 @@ class Api {
     private jhUserPath: string | undefined
 
     private configureAxios() {
-        // TODO: Add support for session as well
         const headers: Record<string, string> = {};
         
         if (this.impactApiKey) {
@@ -94,7 +93,6 @@ class Api {
         jupyterHubUserPath,
     }: {
         impactApiKey?: string
-        impactToken?: string
         serverAddress?: string
         jupyterHubUserPath?: string
     }) {
@@ -126,16 +124,36 @@ class Api {
         })
     }
 
+    static fromImpactSession({
+        jupyterHubUserPath,
+        serverAddress,
+    }: {
+        jupyterHubUserPath?: string
+        serverAddress?: string
+    }) {
+        return new Api({
+            jupyterHubUserPath,
+            serverAddress,
+        })
+    }
+
     private isConfiguredForNode = () => !!this.axiosConfig.jar
 
     private apiKeySet = () =>
         !!this.axiosConfig.headers['impact-api-key'] 
 
+    private hasImpactSession = () => !getCookieValue("impact-session");
+
+    private userPathFromUrl(url: string) {
+        const regex = /\/user\/([^/]+)\//
+        const match = url.match(regex)
+        return match ? match[0] : undefined;
+    }
+
     private getNodeCookieJar = () => this.axiosConfig.jar
 
     private ensureAxiosConfig = async () => {
-        //TODO: Only works for api-key -> add session
-        // If node - set api-key available and cookies to accept cookies from localhost
+        // If node - set api-key if available and cookies to accept cookies from localhost
         if (isNode()) {
             if (
                 !this.isConfiguredForNode() ||
@@ -170,26 +188,40 @@ class Api {
             return
         }
         try {
-            const response = await this.axios.get(
-                `${this.baseUrl}/hub/api/user`
-            )
-            const { server } = response.data
-            if (server === null) {
-                throw new ApiError({
-                    errorCode: ServerNotStarted,
-                    message: 'Server not started on JupyterHub.',
-                })
-            }
-            if (server === undefined) {
-                // Server missing in token scope, probably executing inside JupyterHub.
-                // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
-                this.jhUserPath =
+            if (this.apiKeySet()) {
+                const response = await this.axios.get(
+                    `${this.baseUrl}/hub/api/user`
+                )
+                const { server } = response.data
+                if (server === null) {
+                    throw new ApiError({
+                        errorCode: ServerNotStarted,
+                        message: 'Server not started on JupyterHub.',
+                    })
+                }
+                if (server === undefined) {
+                    // Server missing in token scope, probably executing inside JupyterHub.
+                    // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
+                    this.jhUserPath =
                     typeof process !== 'undefined'
-                        ? process.env?.JUPYTERHUB_SERVICE_PREFIX
-                        : undefined
-            } else {
-                this.jhUserPath = server
+                    ? process.env?.JUPYTERHUB_SERVICE_PREFIX
+                    : undefined
+                } else {
+                    this.jhUserPath = server
+                }
+                
+                return 
             }
+
+            // Use document URL as fallback.
+            const userPathFromUrl = this.userPathFromUrl(document.URL);
+            if (userPathFromUrl) {
+                this.jhUserPath = userPathFromUrl;
+                return
+            } else {
+                throw new Error('Failed to set user path from URL');
+            }
+
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new ApiError({
@@ -207,14 +239,11 @@ class Api {
         await this.ensureAxiosConfig()
         await this.ensureJhUserPath()
 
-        if (this.impactApiKey) {
+        if (this.impactApiKey || this.hasImpactSession()) {
             return
-        }
+        } 
 
-        // TODO: refresh impact-session if it is not set.
-
-        // Update axios config with the acquired impactToken
-        await this.ensureAxiosConfig()
+        throw new Error('No authentication method provided, please provide impact api key or make sure that impact-session token is present')
     }
 
     getWorkspaces = async (): Promise<Workspace[]> => {
