@@ -47,11 +47,10 @@ class Client {
     }
 
     /**
-     * Creates an instance from an Impact Session Cookie.
+     * Creates an instance assuming Impact Session Cookie exists.
      *
      * @static
      * @param {Object} options - The options for creating an instance.
-     * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
      * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
      *                 from the URL when using the Modelon Impact main UI. Optional.
      * @param {string} [options.serverAddress] - The server address. Optional.
@@ -61,8 +60,6 @@ class Client {
      *
      * @example
      *          Client.fromImpactToken({
-     *              impactToken: "eyBmYWtlUGF5bG9hZDogIkxvcmVtIGlwc3VtIGRvbG9yIHNpdCBhbWV0IiB9",
-     *              jupyterHubToken: "d4cff74746ddf3d3c78bc653c303717b",
      *              jupyterHubUserPath: "/user/username@company.com/",
      *              serverAddress: "https://impact.modelon.cloud",
      *          })
@@ -74,13 +71,11 @@ class Client {
         jupyterHubUserPath?: string
         serverAddress?: string
     }) {
-        /*
-        const api = Api.fromImpactToken({
+        const api = Api.fromImpactSession({
             jupyterHubUserPath,
             serverAddress,
         })
         return new Client(api)
-        */
     }
 
     getWorkspaces = (): Promise<Workspace[]> => this.api.getWorkspaces()
@@ -113,8 +108,6 @@ class Client {
     deleteWorkspace = async (workspaceId: WorkspaceId): Promise<void> => {
         return await this.api.deleteWorkspace(workspaceId)
     }
-
-    setImpactToken = (token: string) => this.api.setImpactSession(token)
 
     delete = (path: string) => this.api.delete(path)
     get = (path: string, accept?: string) => this.api.get(path, accept)

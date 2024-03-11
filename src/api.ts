@@ -142,7 +142,7 @@ class Api {
     private apiKeySet = () =>
         !!this.axiosConfig.headers['impact-api-key'] 
 
-    private hasImpactSession = () => !getCookieValue("impact-session");
+    private hasImpactSession = () => !!getCookieValue("impact-session");
 
     private userPathFromUrl(url: string) {
         const regex = /\/user\/([^/]+)\//
@@ -708,11 +708,6 @@ class Api {
                 })
                 .catch((e) => reject(toApiError(e)))
         })
-
-    setImpactSession = (session: string) => {
-        this.impactSession = session
-        this.configureAxios()
-    }
 
     getModelExecutableInfo = ({
         fmuId,
