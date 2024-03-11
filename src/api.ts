@@ -183,7 +183,6 @@ class Api {
     }
 
     private ensureJhUserPath = async () => {
-        // TODO: Requires api-key to be present at the moment
         if (this.jhUserPath) {
             return
         }
