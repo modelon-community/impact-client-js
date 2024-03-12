@@ -1,11 +1,10 @@
 import Axios, { AxiosError, AxiosInstance } from 'axios'
 import ApiError, {
     JhTokenError,
-    MissingAccessTokenCookie,
     ServerNotStarted,
     UnknownApiError,
 } from './api-error'
-import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie'
+import { CookieJar, MemoryCookieStore } from 'tough-cookie'
 import Project from './project'
 import Workspace from './workspace'
 import {
@@ -45,18 +44,6 @@ const getCookieValue = (key: string) => {
     return parts.length === 2 ? parts.pop()?.split(';').shift() : undefined
 }
 
-const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
-    const cookie = cookies.find((c) => c.key === key)
-
-    if (!cookie) {
-        throw new ApiError({
-            errorCode: MissingAccessTokenCookie,
-            message: 'Access token cookie not found',
-        })
-    }
-    return cookie.value
-}
-
 const toApiError = (e: AxiosError | Error) => {
     if (e instanceof AxiosError) {
         return new ApiError({
@@ -73,7 +60,6 @@ class Api {
     private axiosConfig!: AxiosConfig
     private baseUrl: string
     private impactApiKey?: string
-    private impactSession?: string
     private jhUserPath: string | undefined
 
     private configureAxios() {
