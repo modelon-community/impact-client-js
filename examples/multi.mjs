@@ -1,4 +1,4 @@
-// This script examplifies how to use the Range operator to create
+// This script exemplifies how to use the Range operator to create
 // a multi-execution experiment.
 //
 // Make sure to have installed dependencies and have the required environment variables
@@ -22,7 +22,6 @@ dotenv.config({ path: '../.env' })
 
 const client = Client.fromImpactApiKey({
     impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
-    jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
     serverAddress: process.env.MODELON_IMPACT_SERVER,
 })
 
