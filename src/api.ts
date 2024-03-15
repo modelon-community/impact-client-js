@@ -117,6 +117,9 @@ class Api {
         jupyterHubUserPath?: string
         serverAddress?: string
     }) {
+        if (isNode()) {
+            throw new Error("Impact session can only be used from browser.")
+        }
         return new Api({
             jupyterHubUserPath,
             serverAddress,
@@ -160,7 +163,7 @@ class Api {
         } else {
             if (this.impactApiKey && !this.apiKeySet()) {
                 const headers: Record<string, string> = {
-                    'impact-api-key': `Bearer ${this.impactApiKey}`,
+                    'impact-api-key': `${this.impactApiKey}`,
                 }
                 this.axiosConfig = { headers }
                 this.axios = Axios.create(this.axiosConfig)
