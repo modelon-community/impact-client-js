@@ -2,7 +2,6 @@ import ApiError, {
     InvalidApiKey,
     JhTokenError,
     MissingAccessTokenCookie,
-    MissingJupyterHubToken,
     ServerNotStarted,
     UnknownApiError,
 } from './api-error'
@@ -58,7 +57,6 @@ export {
     InvalidApiKey,
     JhTokenError,
     MissingAccessTokenCookie,
-    MissingJupyterHubToken,
     Model,
     ModelDefinition,
     ModelDescription,

@@ -14,7 +14,6 @@ class Client {
      *
      * @static
      * @param {Object} options - The options for creating an instance.
-     * @param {string} [options.jupyterHubToken] - The Jupyter Hub token. Optional.
      * @param {string} [options.jupyterHubUserPath] - The Jupyter Hub user path, extract it
      *                 from the URL when using the Modelon Impact main UI. Optional.
      * @param {string} [options.serverAddress] - The server address. Optional.
