@@ -1,6 +1,6 @@
 import Axios, { AxiosError, AxiosInstance } from 'axios'
 import ApiError, {
-    JhTokenError,
+    InvalidApiKey,
     ServerNotStarted,
     UnknownApiError,
 } from './api-error'
@@ -213,7 +213,7 @@ class Api {
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new ApiError({
-                    errorCode: JhTokenError,
+                    errorCode: InvalidApiKey,
                     httpCode: e.response?.status,
                     message:
                         'Failed to authorize with JupyterHub, invalid api key?',

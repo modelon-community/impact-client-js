@@ -4,7 +4,7 @@ import {
     ApiError,
     Client,
     ExperimentDefinition,
-    JhTokenError,
+    InvalidApiKey,
     Model,
 } from '../../dist'
 import { ModelicaExperimentDefinition, ModelicaModel } from '../../src/types'
@@ -64,7 +64,7 @@ test('Try to use invalid impact API key', async () => {
         // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
         // ApiError has errorCode.
         const error = e as ApiError;
-        expect(error.errorCode).toEqual(JhTokenError)
+        expect(error.errorCode).toEqual(InvalidApiKey)
         expect(error.httpCode).toEqual(400)
     }
 })
