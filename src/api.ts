@@ -1,12 +1,10 @@
 import Axios, { AxiosError, AxiosInstance } from 'axios'
 import ApiError, {
-    JhTokenError,
-    MissingAccessTokenCookie,
-    MissingJupyterHubToken,
+    InvalidApiKey,
     ServerNotStarted,
     UnknownApiError,
 } from './api-error'
-import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie'
+import { CookieJar, MemoryCookieStore } from 'tough-cookie'
 import Project from './project'
 import Workspace from './workspace'
 import {
@@ -46,18 +44,6 @@ const getCookieValue = (key: string) => {
     return parts.length === 2 ? parts.pop()?.split(';').shift() : undefined
 }
 
-const getValueFromJarCookies = (key: string, cookies: Cookie[]): string => {
-    const cookie = cookies.find((c) => c.key === key)
-
-    if (!cookie) {
-        throw new ApiError({
-            errorCode: MissingAccessTokenCookie,
-            message: 'Access token cookie not found',
-        })
-    }
-    return cookie.value
-}
-
 const toApiError = (e: AxiosError | Error) => {
     if (e instanceof AxiosError) {
         return new ApiError({
@@ -74,56 +60,30 @@ class Api {
     private axiosConfig!: AxiosConfig
     private baseUrl: string
     private impactApiKey?: string
-    private impactToken?: string
-    private jhToken: string
     private jhUserPath: string | undefined
 
     private configureAxios() {
-        const headers: Record<string, string> = {
-            Authorization: `token ${this.jhToken}`,
+        const headers: Record<string, string> = {};
+        
+        if (this.impactApiKey) {
+            headers['impact-api-key'] = `${this.impactApiKey}`
         }
-        if (this.impactToken) {
-            headers['Impact-Authorization'] = `Bearer ${this.impactToken}`
-        }
+
         this.axiosConfig = { headers }
         this.axios = Axios.create(this.axiosConfig)
     }
 
     private constructor({
         impactApiKey,
-        impactToken,
-        jupyterHubToken,
         serverAddress,
         jupyterHubUserPath,
     }: {
         impactApiKey?: string
-        impactToken?: string
-        jupyterHubToken?: string
         serverAddress?: string
         jupyterHubUserPath?: string
     }) {
         this.baseUrl = serverAddress || ''
         this.impactApiKey = impactApiKey
-        this.impactToken = impactToken
-
-        if (jupyterHubToken) {
-            this.jhToken = jupyterHubToken
-        } else {
-            // No provided JupyterHub token, to mimick impact-python-client we try to
-            // fallback on the environment variable available inside JupyterHub.
-            if (
-                typeof process !== 'undefined' &&
-                process?.env?.JUPYTERHUB_API_TOKEN
-            ) {
-                this.jhToken = process.env.JUPYTERHUB_API_TOKEN
-            } else {
-                throw new ApiError({
-                    errorCode: MissingJupyterHubToken,
-                    message:
-                        'Impact client instantiation failed: Missing JupyterHub token.',
-                })
-            }
-        }
 
         if (typeof jupyterHubUserPath === 'string') {
             this.jhUserPath =
@@ -136,37 +96,31 @@ class Api {
 
     static fromImpactApiKey({
         impactApiKey,
-        jupyterHubToken,
         jupyterHubUserPath,
         serverAddress,
     }: {
         impactApiKey?: string
-        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress?: string
     }) {
         return new Api({
             impactApiKey,
-            jupyterHubToken,
             jupyterHubUserPath,
             serverAddress,
         })
     }
 
-    static fromImpactToken({
-        impactToken,
-        jupyterHubToken,
+    static fromImpactSession({
         jupyterHubUserPath,
         serverAddress,
     }: {
-        impactToken: string
-        jupyterHubToken?: string
         jupyterHubUserPath?: string
         serverAddress?: string
     }) {
+        if (isNode()) {
+            throw new Error("Impact session can only be used from browser.")
+        }
         return new Api({
-            impactToken,
-            jupyterHubToken,
             jupyterHubUserPath,
             serverAddress,
         })
@@ -174,39 +128,42 @@ class Api {
 
     private isConfiguredForNode = () => !!this.axiosConfig.jar
 
-    private isConfiguredForImpact = () =>
-        !!this.axiosConfig.headers['Impact-Authorization']
+    private apiKeySet = () =>
+        !!this.axiosConfig.headers['impact-api-key'] 
+
+    private hasImpactSession = () => !!getCookieValue("impact-session");
+
+    private userPathFromUrl(url: string) {
+        const regex = /\/user\/([^/]+)\//
+        const match = url.match(regex)
+        return match ? match[0] : undefined;
+    }
 
     private getNodeCookieJar = () => this.axiosConfig.jar
 
     private ensureAxiosConfig = async () => {
+        // If node - set api-key if available and cookies to accept cookies from localhost
         if (isNode()) {
             if (
                 !this.isConfiguredForNode() ||
-                (this.impactToken && !this.isConfiguredForImpact())
+                (this.impactApiKey && !this.apiKeySet())
             ) {
                 const jar = new CookieJar(new MemoryCookieStore(), {
                     allowSpecialUseDomain: true,
                     rejectPublicSuffixes: false,
                 })
                 const headers: Record<string, string> = {
-                    Authorization: `token ${this.jhToken}`,
+                    'impact-api-key': `${this.impactApiKey}`,
                 }
-                if (this.impactToken) {
-                    headers[
-                        'Impact-Authorization'
-                    ] = `Bearer ${this.impactToken}`
-                }
-
+                
                 this.axiosConfig = { headers, jar }
 
                 this.axios = axiosCookieWrapper(Axios.create(this.axiosConfig))
             }
         } else {
-            if (this.impactToken && !this.isConfiguredForImpact()) {
+            if (this.impactApiKey && !this.apiKeySet()) {
                 const headers: Record<string, string> = {
-                    Authorization: `token ${this.jhToken}`,
-                    'Impact-Authorization': `Bearer ${this.impactToken}`,
+                    'impact-api-key': `${this.impactApiKey}`,
                 }
                 this.axiosConfig = { headers }
                 this.axios = Axios.create(this.axiosConfig)
@@ -219,69 +176,67 @@ class Api {
             return
         }
         try {
-            const response = await this.axios.get(
-                `${this.baseUrl}/hub/api/authorizations/token/${this.jhToken}`
-            )
-            const { server } = response.data
-            if (server === null) {
-                throw new ApiError({
-                    errorCode: ServerNotStarted,
-                    message: 'Server not started on JupyterHub.',
-                })
-            }
-            if (server === undefined) {
-                // Server missing in token scope, probably executing inside JupyterHub.
-                // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
-                this.jhUserPath =
+            if (this.apiKeySet()) {
+                const response = await this.axios.get(
+                    `${this.baseUrl}/hub/api/user`
+                )
+                const { server } = response.data
+                if (server === null) {
+                    throw new ApiError({
+                        errorCode: ServerNotStarted,
+                        message: 'Server not started on JupyterHub.',
+                    })
+                }
+                if (server === undefined) {
+                    // Server missing in token scope, probably executing inside JupyterHub.
+                    // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
+                    this.jhUserPath =
                     typeof process !== 'undefined'
-                        ? process.env?.JUPYTERHUB_SERVICE_PREFIX
-                        : undefined
-            } else {
-                this.jhUserPath = server
+                    ? process.env?.JUPYTERHUB_SERVICE_PREFIX
+                    : undefined
+                } else {
+                    this.jhUserPath = server
+                }
+                
+                return 
             }
+
+            // Use document URL as fallback.
+            const userPathFromUrl = this.userPathFromUrl(document.URL);
+            if (userPathFromUrl) {
+                this.jhUserPath = userPathFromUrl;
+                return
+            } else {
+                throw new Error('Failed to set user path from URL');
+            }
+
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new ApiError({
-                    errorCode: JhTokenError,
+                    errorCode: InvalidApiKey,
                     httpCode: e.response?.status,
                     message:
-                        'Failed to authorize with JupyterHub, invalid token?',
+                        'Failed to authorize with JupyterHub, invalid api key?',
                 })
             }
             throw e
         }
     }
 
-    private ensureImpactToken = async () => {
+    private ensureImpactAuth = async () => {
         await this.ensureAxiosConfig()
         await this.ensureJhUserPath()
 
-        if (this.impactToken) {
+        if (this.impactApiKey || this.hasImpactSession()) {
             return
-        }
+        } 
 
-        await this.axios.post(
-            `${this.baseUrl}${this.jhUserPath}impact/api/login`,
-            { secretKey: this.impactApiKey }
-        )
-        // extract cookie value, set cookie
-        const nodeCookieJar = this.getNodeCookieJar()
-        if (nodeCookieJar) {
-            // Get cookie value from cookiejar
-            const cookies = await nodeCookieJar.getCookies(
-                `${this.baseUrl}${this.jhUserPath}`
-            )
-            this.impactToken = getValueFromJarCookies('access_token', cookies)
-        } else {
-            this.impactToken = getCookieValue('access_token')
-        }
-        // Update axios config with the acquired impactToken
-        await this.ensureAxiosConfig()
+        throw new Error('No authentication method provided, please provide impact api key or make sure that impact-session token is present')
     }
 
     getWorkspaces = async (): Promise<Workspace[]> => {
         return new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -315,7 +270,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ExperimentId> =>
         new Promise((resolve, reject) =>
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .post(
@@ -340,7 +295,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<void> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .delete(
@@ -360,7 +315,7 @@ class Api {
         name: string
     }): Promise<Workspace> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .post(
@@ -388,7 +343,7 @@ class Api {
 
     deleteWorkspace = async (workspaceId: WorkspaceId): Promise<void> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .delete(
@@ -412,7 +367,7 @@ class Api {
         options?: ExecutionOptions
     }): Promise<void> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() =>
                     this.axios
                         .post(
@@ -438,7 +393,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ExecutionStatusType> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -454,7 +409,7 @@ class Api {
         workspaceId: WorkspaceId
     ): Promise<CustomFunction[]> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -474,7 +429,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ExperimentItem | undefined> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -499,7 +454,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ExperimentItem[]> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -520,7 +475,7 @@ class Api {
         workspaceId: WorkspaceId
     ): Promise<ExperimentItem[]> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -539,7 +494,7 @@ class Api {
 
     getWorkspaceProjects = (workspaceId: WorkspaceId): Promise<Project[]> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -570,7 +525,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<Case[] | undefined> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -592,7 +547,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ExperimentTrajectories> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .post(
@@ -617,7 +572,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ExperimentVariables> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -638,7 +593,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<CaseInput> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -660,7 +615,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<string> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -680,7 +635,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<string> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -700,7 +655,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<CustomFunctionOptions> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -724,7 +679,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<CaseTrajectories> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .post(
@@ -742,11 +697,6 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
-    setImpactToken = (token: string) => {
-        this.impactToken = token
-        this.configureAxios()
-    }
-
     getModelExecutableInfo = ({
         fmuId,
         workspaceId,
@@ -755,7 +705,7 @@ class Api {
         workspaceId: WorkspaceId
     }): Promise<ModelExecutableInfo> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -771,7 +721,7 @@ class Api {
         workspaceId: WorkspaceId
     ): Promise<ModelExecutableInfo[]> =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -783,9 +733,14 @@ class Api {
                 .catch((e) => reject(toApiError(e)))
         })
 
+    setImpactApiKey = (apiKey: string) => {
+        this.impactApiKey = apiKey;
+        this.configureAxios();
+    }
+
     delete = (path: string) =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .delete(
@@ -799,7 +754,7 @@ class Api {
 
     get = (path: string, accept?: string) =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .get(
@@ -820,7 +775,7 @@ class Api {
 
     post = (path: string, body: unknown, accept?: string) =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .post(
@@ -842,7 +797,7 @@ class Api {
 
     put = (path: string, body: unknown, accept?: string) =>
         new Promise((resolve, reject) => {
-            this.ensureImpactToken()
+            this.ensureImpactAuth()
                 .then(() => {
                     this.axios
                         .put(

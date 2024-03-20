@@ -19,7 +19,7 @@ For non-browser scripting purposes the best alternative is to use [impact-client
 
 ### Authentication
 
-If your app is running inside the Modelon Impact JupyterHub environment you only need to provide an Impact API key to authenticate. If your app runs outside the JupyterHub environment it will also need to authenticate towards JupyterHub using a token.
+If your app is running inside the Modelon Impact JupyterHub environment you can either use an Impact API key or use the authentication cookie (via `Client.fromImpactSession`) to authenticate. If your app runs outside the JupyterHub environment you will always have to use the Impact API key for authentication. The API-key can be generated from the Server Management page.
 
 #### Obtaining and setting the Impact API key
 
@@ -63,7 +63,6 @@ Create a `.env` file in the root of your project with the following content:
 
 ```bash
 MODELON_IMPACT_CLIENT_API_KEY=<your impact API key>
-JUPYTERHUB_API_TOKEN=<your JupyterHub API token>
 MODELON_IMPACT_SERVER=<Modelon Impact server address>
 ```
 
@@ -84,7 +83,6 @@ dotenv.config();
 
 const client = Client.fromImpactApiKey({
   impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
-  jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
   serverAddress: process.env.MODELON_IMPACT_SERVER,
 });
 
