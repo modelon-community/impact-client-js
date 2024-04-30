@@ -12,7 +12,7 @@ jobs:
     name: Validate PR title
     runs-on: ubuntu-latest
     steps:
-      # Pin action to SHA instead of git tag, the sha is equal to the v4 tag.
-      - uses: amannn/action-semantic-pull-request@91682d013dea3ff257520b9b68c9cb93ced4fe9b
+      # Pin action to SHA instead of git tag, the sha is equal to the v5.5.2 tag.
+      - uses: amannn/action-semantic-pull-request@cfb60706e18bc85e8aec535e3c577abe8f70378e
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
