@@ -3,7 +3,6 @@ export const InvalidApiKey = 11034
 const BASE = 100000
 export const UnknownApiError = BASE
 export const MissingAccessTokenCookie = BASE + 1
-export const MissingJupyterHubToken = BASE + 2
 export const ServerNotStarted = BASE + 3
 export const JhTokenError = BASE + 4
 

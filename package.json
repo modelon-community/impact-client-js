@@ -1,9 +1,10 @@
 {
     "name": "@modelon/impact-client-js",
-    "version": "3.2.8",
+    "version": "4.0.0-alpha.1",
     "description": "Modelon Impact Client for Javascript",
     "scripts": {
         "build": "tsup",
+        "watch": "tsup --watch",
         "lint": "eslint src/",
         "test": "vitest tests",
         "unit-test": "vitest tests/unit",
@@ -42,7 +43,7 @@
         "eslint": "^8.23.1",
         "jsdom": "^22.1.0",
         "prettier": "^2.7.1",
-        "semantic-release": "^19.0.5",
+        "semantic-release": "^23.0.8",
         "tsup": "^6.2.3",
         "typescript": "^4.8.2",
         "vitest": "^0.34.3"

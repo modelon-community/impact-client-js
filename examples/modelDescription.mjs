@@ -1,4 +1,4 @@
-// This script examplifies how to get model description units and variables.
+// This script exemplifies how to get model description units and variables.
 //
 // Make sure to have installed dependencies and have the required environment variables
 // available, as described in the Quick start example:
@@ -20,7 +20,6 @@ dotenv.config({ path: '../.env' })
 
 const client = Client.fromImpactApiKey({
     impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
-    jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
     serverAddress: process.env.MODELON_IMPACT_SERVER,
 })
 
