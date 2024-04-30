@@ -4,6 +4,7 @@
     "description": "Modelon Impact Client for Javascript",
     "scripts": {
         "build": "tsup",
+        "watch": "tsup --watch",
         "lint": "eslint src/",
         "test": "vitest tests",
         "unit-test": "vitest tests/unit",

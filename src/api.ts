@@ -184,7 +184,7 @@ class Api {
                 if (server === null) {
                     throw new ApiError({
                         errorCode: ServerNotStarted,
-                        message: 'Server not started on JupyterHub.',
+                        message: 'Modelon Impact server not started.',
                     })
                 }
                 if (server === undefined) {
@@ -216,7 +216,7 @@ class Api {
                     errorCode: InvalidApiKey,
                     httpCode: e.response?.status,
                     message:
-                        'Failed to authorize with JupyterHub, invalid api key?',
+                        'Failed to authorize with Modelon Impact, invalid api key?',
                 })
             }
             throw e

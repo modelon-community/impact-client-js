@@ -29,18 +29,6 @@ Remember that this is the only time you will see the secret. Make sure to store 
 
 Copy the key and keep it safe. If the key is lost or compromised, you can generate a new one by clicking the Regenerate and replace key button. This will delete the old key, so any application that uses it must have their keys updated to work. The API key is personal and each user may have one single key at a time, so do not share one key between several persons.
 
-#### Obtaining and setting the JupyterHub token
-
-Note that this is only required if you are running your app outside the Modelon Impact JupyterHub environment.
-
-The token can be acquired using the token page at https://impact.modelon.cloud/hub/token or the corresponding address for on-premise installations.
-
-You can get a secret token by choosing the “Request new API token” option. These are fully functional access tokens for the JupyterHub API. Everything that can be done with JupyterHub can be done with these tokens.
-
-Remember that this is the only time you will see the secret. Make sure to store it safely.
-
-If the token is lost, you can always generate a new one by clicking the “Request new API token” button. While initializing the client, you will be asked to enter the JupyterHub API token in a prompt.
-
 ## Quick start
 
 This quick start gives an example of how to setup a very basic node.js project that leverages impact-client-js. The more likely usage
