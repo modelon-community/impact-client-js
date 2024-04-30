@@ -5,9 +5,7 @@ import {
     Client,
     ExperimentDefinition,
     InvalidApiKey,
-    JhTokenError,
     Model,
-    Workspace,
 } from '../../dist'
 import { ModelicaExperimentDefinition, ModelicaModel } from '../../src/types'
 import { beforeEach, expect, test } from 'vitest'
@@ -19,15 +17,11 @@ const TwentySeconds = 20 * 1000
 
 const getClient = (options?: {
     impactApiKey?: string
-    jupyterHubToken?: string
 }) =>
     Client.fromImpactApiKey({
         impactApiKey:
             options?.impactApiKey ||
             (process.env.MODELON_IMPACT_CLIENT_API_KEY as string),
-        jupyterHubToken:
-            options?.jupyterHubToken ||
-            (process.env.JUPYTERHUB_API_TOKEN as string),
         serverAddress: process.env.MODELON_IMPACT_SERVER as string,
     })
 
@@ -60,45 +54,20 @@ const deleteTestWorkspace = async (client: Client) => {
     await Promise.all(deletePromises)
 }
 
-test('Try to use invalid impact API key', () =>
-    new Promise<void>((done) => {
-        const client = getClient({ impactApiKey: 'invalid-api-key' })
-
-        client
-            .getWorkspace('non-existing-workspace')
-            .then(() => {
-                throw new Error('Test should have caught error')
-            })
-            .catch((e: ApiError) => {
-                // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
-                // ApiError has errorCode.
-                if ('errorCode' in e) {
-                    expect(e.errorCode).toEqual(InvalidApiKey)
-                    expect(e.httpCode).toEqual(400)
-                    done()
-                }
-            })
-    }))
-
-test('Try to use invalid jupyter hub token', () =>
-    new Promise<void>((done) => {
-        const client = getClient({ jupyterHubToken: 'invalid-jh-token' })
-
-        client
-            .getWorkspace('non-existing-workspace')
-            .then(() => {
-                throw new Error('Test should have caught error')
-            })
-            .catch((e: ApiError) => {
-                // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
-                // ApiError has errorCode.
-                if ('errorCode' in e) {
-                    expect(e.errorCode).toEqual(JhTokenError)
-                    expect(e.httpCode).toEqual(403)
-                    done()
-                }
-            })
-    }))
+test('Try to use invalid impact API key', async () => {
+    const client = getClient({ impactApiKey: 'invalid-api-key' })
+    
+    try {
+        await client.getWorkspace('non-existing-workspace')
+        throw new Error('Test should have caught error')
+    } catch (e) {
+        // instanceof does not work for checking the type here, a ts-jest specific problem perhaps.
+        // ApiError has errorCode.
+        const error = e as ApiError;
+        expect(error.errorCode).toEqual(InvalidApiKey)
+        expect(error.httpCode).toEqual(400)
+    }
+})
 
 test(
     'Setup and execute experiment from json experiment definition',

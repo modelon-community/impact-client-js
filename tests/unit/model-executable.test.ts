@@ -21,7 +21,6 @@ test('Create and examine a ModelExecutable instance', async () => {
     // @ts-ignore
     const api = new Api({
         impactApiKey: 'mock-api-key',
-        jupyterHubToken: 'mock-jh-token',
     })
 
     const modelExecutable = await ModelExecutable.from({

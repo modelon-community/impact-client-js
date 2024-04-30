@@ -19,7 +19,7 @@ For non-browser scripting purposes the best alternative is to use [impact-client
 
 ### Authentication
 
-If your app is running inside the Modelon Impact JupyterHub environment you only need to provide an Impact API key to authenticate. If your app runs outside the JupyterHub environment it will also need to authenticate towards JupyterHub using a token.
+If your app is running inside the Modelon Impact JupyterHub environment you can either use an Impact API key or use the authentication cookie (via `Client.fromImpactSession`) to authenticate. If your app runs outside the JupyterHub environment you will always have to use the Impact API key for authentication. The API-key can be generated from the Server Management page.
 
 #### Obtaining and setting the Impact API key
 
@@ -28,18 +28,6 @@ An API key is needed for authentication in order to utilize the client with the 
 Remember that this is the only time you will see the secret. Make sure to store it safely.
 
 Copy the key and keep it safe. If the key is lost or compromised, you can generate a new one by clicking the Regenerate and replace key button. This will delete the old key, so any application that uses it must have their keys updated to work. The API key is personal and each user may have one single key at a time, so do not share one key between several persons.
-
-#### Obtaining and setting the JupyterHub token
-
-Note that this is only required if you are running your app outside the Modelon Impact JupyterHub environment.
-
-The token can be acquired using the token page at https://impact.modelon.cloud/hub/token or the corresponding address for on-premise installations.
-
-You can get a secret token by choosing the “Request new API token” option. These are fully functional access tokens for the JupyterHub API. Everything that can be done with JupyterHub can be done with these tokens.
-
-Remember that this is the only time you will see the secret. Make sure to store it safely.
-
-If the token is lost, you can always generate a new one by clicking the “Request new API token” button. While initializing the client, you will be asked to enter the JupyterHub API token in a prompt.
 
 ## Quick start
 
@@ -63,7 +51,6 @@ Create a `.env` file in the root of your project with the following content:
 
 ```bash
 MODELON_IMPACT_CLIENT_API_KEY=<your impact API key>
-JUPYTERHUB_API_TOKEN=<your JupyterHub API token>
 MODELON_IMPACT_SERVER=<Modelon Impact server address>
 ```
 
@@ -84,7 +71,6 @@ dotenv.config();
 
 const client = Client.fromImpactApiKey({
   impactApiKey: process.env.MODELON_IMPACT_CLIENT_API_KEY,
-  jupyterHubToken: process.env.JUPYTERHUB_API_TOKEN,
   serverAddress: process.env.MODELON_IMPACT_SERVER,
 });
 
