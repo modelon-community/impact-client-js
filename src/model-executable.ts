@@ -1,6 +1,5 @@
 import Analysis from './analysis'
 import Api from './api'
-import DefaultExperiment from './default-experiment'
 import ExperimentDefinition from './experiment-definition'
 import ModelDescription from './model-description'
 import { XMLParser } from 'fast-xml-parser'
