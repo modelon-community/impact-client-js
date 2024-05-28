@@ -110,6 +110,8 @@ class Client {
 
     setImpactApiKey = (apiKey: string) =>  this.api.setImpactApiKey(apiKey);
 
+    logout = () => this.api.logout();
+
     delete = (path: string) => this.api.delete(path)
     get = (path: string, accept?: string) => this.api.get(path, accept)
     post = (path: string, body: unknown, accept?: string) =>

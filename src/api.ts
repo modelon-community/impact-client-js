@@ -738,6 +738,21 @@ class Api {
         this.configureAxios();
     }
 
+    logout = () =>
+        new Promise((resolve, reject) => {
+            this.ensureImpactAuth()
+                .then(() => {
+                    this.axios
+                        .get(
+                            `${this.baseUrl}/logout`
+                        )
+                        // Only returns proper message if impact-api-key is used, with session html page is returned
+                        .then((response) => resolve(response.data))
+                        .catch((e) => reject(toApiError(e)))
+                })
+                .catch((e) => reject(toApiError(e)))
+        })
+
     delete = (path: string) =>
         new Promise((resolve, reject) => {
             this.ensureImpactAuth()
