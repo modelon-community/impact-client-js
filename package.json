@@ -1,6 +1,6 @@
 {
     "name": "@modelon/impact-client-js",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "description": "Modelon Impact Client for Javascript",
     "scripts": {
         "build": "tsup",
