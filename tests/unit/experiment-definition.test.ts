@@ -1,9 +1,13 @@
 import ExperimentDefinition from '../../src/experiment-definition'
 import Analysis from '../../src/analysis'
 import Model from '../../src/model'
-import TestDefinition from './test-definition.json'
-import { ModelicaModel, ModelicaExperimentDefinition } from '../../src/types'
+import {
+    ModelicaExperimentExtensions,
+    ModelicaExperimentModifiers,
+} from '../../src/types'
 import { expect, test } from 'vitest'
+import { components } from '../../src/schema/impact-api'
+import { mockTestDefinition } from './mockTestDefinition'
 
 test('Create experiment definition without modifiers and parameters', () => {
     const customFunction = 'dynamic'
@@ -16,7 +20,7 @@ test('Create experiment definition without modifiers and parameters', () => {
     })
 
     expect(modelExperiment.toModelicaExperimentDefinition()).toEqual({
-        version: 2,
+        version: 3,
         base: {
             model: {
                 modelica: {
@@ -33,10 +37,16 @@ test('Create experiment definition without modifiers and parameters', () => {
             },
             analysis: {
                 type: customFunction,
-                parameters: {
-                    start_time: 0,
-                    final_time: 1,
-                },
+                parameters: [
+                    {
+                        name: 'start_time',
+                        value: 0,
+                    },
+                    {
+                        name: 'final_time',
+                        value: 1,
+                    },
+                ],
                 simulationOptions: {
                     ncp: 100,
                     dynamic_diagnostics: false,
@@ -44,7 +54,6 @@ test('Create experiment definition without modifiers and parameters', () => {
                 solverOptions: {},
                 simulationLogLevel: 'WARNING',
             },
-            modifiers: {},
         },
         extensions: [],
     })
@@ -53,13 +62,57 @@ test('Create experiment definition without modifiers and parameters', () => {
 test('Create experiment definition with modifiers and parameters', () => {
     const customFunction = 'dynamic'
     const modelName = 'Modelica.Blocks.Examples.PID_Controller'
-    const modifiers = { variables: { 'inertia1.J': 2, 'PI.k': 40 } }
-    const extensions = [
+    const modifiers: ModelicaExperimentModifiers = {
+        variables: [
+            { kind: 'value', name: 'inertia1.J', value: 2, dataType: 'REAL' },
+            { kind: 'value', name: 'PI.k', value: 40, dataType: 'REAL' },
+        ],
+        initializeFrom: null,
+        initializeFromCase: null,
+        initializeFromExternalResult: null,
+    }
+    const extensions: ModelicaExperimentExtensions = [
         {
-            modifiers: { variables: { 'inertia1.w': 1, 'inertia2.w': 2 } },
+            modifiers: {
+                variables: [
+                    {
+                        kind: 'value',
+                        name: 'inertia1.w',
+                        value: 1,
+                        dataType: 'REAL',
+                    },
+                    {
+                        kind: 'value',
+                        name: 'inertia2.w',
+                        value: 2,
+                        dataType: 'REAL',
+                    },
+                ],
+                initializeFrom: null,
+                initializeFromCase: null,
+                initializeFromExternalResult: null,
+            },
         },
         {
-            modifiers: { variables: { 'inertia1.w': 2, 'inertia2.w': 3 } },
+            modifiers: {
+                variables: [
+                    {
+                        kind: 'value',
+                        name: 'inertia1.w',
+                        value: 2,
+                        dataType: 'REAL',
+                    },
+                    {
+                        kind: 'value',
+                        name: 'inertia2.w',
+                        value: 3,
+                        dataType: 'REAL',
+                    },
+                ],
+                initializeFrom: null,
+                initializeFromCase: null,
+                initializeFromExternalResult: null,
+            },
         },
     ]
     const model = Model.fromModelDefinition({
@@ -76,12 +129,18 @@ test('Create experiment definition with modifiers and parameters', () => {
             platform: 'auto',
             runtimeOptions: {},
         },
-    } as ModelicaModel)
+    } as components['schemas']['ModelicaEnvelop'])
     const analysis = Analysis.from({
-        parameters: {
-            start_time: 0,
-            final_time: 4,
-        },
+        parameters: [
+            {
+                name: 'start_time',
+                value: 0,
+            },
+            {
+                name: 'final_time',
+                value: 4,
+            },
+        ],
         type: customFunction,
     })
 
@@ -92,7 +151,7 @@ test('Create experiment definition with modifiers and parameters', () => {
         modifiers,
     })
 
-    const expectedDefinition = { ...TestDefinition }
+    const expectedDefinition = { ...mockTestDefinition }
     expectedDefinition.base.modifiers = modifiers
 
     expect(modelExperiment.toModelicaExperimentDefinition()).toEqual(
@@ -103,11 +162,11 @@ test('Create experiment definition with modifiers and parameters', () => {
 test('From ModelicaExperimentDefinition and back should produce original ModelicaExperimentDefinition', () => {
     const modelExperiment =
         ExperimentDefinition.fromModelicaExperimentDefinition(
-            TestDefinition as ModelicaExperimentDefinition
+            mockTestDefinition
         )
 
     expect(modelExperiment.toModelicaExperimentDefinition()).toEqual(
-        TestDefinition
+        mockTestDefinition
     )
 })
 
@@ -124,10 +183,16 @@ test('Validate that a ModelicaExperimentDefinition with explicit model options a
     }
     const analysis = Analysis.from({
         customFunctionOptions,
-        parameters: {
-            start_time: 0,
-            final_time: 10,
-        },
+        parameters: [
+            {
+                name: 'start_time',
+                value: 0,
+            },
+            {
+                name: 'final_time',
+                value: 10,
+            },
+        ],
         simulationOptions: { ncp: 250 },
         type: 'dynamic',
     })
@@ -137,11 +202,7 @@ test('Validate that a ModelicaExperimentDefinition with explicit model options a
     })
     const experimentDefinition = ExperimentDefinition.from({
         analysis,
-        extensions: [
-            {
-                modifiers: {},
-            },
-        ],
+        extensions: [],
         model,
     })
 
@@ -167,10 +228,10 @@ test('Validate that a ModelicaExperimentDefinition with customFunction options a
 
     const analysis = Analysis.from({
         customFunctionOptions,
-        parameters: {
-            start_time: 0,
-            final_time: 10,
-        },
+        parameters: [
+            { name: 'start_time', value: 0 },
+            { name: 'final_time', value: 10 },
+        ],
         type: 'dynamic',
     })
     const model = Model.from({
@@ -179,21 +240,23 @@ test('Validate that a ModelicaExperimentDefinition with customFunction options a
     })
     const experimentDefinition = ExperimentDefinition.from({
         analysis,
-        extensions: [
-            {
-                modifiers: {},
-            },
-        ],
+        extensions: [],
         model,
     })
 
     expect(experimentDefinition.toModelicaExperimentDefinition()).toEqual({
         base: {
             analysis: {
-                parameters: {
-                    final_time: 10,
-                    start_time: 0,
-                },
+                parameters: [
+                    {
+                        name: 'start_time',
+                        value: 0,
+                    },
+                    {
+                        name: 'final_time',
+                        value: 10,
+                    },
+                ],
                 simulationLogLevel: 'WARNING',
                 simulationOptions: {
                     dynamic_diagnostics: false,
@@ -217,13 +280,9 @@ test('Validate that a ModelicaExperimentDefinition with customFunction options a
                     runtimeOptions: {},
                 },
             },
-            modifiers: {},
+            modifiers: undefined,
         },
-        extensions: [
-            {
-                modifiers: {},
-            },
-        ],
-        version: 2,
+        extensions: [],
+        version: 3,
     })
 })

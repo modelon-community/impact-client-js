@@ -29,7 +29,7 @@ import {
     ModelicaModel,
     Variable,
     WorkspaceDefinition,
-} from './types/index.d'
+} from './types/index'
 import Model from './model'
 import Range from './range'
 import Workspace from './workspace'

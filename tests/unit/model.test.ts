@@ -1,14 +1,11 @@
 import Model from '../../src/model'
-import { ModelDefinition } from '../../src/types'
-import TestDefinition from './test-definition.json'
 import { expect, test } from 'vitest'
+import { mockTestDefinition } from './mockTestDefinition'
 
 test('From Model and back should produce original Model', () => {
-    const model = Model.fromModelDefinition(
-        TestDefinition.base.model as ModelDefinition
-    )
+    const model = Model.fromModelDefinition(mockTestDefinition.base.model)
 
-    expect(model.toModelDefinition()).toEqual(TestDefinition.base.model)
+    expect(model.toModelDefinition()).toEqual(mockTestDefinition.base.model)
 })
 
 test('Model with only custom function name should get default options', () => {

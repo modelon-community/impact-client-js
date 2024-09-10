@@ -68,13 +68,13 @@ class ExperimentDefinition {
         }))
 
     toModelicaExperimentDefinition = (): ModelicaExperimentDefinition => ({
-        version: 2,
+        version: 3,
         base: {
             model: this.model.toModelDefinition(),
             analysis:
                 this.analysis?.toModelicaExperimentAnalysis() ??
                 Analysis.DefaultAnalysis,
-            modifiers: this.modifiers || {},
+            ...(this.modifiers ? { modifiers: this.modifiers } : {}),
         },
         extensions: this.extensions || [],
     })

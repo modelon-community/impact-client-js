@@ -7,13 +7,16 @@ export type CustomFunctionOptions =
 export type CustomFunction =
     operations['getCustomFunction']['responses']['200']['content']['application/json']
 
-export type ExecutionOptions = 
-    NonNullable<NonNullable<operations['execute']['requestBody']>['content']['application/json']['options']>
+export type ExecutionOptions = NonNullable<
+    NonNullable<
+        operations['execute']['requestBody']
+    >['content']['application/json']['options']
+>
 
 export type ExecutionStatusType =
     operations['getExecutionStatus']['responses']['200']['content']['application/json']
 
-export type ExperimentItem = components['schemas']['ExperimentItemV2']
+export type ExperimentItem = components['schemas']['ExperimentItemV3']
 
 export type ExperimentMetaData = components['schemas']['ExperimentMetaData']
 
@@ -22,37 +25,57 @@ export type WorkspaceDefinition =
     components['schemas']['WorkspaceDefinitionProtocol']
 
 export type ModelicaExperimentDefinition =
-    components['schemas']['ExperimentDefinition']
-export type ModelDefinition = components['schemas']['Model']
+    components['schemas']['ExperimentDefinitionV3']
 
-export type ModelicaExperimentExtensions = components['schemas']['Extensions']
+export type ModelDefinition =
+    | components['schemas']['FmuEnvelop']
+    | components['schemas']['ModelicaEnvelop']
+
+export type ModelicaExperimentExtensions =
+    components['schemas']['ExtensionV3'][]
 
 export type ModelicaExperimentAnalysisParameters =
-    components['schemas']['Analysis']['parameters']
+    components['schemas']['AnalysisV3']['parameters']
 export type ModelicaExperimentSimulationOptions =
-    components['schemas']['Analysis']['simulationOptions']
+    components['schemas']['AnalysisV3']['simulationOptions']
 export type ModelicaExperimentSolverOptions =
-    components['schemas']['Analysis']['solverOptions']
+    components['schemas']['AnalysisV3']['solverOptions']
 export type ModelicaExperimentSimulationLogLevel =
-    components['schemas']['Analysis']['simulationLogLevel']
-export type ModelicaExperimentAnalysis = components['schemas']['Analysis']
+    components['schemas']['AnalysisV3']['simulationLogLevel']
+export type ModelicaExperimentAnalysis = components['schemas']['AnalysisV3']
 
-export type ModelicaExperimentModifiers = components['schemas']['Modifiers']
+export type ModelicaExperimentModifiers = components['schemas']['ModifiersV3']
 
-export type CaseInput =
-    operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items'][0]['input']
+export type CaseInput = NonNullable<
+    NonNullable<
+        NonNullable<
+            operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']
+        >['items']
+    >[0]['input']
+>
 
-export type CaseTrajectories =
-    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items'][0]['items']
+export type CaseTrajectories = NonNullable<
+    NonNullable<
+        NonNullable<
+            operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']
+        >['items']
+    >[0]['items']
+>
 
-export type CaseRunInfo =
-    operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']['items'][0]['run_info']
+export type CaseRunInfo = NonNullable<
+    NonNullable<
+        operations['getAllCaseInfo']['responses']['200']['content']['application/json']['data']
+    >['items']
+>[0]['run_info']
 
 export type ExperimentRunInfo =
-    components['schemas']['ExperimentItemV2']['run_info']
+    components['schemas']['ExperimentItemV3']['run_info']
 
-export type ExperimentTrajectories =
-    operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']['items']
+export type ExperimentTrajectories = NonNullable<
+    NonNullable<
+        operations['getTrajectories']['responses']['200']['content']['application/vnd.impact.trajectories.v2+json']['data']
+    >['items']
+>
 
 export type ExperimentVariables =
     operations['getVariables']['responses']['200']['content']['application/json']
@@ -62,13 +85,12 @@ export type LocalProjectProtocol = components['schemas']['LocalProjectProtocol']
 export type FmuModel = components['schemas']['FmuModel']
 export type ModelicaModel = components['schemas']['ModelicaModel']
 
-export type ModelExecutableInfo =
-    components['schemas']['ModelExecutableListV2'][0]
+export type ModelExecutableInfo = components['schemas']['ModelExecutableItemV2']
 
 const modelTypes = ['fmuModel', 'modelicaModel'] as const
-export type ModelType = typeof modelTypes[number]
+export type ModelType = (typeof modelTypes)[number]
 
-export type CaseDefinition = components['schemas']['Extensions'][0] & {
+export type CaseDefinition = components['schemas']['ExtensionV3'] & {
     caseId: string
 }
 

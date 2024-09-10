@@ -4,239 +4,223 @@
  */
 
 
-/** Type helpers */
-type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
-type OneOf<T extends any[]> = T extends [infer Only] ? Only : T extends [infer A, infer B, ...infer Rest] ? OneOf<[XOR<A, B>, ...Rest]> : never;
+/** WithRequired type helpers */
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
 export interface paths {
   "/": {
     /**
-     * Returns an object with meta data for this API 
+     * Returns an object with meta data for this API
      * @description Can be used by client to check that the API is of a version it supports. The APIs version is semantic.
      */
     get: operations["getAPIMetaData"];
   };
   "/docs": {
     /**
-     * Returns the HTML documentation page. 
+     * Returns the HTML documentation page.
      * @description The HTML documentation page for all the Modelon Impact REST API's.
      */
     get: operations["getDocs"];
   };
   "/login": {
     /**
-     * Logs in a user 
-     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created in the 'IMPACT API KEY' section of the <a class="visible-link" href="__IMPACT_SERVER_MANAGEMENT_URL__"> 'Server management'</a> page.
+     * Logs in a user
+     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created in the 'IMPACT API KEY' section of the <a class="visible-link" href="__IMPACT_SERVER_MANAGEMENT_URL__"> 'Server management'</a> page. By default this endpoint uses cookies but can be toggled using no_cookies parameter.
      */
     post: operations["login"];
   };
   "/projects": {
     /**
-     * Get all projects 
+     * Get all projects
      * @description Returns a list of all local projects that exists. The query parameter vcsInfo can be used to also get info on how projects are version controlled.
      */
     get: operations["getProjects"];
-    parameters?: {
-        /**
-         * @description If true, returned projects vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for any returned project. Default is false. 
-         * @example vcsInfo=true
-         */
-        /**
-         * @description Used to filter so only projects of a specified projectType is returned. If not given all project types are returned. 
-         * @example type=RELEASED
-         */
-      query?: {
-        vcsInfo?: string;
-        type?: string;
-      };
-    };
   };
   "/executions": {
     /**
-     * Get all 'running' and 'pending' executions 
+     * Get all 'running' and 'pending' executions
      * @description Returns a list of all 'running' and 'pending' executions.
      */
     get: operations["getExecutions"];
   };
   "/project-imports": {
     /**
-     * Start import of a project 
+     * Start import of a project
      * @description Will initiate import of a project. After a successful completion of a call to this endpoint, call GET /project-imports/{importId} to check status.
      */
     post: operations["importProject"];
   };
   "/project-imports/{importId}": {
     /**
-     * Returns status for a project import. Also returns data for the imported resource when ready 
+     * Returns status for a project import. Also returns data for the imported resource when ready
      * @description The project needs to be setup for import by calling POST /project-imports, before calling this API endpoint.
      */
     get: operations["importProjectStatus"];
     /**
-     * Deletes a project import 
+     * Deletes a project import
      * @description This API end point can be be called after a project has been imported.
      */
     delete: operations["deleteProjectImport"];
     parameters: {
+      path: {
         /**
-         * @description ID of the project import to check status on. 
+         * @description ID of the project import to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         importId: string;
       };
     };
   };
   "/project-exports": {
     /**
-     * Prepares a project for download as a zip file 
+     * Prepares a project for download as a zip file
      * @description The compressed project will be prepared. After a successful completion of a call to this endpoint, call GET /project-exports/{exportId} to check status.
      */
     post: operations["prepareExportProjectAsync"];
   };
   "/project-exports/{exportId}": {
     /**
-     * Returns status for preparing a project for download. Also returns data for download when ready 
+     * Returns status for preparing a project for download. Also returns data for download when ready
      * @description The project needs to be setup for export by calling POST /project-exports, before calling this API endpoint.
      */
     get: operations["exportProjectAsync"];
     /**
-     * Deletes a project export, including the compressed zip 
+     * Deletes a project export, including the compressed zip
      * @description This API end point can be be called after a compressed project has been downloaded.
      */
     delete: operations["deleteExportedProjectAsync"];
     parameters: {
+      path: {
         /**
-         * @description ID of the compressed project to check status on. 
+         * @description ID of the compressed project to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         exportId: string;
       };
     };
   };
   "/projects/{project}": {
     /**
-     * Get a project 
+     * Get a project
      * @description Returns a project given a project ID. The query parameter vcsInfo can be used to also get info on how the project is version controlled.
      */
     get: operations["getProject"];
     /**
-     * Update a project 
+     * Update a project
      * @description Updates a project given project data and a project ID. Only the project definition is allowed to be updated and content entries cannot be added or deleted. Content ID or project format cannot be updated.
      */
     put: operations["updateProject"];
     /**
-     * Delete a project 
+     * Delete a project
      * @description Deletes a project given a project ID. Will also delete any reference from workspaces to this project.
      */
     delete: operations["deleteProject"];
     parameters: {
+      path: {
         /**
-         * @description ID of the project the content is imported into. 
+         * @description ID of the project the content is imported into.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         project: string;
       };
     };
   };
   "/projects/{project}/icon": {
     /**
-     * Get the project icon. 
+     * Get the project icon.
      * @description Returns the icon(if it exists) for the project.
      */
     get: operations["getIcon"];
     parameters: {
+      path: {
         /**
-         * @description ID of the project. 
+         * @description ID of the project.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         project: string;
       };
     };
   };
   "/projects/{project}/content": {
     /**
-     * Create new content entry 
+     * Create new content entry
      * @description Will create a new content entry for a project. For MODELICA content entries an empty structured modelica library will also be created on disk.
      */
     post: operations["createContent"];
     parameters: {
+      path: {
         /**
-         * @description ID of the project the content is created in. 
+         * @description ID of the project the content is created in.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         project: string;
       };
     };
   };
   "/projects/{project}/content/{content}": {
     /**
-     * Get a content entry 
+     * Get a content entry
      * @description Returns a content entry given project and content IDs.
      */
     get: operations["getContent"];
     /**
-     * Delete a content entry 
+     * Delete a content entry
      * @description Deletes a content entry from a project. Any files on disk that exists for this content is also deleted.
      */
     delete: operations["deleteContent"];
     parameters: {
-        /**
-         * @description ID of the project the content is defined in. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description ID of the content entry. 
-         * @example 79sd8-3n2a4-e3t24
-         */
       path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
         project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
         content: string;
       };
     };
   };
   "/projects/{project}/content-imports": {
     /**
-     * Start import of existing content 
+     * Start import of existing content
      * @description Will initiate import of existing content. After a successful completion of a call to this endpoint, call GET /projects/{project}/content-imports/{importId} to check status.
      */
     post: operations["importContent"];
     parameters: {
+      path: {
         /**
-         * @description ID of the project the content is imported into. 
+         * @description ID of the project the content is imported into.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         project: string;
       };
     };
   };
   "/projects/{project}/content-imports/{importId}": {
     /**
-     * Returns status for a content import. Also returns data for the imported resource when ready 
+     * Returns status for a content import. Also returns data for the imported resource when ready
      * @description The content needs to be setup for import by calling POST /content-imports, before calling this API endpoint.
      */
     get: operations["importContentStatus"];
     /**
-     * Deletes a content import 
+     * Deletes a content import
      * @description This API end point can be be called after a content has been imported.
      */
     delete: operations["deleteContentImport"];
     parameters: {
-        /**
-         * @description ID of the project the content is imported into. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description ID of the content import to check status on. 
-         * @example 79sd8-3n2a4-e3t24
-         */
       path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
         project: string;
+        /**
+         * @description ID of the content import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
         importId: string;
       };
     };
@@ -245,66 +229,66 @@ export interface paths {
     /** Imports an co-simulation FMU */
     post: operations["importFMU"];
     parameters: {
-        /**
-         * @description ID of the project the content is defined in. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description ID of the content entry. 
-         * @example 79sd8-3n2a4-e3t24
-         */
       path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
         project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
         content: string;
       };
     };
   };
   "/projects/{project}/content/{content}/fmu-imports/{importId}": {
     /**
-     * Returns status for a FMU import. Also returns data for the imported resource when ready 
+     * Returns status for a FMU import. Also returns data for the imported resource when ready
      * @description The content needs to be setup for import by calling POST /fmu-imports, before calling this API endpoint.
      */
     get: operations["importFMUStatus"];
     /**
-     * Deletes a FMU import 
+     * Deletes a FMU import
      * @description This API end point can be be called after a FMU has been imported.
      */
     delete: operations["deleteFMUImport"];
     parameters: {
-        /**
-         * @description ID of the project the content is defined in. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description ID of the content entry. 
-         * @example 79sd8-3n2a4-e3t24
-         */
-        /**
-         * @description ID of the content import to check status on. 
-         * @example 79sd8-3n2a4-e3t24
-         */
       path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
         project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
         content: string;
+        /**
+         * @description ID of the content import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
         importId: string;
       };
     };
   };
   "/workspace-template": {
     /**
-     * Returns an object containing the template for the workspace. 
+     * Returns an object containing the template for the workspace.
      * @description The response from this endpoint can be used as a template to create a new workspace by sending it as the request body for the POST /workspaces endpoint.
      */
     get: operations["getWorkspaceTemplate"];
   };
   "/workspaces": {
     /**
-     * Returns an object containing a list of all available workspaces together with metadata 
+     * Returns an object containing a list of all available workspaces together with metadata
      * @description The workspace ID in the returned object serve as unique IDs that can be used in other API calls to perform operations for a specific workspace.
      */
     get: operations["getWorkspaces"];
     /**
-     * Creates a new workspace 
+     * Creates a new workspace
      * @description Creates a new workspace with some name.
      */
     post: operations["createWorkspace"];
@@ -313,18 +297,18 @@ export interface paths {
     /** Returns an object containing the metadata of the specified ID */
     get: operations["getWorkspaceId"];
     /**
-     * This end-point can be used to update a workspace configuration. This can be used to modify the workspace definition. Only fields under 'definition' can be updated. Also, the fields 'createdAt', 'format' and 'guid' cannot be updated. The recomended way to update the workspace is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data. 
+     * This end-point can be used to update a workspace configuration. This can be used to modify the workspace definition. Only fields under 'definition' can be updated. Also, the fields 'createdAt', 'format' and 'guid' cannot be updated. The recomended way to update the workspace is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data.
      * @description Updates the configuration of the workspace.
      */
     put: operations["updateWorkspaceConfiguration"];
     /** Deletes a workspace with the specified ID */
     delete: operations["deleteWorkspace"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
@@ -333,312 +317,305 @@ export interface paths {
     /** Returns what conversions are needed for a workspace and what potential issues there are */
     get: operations["getWorkspaceConversionCheckId"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/dependencies": {
     /**
-     * Get workspace dependencies 
+     * Get workspace dependencies
      * @description Get workspace dependencies.
      */
     get: operations["getWorkspaceDependencies"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/dependency-imports": {
     /**
-     * Start import of a project and add it as a dependency to the workspace 
+     * Start import of a project and add it as a dependency to the workspace
      * @description Will initiate import of a project and add it as a dependency to the workspace. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/dependency-imports/{importId} to check status.
      */
     post: operations["importWorkspaceDependency"];
     parameters: {
+      path: {
         /**
-         * @description ID of workspace the project will be added to as a dependency. 
+         * @description ID of workspace the project will be added to as a dependency.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/dependency-imports/{importId}": {
     /**
-     * Returns status for a dependency import. Also returns data for the imported resource when ready 
+     * Returns status for a dependency import. Also returns data for the imported resource when ready
      * @description The project to be added as a dependency needs to be setup for import by calling POST /dependency-imports, before calling this API endpoint.
      */
     get: operations["importWorkspaceDependencyStatus"];
     /**
-     * Deletes a workspace dependency import 
+     * Deletes a workspace dependency import
      * @description This API end point can be be called after a project has been imported and added as a workspace depenendency.
      */
     delete: operations["deleteWorkspaceDependencyImport"];
     parameters: {
+      path: {
         /**
-         * @description ID of workspace the project will be added to as a dependency. 
+         * @description ID of workspace the project will be added to as a dependency.
          * @example MyWorkspace
          */
+        workspace: string;
         /**
-         * @description ID of the dependency import to check status on. 
+         * @description ID of the dependency import to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
-        workspace: string;
         importId: string;
       };
     };
   };
   "/workspaces/{workspace}/project-imports": {
     /**
-     * Start import of an editable project to be added to the workspace 
+     * Start import of an editable project to be added to the workspace
      * @description Will initiate import of a project and add it to the workspace. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/project-imports/{importId} to check status.
      */
     post: operations["importWorkspaceProject"];
     parameters: {
+      path: {
         /**
-         * @description ID of workspace the editable project will be added to. 
+         * @description ID of workspace the editable project will be added to.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/project-imports/{importId}": {
     /**
-     * Returns status for a project import. Also returns data for the imported resource when ready 
+     * Returns status for a project import. Also returns data for the imported resource when ready
      * @description The editable project to be added to the workspace needs to be setup for import by calling POST /project-imports, before calling this API endpoint.
      */
     get: operations["importWorkspaceProjectStatus"];
     /**
-     * Deletes a workspace project import 
+     * Deletes a workspace project import
      * @description This API end point can be be called after a project has been imported and added to the workspace.
      */
     delete: operations["deleteWorkspaceProjectImport"];
     parameters: {
+      path: {
         /**
-         * @description ID of workspace the editable project will be added to. 
+         * @description ID of workspace the editable project will be added to.
          * @example MyWorkspace
          */
+        workspace: string;
         /**
-         * @description ID of the editable project import to check status on. 
+         * @description ID of the editable project import to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
-        workspace: string;
         importId: string;
       };
     };
   };
   "/workspaces/{workspace}/projects": {
     /**
-     * Get workspace projects 
+     * Get workspace projects
      * @description Get workspace projects.
      */
     get: operations["getWorkspaceProjects"];
     /**
-     * Create and add a project to workspace. 
+     * Create and add a project to workspace.
      * @description Create an empty projects and adds it to workspace.
      */
     post: operations["createAndAddProjectsToWorkspace"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/projects/{project}/experiments": {
     /**
-     * Get project generated experiments for a workspace. 
+     * Get project generated experiments for a workspace.
      * @description Get project generated experiments for a workspace.
      */
     get: operations["getWorkspaceProjectExperiments"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
+        workspace: string;
         /**
-         * @description ID of the project. 
+         * @description ID of the project.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
-        workspace: string;
         project: string;
       };
     };
   };
   "/workspaces/{workspace}/projects/{project}/model-executables": {
     /**
-     * Get project generated FMUs for a workspace. 
+     * Get project generated FMUs for a workspace.
      * @description Get project generated FMUs for a workspace.
      */
     get: operations["getWorkspaceProjectFmus"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
+        workspace: string;
         /**
-         * @description ID of the project. 
+         * @description ID of the project.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
-        workspace: string;
         project: string;
       };
     };
   };
   "/workspaces/{workspace}/sharing-definition": {
     /**
-     * Returns a workspaces sharing defintion 
+     * Returns a workspaces sharing defintion
      * @description Will create a workspace definition that can be shared with other users. This requires that all projects used in the workspace is either version controlled or a released projcet. The 'strict' query parameter can be used to specify if the version control URIs are to specific commits or not. The end-point /workspace-imports is used to import a workspace based on the shared definition returned from this end-point.
      */
     get: operations["getWorkspaceSharingId"];
     parameters: {
+      path: {
         /**
-         * @description If true, version control references will be to a specific commit. If false, version control references will not contain specific commit. Default is false. 
-         * @example strict=true
-         */
-      query?: {
-        strict?: string;
-      };
-        /**
-         * @description ID of the workspace. 
+         * @description ID of the workspace.
          * @example MyWorkspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/custom-functions/{custom-function}": {
     /**
-     * Get the custom function meta-data 
+     * Get the custom function meta-data
      * @description Gets the meta-data for a custom function describing which parameters the custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center.
      */
     get: operations["getCustomFunction"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Name of the custom function. 
+         * @description Name of the custom function.
          * @example steady state
          */
-      path: {
-        workspace: string;
         "custom-function": string;
       };
     };
   };
   "/workspaces/{workspace}/custom-functions/{custom-function}/options": {
     /**
-     * Gets the execution options 
+     * Gets the execution options
      * @description Gets the (aggregated) options for a custom function. This includes: Workspace specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the workspace specific options, secondarily from the application default options and in third hand from the custom function default options.
      */
     get: operations["getExecutionOptions"];
     /**
-     * Sets execution option values 
+     * Sets execution option values
      * @description The values for the options are saved for a specific custom function and workspace.
      */
     put: operations["putExecutionOptions"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Name of the custom function. 
+         * @description Name of the custom function.
          * @example steady state
          */
-      path: {
-        workspace: string;
         "custom-function": string;
       };
     };
   };
   "/workspaces/{workspace}/custom-functions/{custom-function}/default-options": {
     /**
-     * Gets the default execution options 
+     * Gets the default execution options
      * @description Gets the application level default options for a custom function. This includes: Options configured as defaults for the application and default options specified in the custom function. For options specified on both levels, the value is taken from the application default options.
      */
     get: operations["getDefaultExecutionOptions"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Name of the custom function. 
+         * @description Name of the custom function.
          * @example steady state
          */
-      path: {
-        workspace: string;
         "custom-function": string;
       };
     };
   };
   "/workspaces/{workspace}/projects/{project}/custom-functions/{custom-function}/options": {
     /**
-     * Gets the execution options 
+     * Gets the execution options
      * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
      */
     get: operations["getExecutionOptionsProjects"];
     /**
-     * Sets execution option values 
+     * Sets execution option values
      * @description The values for the options are saved for a specific custom function and project.
      */
     put: operations["putProjectExecutionOptions"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description ID of the project execution options are located in. 
+         * @description ID of the project execution options are located in.
          * @example 79sd8-3n2a4-e3t24
          */
+        project: string;
         /**
-         * @description Name of the custom function. 
+         * @description Name of the custom function.
          * @example steady state
          */
-      path: {
-        workspace: string;
-        project: string;
         "custom-function": string;
       };
     };
   };
   "/workspaces/{workspace}/custom-functions": {
     /**
-     * Get a list of custom functions meta-data 
+     * Get a list of custom functions meta-data
      * @description Which custom functions that exists are useful when setting up an experiment using POST /workspaces/{workspace}/experiments. The name of a custom function is used for the field 'analysis_function' which specifies that it should be used for the experiment. The meta-data also describes which parameters each custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center.
      */
     get: operations["getCustomFunctions"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
-      path: {
         workspace: string;
       };
     };
@@ -647,11 +624,11 @@ export interface paths {
     /** Returns the set of unit conversion factors */
     get: operations["getUnitConversionFactors"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
-      path: {
         workspace: string;
       };
     };
@@ -660,32 +637,32 @@ export interface paths {
     /** Returns all model executables input and run info */
     get: operations["getAllModelExecutableInfo"];
     /**
-     * Sets up a model executable to be compiled 
+     * Sets up a model executable to be compiled
      * @description The name of the model to be compiled is specified by the field 'class_name'. The remaining fields in the input are options for the compilation process. For a reference of what options can be used in the field 'compiler_options' and 'runtime_option' see the OCT User's Guide, which can be found in the Modelon Impact help center. If the FMU should be executed in Impact (rather than exported) it is recommended that 'fmi_target' is 'me', 'fmi_version' is '2.0' and 'platform' is 'auto'. If this end-point is called with the query parameter 'getCached' set to true, then a previously compiled model executable is returned, if such an FMU exists. To get a cached model executable (FMU) there must exists a successfully compiled model executable that was compiled with the same inputs as in the current call. Furthermore, if the Modelica model for which the FMU compilation is requested has been changed in a structural way, or at least one of its dependent models have changed, then a cached FMU will not be returned. Setting non-structural parameters and making graphical changes to the Modelica model will not break the cache for its compiled FMU.
      */
     post: operations["modelExecutableSetup"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
-      path: {
         workspace: string;
       };
     };
   };
   "/workspaces/{workspace}/model-executables/supported-platforms": {
     /**
-     * Returns the supported platforms for FMU generation 
+     * Returns the supported platforms for FMU generation
      * @description Can be used to find which values are supported for the field 'platform' when calling the POST method on '/workspaces/{workspace}/model-executables'.
      */
     get: operations["getFmuPlatforms"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
-      path: {
         workspace: string;
       };
     };
@@ -696,16 +673,16 @@ export interface paths {
     /** Deletes the FMU with the specified ID */
     delete: operations["deleteModelExecutable"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The FMU ID. 
+         * @description The FMU ID.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
@@ -714,23 +691,23 @@ export interface paths {
     /** Get compilation status */
     get: operations["getCompilationStatus"];
     /**
-     * Compiles a model 
+     * Compiles a model
      * @description First call POST /workspaces/{workspace}/model-executables to setup what should be compiled.
      */
     post: operations["modelExecutableCompile"];
     /** Cancel a running compilation */
     delete: operations["cancelCompilation"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the model to be compiled. 
+         * @description Reference ID to the model to be compiled.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
@@ -739,16 +716,16 @@ export interface paths {
     /** Downloads the model executable compilation log */
     get: operations["downloadCompilationLog"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the compiled model. 
+         * @description Reference ID to the compiled model.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
@@ -757,16 +734,16 @@ export interface paths {
     /** Downloads the model description file for an FMU */
     get: operations["downloadModelDescription"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the compiled model. 
+         * @description Reference ID to the compiled model.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
@@ -775,16 +752,16 @@ export interface paths {
     /** Downloads an FMU binary that is compiled */
     get: operations["downloadCompiledFMU"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the compiled model. 
+         * @description Reference ID to the compiled model.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
@@ -793,58 +770,58 @@ export interface paths {
     /** Gets the FMU meta-data */
     post: operations["getFmuMeta"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the compiled model. 
+         * @description Reference ID to the compiled model.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/settable-parameters": {
     /**
-     * Gets the parameters that can be set on the FMU 
+     * Gets the parameters that can be set on the FMU
      * @description Can be used to find what parameters are feasible to have as modifiers in an experiment.
      */
     get: operations["getFmuParameters"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the compiled model. 
+         * @description Reference ID to the compiled model.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
   };
   "/workspaces/{workspace}/model-executables/{fmuId}/string-parameters-and-values": {
     /**
-     * Gets parameters that have string values together with those values 
+     * Gets parameters that have string values together with those values
      * @description Gets a list of parameters whose values are strings and one list with respective value in order. Can be used when requiring string parameters that don't come with the result.
      */
     get: operations["getFmuStringParametersAndValues"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description Reference ID to the compiled model. 
+         * @description Reference ID to the compiled model.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         fmuId: string;
       };
     };
@@ -853,15 +830,15 @@ export interface paths {
     /** Get all experiments meta-data */
     get: operations["getAllExperimentInfo"];
     /**
-     * Sets up an experiment for execution 
+     * Sets up an experiment for execution
      * @description The required inputs for setting up a multi-execution experiment is either 'id' in 'base/model/fmu' OR 'className' in 'base/model/modelica', along with 'type' in 'base/analysis'. These can be obtained from POST /workspaces/{workspace}/model-executables and GET /workspaces/{workspace}/custom-functions respectively. The FMU 'id' specifies what FMU the experiment is based on, and analysis 'type' specifies what analysis custom function is used for each case of the experiment. Furthermore, experiments support multi-execution, i.e., batch computations where each case executes a custom function. Multi-execution experiments can be set up in two ways.
-     * 
-     * The first way to setup multi-execution experiments is to specify 'operators' for 'modifiers' which are applied to the base experiment. An example experiment for this could contain the 'modifiers': {'variables': {'x': 'range(1, 2, 3)'}}, which would result in a multi-execution experiment with three cases: x=1, x=1.5, and x=2. Note that if multiple 'operators' are used for different variables, the experiment will be expand to cases with all combinations of parametrizations, i.e., full factorial is used to expand the experiment. Here is a full example using the range operator to create cases:
-     * 
+     *
+     * The first way to setup multi-execution experiments is to specify 'operators' for 'modifiers' which are applied to the base experiment. An example experiment for this could contain the 'modifiers': {'variables': [{'kind': 'range', 'name' : 'x', 'start' : 1, 'end' : 2, 'steps' : 3}]},  which would result in a multi-execution  experiment with three cases: x=1, x=1.5, and x=2. Note that if multiple 'operators' are used for different variables, the experiment will be expand to cases with all combinations of parametrizations, i.e., full factorial is used to expand the experiment. Here is a full example using the range operator to create cases:
+     *
      * <pre>
      * {
      *   "experiment": {
-     *     "version": 2,
+     *     "version": 3,
      *     "base": {
      *       "model": {
      *         "fmu": {
@@ -869,39 +846,49 @@ export interface paths {
      *         }
      *       },
      *       "modifiers": {
-     *         "variables": {
-     *           "inertia1.J": "range(1, 2, 10)",
-     *         }
-     *       },
+     *         "variables": [{
+     *           "kind": "range",
+     *           "name" : "inertia1.J",
+     *           "start" : 0,
+     *           "end" : 2,
+     *           "steps" : 10
+     *           }]
+     *          },
      *       "analysis": {
      *         "type": "dynamic",
-     *         "parameters": {
-     *           "start_time": 0,
-     *           "final_time": 1
-     *         }
+     *         "parameters": [
+     *          {
+     *           "name": start_time,
+     *           "value": 0
+     *          },
+     *          {
+     *           "name": final_time,
+     *           "value": 1
+     *         },
+     *         ]
      *       }
      *     }
      *   }
      * }
      * </pre>
-     * 
-     * The other way of defining an experiment is to specify 'extensions' to the 'base' definition, where each 'extension' is combined with 'base' to create a case. For example, an experiment with the 'extensions': [{'modifiers': {'variables': {'x': 1}}}, {'modifiers': {'variables': {'x': 1.5}}}, {'modifiers': {'variables': {'x': 2}}}], would result in the same multi-execution as above (if no modifiers are defined in 'base'). This way of creating cases gives more freedom to the client to set up a multi-execution experiment, since cases are defined by parameter configurations, as opposed to operators (like the range operator). This approach also allows different options and custom function parameters to be used for the different cases. These two methods of setting up a multi-execution cannot be combined. So, if any extensions are given, it is not allowed to include any 'operators' anywhere in the experiment. It is however allowed to provide parameter values (with no operators) in 'base' in combination with defining cases with 'extensions'. In this case, parameters set in 'extensions' overrides those set in 'base'.
-     * 
-     * The following example shows how 'extensions' are used to set options and parameters for separate cases and thereby overriding the values in the 'base' definition. The 'base' definition in the example have 'analysis': {'type': 'dynamic', 'parameters': {'start_time': 2, 'final_time': 3}}, and 'modifiers': {'variables': {'x': 1, 'y': 3}}}. If used with the 'extensions':
-     * 
-     * [{'analysis': {'parameters': {'final_time': 4}}}, 'modifiers': {'variables': {'y': 5}}}, {'analysis': {'parameters': {'start_time': 1}}}, 'modifiers': {'variables': {'x': 2}}}],
-     * 
+     *
+     * The other way of defining an experiment is to specify 'extensions' to the 'base' definition, where each 'extension' is combined with 'base' to create a case. For example, an experiment with the 'extensions': [{'modifiers':  {'variables': [{'kind': 'value', 'dataType': 'REAL', 'name': 'x', 'value': 1}]}}, {'modifiers': {'variables': [{'kind': 'value', 'dataType': 'REAL', 'name': 'x',  'value': 1.5}]}}, {'modifiers': {'variables': [{'kind': 'value', 'dataType':  'REAL', 'name': 'x', 'value': 2}]}}], would result in the same multi-execution as above (if no modifiers are defined in 'base'). This way of creating cases gives more freedom to the client to set up a multi-execution experiment, since cases are defined by parameter configurations, as opposed to operators (like the range operator). This approach also allows different options and custom function parameters to be used for the different cases. These two methods of setting up a multi-execution cannot be combined. So, if any extensions are given, it is not allowed to include any 'operators' anywhere in the experiment. It is however allowed to provide parameter values (with no operators) in 'base' in combination with defining cases with 'extensions'. In this case, parameters set in 'extensions' overrides those set in 'base'.
+     *
+     * The following example shows how 'extensions' are used to set options and parameters for separate cases and thereby overriding the values in the 'base' definition. The 'base' definition in the example have 'analysis': {'type': 'dynamic', 'parameters': [{'name': 'start_time', 'value': 0}, {'name': 'final_time', 'value': 3}]},  and 'modifiers': {'variables': [{'kind': 'value', 'dataType': 'REAL', 'name': 'x', 'value': 1},  {'kind': 'value', 'dataType': 'REAL', 'name': 'y', 'value': 3}]}}.  If used with the 'extensions':
+     *
+     * [{'analysis': {'parameters': [{'name': 'final_time', 'value': 3}]}}, 'modifiers': {'variables':  [{'kind': 'value', 'dataType': 'REAL', 'name': 'y', 'value': 5}]}}, {'analysis': {'parameters': [{'name': 'start_time', 'value': 1}]}}, 'modifiers': {'variables':  [{'kind': 'value', 'dataType': 'REAL', 'name': 'x', 'value': 2}]}}],
+     *
      * we will get two cases. The first case will use 2 for 'start_time' from the 'base' and 4 for 'final_time' as it is overridden by the 'extension', in the same way it will use 'x'=1 and 'y'=5 as modifiers. The second case overrides 'start_time' and 'x' and will result in 'start_time'=1, 'final_time'=3, 'x'=2, and 'y'=3.
-     * 
-     * The old (version 1) experiment format can still be used but will be removed in a future version.
+     *
+     * The old (version 1 and version 2) experiment formats are deprecated and will be removed in a future version.
      */
     post: operations["setupExperiment"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
-      path: {
         workspace: string;
       };
     };
@@ -910,23 +897,23 @@ export interface paths {
     /** Get experiment information */
     get: operations["getExperimentInfo"];
     /**
-     * Set a label for an experiment 
+     * Set a label for an experiment
      * @description Can be used to set a human readable identifier for an experiment.
      */
     put: operations["setLabel"];
     /** Removes an experiment */
     delete: operations["removeExperiment"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         experimentId: string;
       };
     };
@@ -935,23 +922,23 @@ export interface paths {
     /** Get execution status */
     get: operations["getExecutionStatus"];
     /**
-     * Executes an experiment 
+     * Executes an experiment
      * @description First call POST /workspaces/{workspace}/experiments to setup what should be executed.
      */
     post: operations["execute"];
     /** Cancel a running execution */
     delete: operations["cancelExecution"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         experimentId: string;
       };
     };
@@ -960,16 +947,16 @@ export interface paths {
     /** Get all cases meta-data */
     get: operations["getAllCaseInfo"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         experimentId: string;
       };
     };
@@ -978,26 +965,26 @@ export interface paths {
     /** Get case information */
     get: operations["getCaseInfo"];
     /**
-     * Update case information 
+     * Update case information
      * @description This end-point can be used to update a case input. This can be used to modify the case and then execute the case again as part of an experiment and get different results for the case. Only fields under 'input' and 'meta' can be updated. Also, the fields 'fmu_id', 'analysis_function', 'structural_parametrization' and 'fmu_base_parametrization' cannot be updated. After a case is updated the 'consistent' field will be set to 'false' to signify that case results might not match the case input. Executing the case as part of an experiment will set 'consistent' to 'true'. The recomended way to update the case is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data.
      */
     put: operations["putCaseInfo"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
+        experimentId: string;
         /**
-         * @description The ID of the case. 
+         * @description The ID of the case.
          * @example case_1
          */
-      path: {
-        workspace: string;
-        experimentId: string;
         caseId: string;
       };
     };
@@ -1006,21 +993,21 @@ export interface paths {
     /** Get the log for a finished case */
     get: operations["getCaseLog"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the simulation. 
+         * @description The ID of the simulation.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
+        experimentId: string;
         /**
-         * @description The ID of the case. 
+         * @description The ID of the case.
          * @example case_1
          */
-      path: {
-        workspace: string;
-        experimentId: string;
         caseId: string;
       };
     };
@@ -1029,48 +1016,118 @@ export interface paths {
     /** Download the result file for a finished case */
     get: operations["getCaseResults"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
+        experimentId: string;
         /**
-         * @description The ID of the case. 
+         * @description The ID of the case.
          * @example case_1
          */
+        caseId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/variables": {
+    /** Get all variables in the case result */
+    get: operations["getCaseVariables"];
+    parameters: {
       path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
         workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
         experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
         caseId: string;
       };
     };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/trajectories": {
     /**
-     * Get the trajectories for specified variables from the experiment result for a finished case 
+     * Get the trajectories for specified variables from the experiment result for a finished case
      * @description This end-point can be used to fetch trajectories from cases that have finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 from the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
      */
     post: operations["getCaseTrajectories"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
+        experimentId: string;
         /**
-         * @description The ID of the case. 
+         * @description The ID of the case.
          * @example case_1
          */
-      path: {
-        workspace: string;
-        experimentId: string;
         caseId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result-imports": {
+    /**
+     * Start import of a result
+     * @description Will initiate import of a result. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result-imports/{importId} to check status.
+     */
+    post: operations["importResult"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result-imports/{importId}": {
+    /**
+     * Returns status for a result import. Also returns data for the imported resource when ready
+     * @description The result needs to be setup for import by calling POST /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result-imports, before calling this API endpoint.
+     */
+    get: operations["importResultStatus"];
+    /**
+     * Deletes a result import
+     * @description This API end point can be be called after a result has been imported.
+     */
+    delete: operations["deleteResultImport"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the result import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
       };
     };
   };
@@ -1078,21 +1135,21 @@ export interface paths {
     /** Get the artifact metadata for a case. */
     get: operations["getCustomArtifactMeta"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
+        experimentId: string;
         /**
-         * @description The ID of the case. 
+         * @description The ID of the case.
          * @example case_1
          */
-      path: {
-        workspace: string;
-        experimentId: string;
         caseId: string;
       };
     };
@@ -1101,27 +1158,74 @@ export interface paths {
     /** Get an artifact for a case as stored by the custom function used for running the case */
     get: operations["getCustomArtifact"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
+        experimentId: string;
         /**
-         * @description The ID of the case. 
+         * @description The ID of the case.
          * @example case_1
          */
+        caseId: string;
         /**
-         * @description The ID of the artifact. 
+         * @description The ID of the artifact.
          * @example report
          */
-      path: {
-        workspace: string;
-        experimentId: string;
-        caseId: string;
         artifactId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts-imports": {
+    /**
+     * Start import of a custom artifact
+     * @description Will initiate import of a custom artifact. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts-imports/{importId} to check status.
+     */
+    post: operations["importCustomArtifact"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
+  };
+  "/workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts-imports/{importId}": {
+    /**
+     * Returns status for a custom artifact import. Also returns data for the imported resource when ready
+     * @description The custom artifact needs to be setup for import by calling POST /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts-imports, before calling this API endpoint.
+     */
+    get: operations["importCustomArtifactStatus"];
+    /**
+     * Deletes a custom artifact import
+     * @description This API end point can be be called after a custom artifact has been imported.
+     */
+    delete: operations["deleteCustomArtifactImport"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the custom artifact import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
       };
     };
   };
@@ -1129,144 +1233,175 @@ export interface paths {
     /** Get all variables in the experiment result */
     get: operations["getVariables"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         experimentId: string;
       };
     };
   };
   "/workspaces/{workspace}/experiments/{experimentId}/trajectories": {
     /**
-     * Get the trajectories for specified variables from the experiment result 
+     * Get the trajectories for specified variables from the experiment result
      * @description This end-point can be used to fetch trajectories from experiments that has finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 under 'case_1' in the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
      */
     post: operations["getTrajectories"];
     parameters: {
+      path: {
         /**
-         * @description Name of the workspace. 
+         * @description ID of the workspace.
          * @example workspace
          */
+        workspace: string;
         /**
-         * @description The ID of the experiment. 
+         * @description The ID of the experiment.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
-      path: {
-        workspace: string;
         experimentId: string;
       };
     };
   };
   "/workspace-exports": {
     /**
-     * Prepares a workspace for download as a zip file 
+     * Prepares a workspace for download as a zip file
      * @description The compressed workspace will be prepared. After a successful completion of a call to this endpoint, call GET /workspace-exports/{exportId} to check status.
      */
     post: operations["prepareExportWorkspaceAsync"];
   };
   "/workspace-exports/{exportId}": {
     /**
-     * Returns status for preparing a workspace for download. Also returns data for download when ready 
+     * Returns status for preparing a workspace for download. Also returns data for download when ready
      * @description The workspace needs to be setup for export by calling POST /workspace-exports, before calling this API endpoint.
      */
     get: operations["exportWorkspaceAsync"];
     /**
-     * Deletes a workspace export, including the compressed zip 
+     * Deletes a workspace export, including the compressed zip
      * @description This API end point can be be called after a compressed workspace has been downloaded.
      */
     delete: operations["deleteExportedWorkspaceAsync"];
     parameters: {
+      path: {
         /**
-         * @description ID of the compressed workspace to check status on. 
+         * @description ID of the compressed workspace to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         exportId: string;
       };
     };
   };
   "/workspace-imports": {
     /**
-     * Start import of an existing workspace 
+     * Start import of an existing workspace
      * @description Will initiate import of an existing workspace. After a successful completion of a call to this endpoint, call GET /workspace-imports/{importId} to check status.
      */
     post: operations["importWorkspace"];
   };
   "/workspace-imports/{importId}": {
     /**
-     * Returns status for a workspace import. Also returns data for the imported resource when ready 
+     * Returns status for a workspace import. Also returns data for the imported resource when ready
      * @description The workspace needs to be setup for import by calling POST /workspace-imports, before calling this API endpoint.
      */
     get: operations["importWorkspaceStatus"];
     /**
-     * Deletes a workspace import 
+     * Deletes a workspace import
      * @description This API end point can be be called after a workspace has been imported.
      */
     delete: operations["deleteWorkspaceImport"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace import to check status on. 
+         * @description ID of the workspace import to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         importId: string;
       };
     };
   };
   "/workspace-imports-matchings": {
     /**
-     * Get all projects matchings for workspace import 
+     * Get all projects matchings for workspace import
      * @description Get all projects matchings that would happen during a workspace import. As import will fail if there are multiple possible matchings of local projects for a project, this end-point is used to get these matchings which can be resolved to an unequivocal 'selection'. Selections are used as (optional) input to the end-point /workspace-imports, see it for more details on the format of a selection.
      */
     post: operations["importWorkspaceMatchings"];
   };
+  "/published-workspaces": {
+    /**
+     * Get all published workspaces
+     * @description Returns a list of all published workspaces that exists. The query parameter can be used to filter the workspaces returned.
+     */
+    get: operations["getPublishedWorkspaces"];
+  };
+  "/published-workspaces/{sharingId}": {
+    /** Returns an object containing the metadata of the specified published workspace ID */
+    get: operations["getPublishedWorkspaceId"];
+    /** Deletes a published workspace with the specified ID */
+    delete: operations["deletePublishedWorkspace"];
+    /**
+     * This end-point can be used to update a published workspace. This can be used to modify the published workspace name.
+     * @description Updates the name of the published workspace.
+     */
+    patch: operations["updatePublishedWorkspace"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the published workspace.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        sharingId: string;
+      };
+    };
+  };
+  "/published-workspaces-quota/users/me": {
+    /** Gets storage quota for the current user. */
+    get: operations["getPublishedWorkspaceQuota"];
+  };
   "/workspace-conversions": {
     /**
-     * Starts a workspace conversion 
+     * Starts a workspace conversion
      * @description Will start a conversion of a workspace. A backup can optionally be made as part this conversion. As conversions are non-reversible it is recommended to create and keep a backup over a transition period. After a successful completion of a call to this endpoint, call GET /workspace-conversions/{conversionId} to check status.
      */
     post: operations["prepareWorkspaceConversionAsync"];
   };
   "/workspace-conversions/{conversionId}": {
     /**
-     * Returns status for workspace conversion 
+     * Returns status for workspace conversion
      * @description The workspace needs to be setup for conversion by calling POST /workspace-conversions, before calling this API endpoint.
      */
     get: operations["workspaceConversionStatusAsync"];
     /**
-     * Deletes a workspace conversion 
+     * Deletes a workspace conversion
      * @description This API end point can be be called after a workspace conversion is finished. Will not delete any created backups or revert any changes from on-going conversion.
      */
     delete: operations["deletedWorkspaceConversionAsync"];
     parameters: {
+      path: {
         /**
-         * @description ID of the workspace conversion to check status on. 
+         * @description ID of the workspace conversion to check status on.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         conversionId: string;
       };
     };
   };
   "/exports/{exportId}": {
     /**
-     * Downloads a file that has been setup to be exported 
+     * Downloads a file that has been setup to be exported
      * @description This route is used for downloading exported files. Other end-points will reference here with a download URI.
      */
     get: operations["exportFile"];
     parameters: {
+      path: {
         /**
-         * @description ID of the compressed workspace to download. 
+         * @description ID of the compressed workspace to download.
          * @example 79sd8-3n2a4-e3t24
          */
-      path: {
         exportId: string;
       };
     };
@@ -1277,79 +1412,105 @@ export interface paths {
   };
   "/uploads/results/{uploadId}": {
     /**
-     * Get the current status of upload 
+     * Get the current status of upload
      * @description Get the current status of upload for a given uploadId.
      */
     get: operations["getUploadStatus"];
     parameters: {
+      path: {
         /**
-         * @description Id for result storage. 
+         * @description Id for result storage.
          * @example 2f036b9fab6f45c788cc466da327cc78workspace
          */
-      path: {
         uploadId: string;
       };
     };
   };
   "/external-result/{uploadId}": {
     /**
-     * Get the result file meta-data 
+     * Get the result file meta-data
      * @description Gets the meta-data for a result file.
      */
     get: operations["getUploadedResultEntity"];
     /** Deletes the result with the specified ID */
     delete: operations["deleteUploadedResultEntity"];
     parameters: {
+      path: {
         /**
-         * @description Id for result storage. 
+         * @description Id for result storage.
          * @example 2f036b9fab6f45c788cc466da327cc78workspace
          */
-      path: {
         uploadId: string;
       };
     };
   };
   "/users/me": {
     /**
-     * Gets data on the currently logged in user 
+     * Gets data on the currently logged in user
      * @description Returns the ID of the current user, which is used to create API keys, and the external IDs connected to it.
      */
     get: operations["getCurrentUser"];
   };
   "/users/{userId}/keys": {
     /**
-     * Gets information on the API keys belonging to a user 
+     * Gets information on the API keys belonging to a user
      * @description Get information on the API keys belonging to the user by the given ID. The information includes the key ID and the creation time but not the secret key itself.
      */
     get: operations["getAPIkeys"];
     /**
-     * Creates a new API key 
+     * Creates a new API key
      * @description Creates a new API key belonging to the user with the given ID. The response contains a new API key which is the only time this key can be retrieved. They key must be safely stored by the recepient, as there is no way to retrieve it at a later point. A user may only have one API key at a time, so if it is lost or compromised, it must be deleted before a new one can be created. The API key can be used with the /login endpoint to log in. Each key has an ID to identify it when deleting it.
      */
     post: operations["postAPIkey"];
     parameters: {
+      path: {
         /**
-         * @description ID of the user. 
+         * @description ID of the user.
          * @example 3ae546601b0d473db83bccee0ca27c7e
          */
-      path: {
         userId: string;
       };
     };
   };
   "/users/{userId}/keys/{keyId}": {
     /**
-     * Deletes an API key 
+     * Deletes an API key
      * @description Deletes an API key with the given ID, belonging to a specified user.
      */
     delete: operations["deleteAPIKey"];
   };
   "/keys/validation": {
     /**
-     * Validates an API key 
+     * Validates an API key
      * @description Validates an API key.
      */
     post: operations["validateAPIKey"];
+  };
+  "/workspaces/{workspace}/custom-web-apps": {
+    /** Get the custom webapps for a workspace. */
+    get: operations["getWorkspaceCustomWebApps"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+      };
+    };
+  };
+  "/projects/{project}/custom-web-apps": {
+    /** Get the custom webapps for a project. */
+    get: operations["getProjectCustomWebApps"];
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
   };
 }
 
@@ -1359,812 +1520,1037 @@ export interface components {
   schemas: {
     /** @description A project entity. */
     LocalProjectProtocol: {
-      /**
-       * @description ID of the project. 
-       * @example 79sd8-3n2a4-e3t24
-       */
+      /** @description ID of the project. */
       id: string;
-      /** @description The definition of a project. */
-      definition: {
-        /**
-         * @description Case sensitive project name. Must start with a letter and only use letters, numbers, underscores and dashes. 
-         * @example MyProject
-         */
-        name: string;
-        /**
-         * @description The semantic version of the project. 
-         * @example 2.0.3-beta.3+build.5
-         */
-        version?: string;
-        /**
-         * @description The semantic schema version of the project definition. 
-         * @default 1.0.0 
-         * @example 1.0.0
-         */
-        format: string;
-        /** @default [] */
-        dependencies: ({
-            /**
-             * @description The name of the project dependency. 
-             * @example Modelica
-             */
-            name: string;
-            /**
-             * @description Version specifier. 
-             * @example 4.0.0
-             */
-            versionSpecifier?: string;
-          })[];
-        /** @default [] */
-        content: ({
-            /**
-             * Format: path 
-             * @description Relative path in the project. Can be file or folder. 
-             * @example SomeLib.mo
-             */
-            relpath: string;
-            /**
-             * @description Type of content. 
-             * @enum {unknown}
-             */
-            contentType: "MODELICA" | "VIEWS" | "FAVORITES" | "CUSTOM_FUNCTIONS" | "REFERENCE_RESULTS" | "GENERIC" | "EXPERIMENT_DEFINITIONS";
-            /**
-             * @description Modelica library name or other name for display. 
-             * @example SomeLib
-             */
-            name?: string;
-            /**
-             * @description If content entry gets disabled by default when included into a new workspace. 
-             * @default false 
-             * @example true
-             */
-            defaultDisabled: boolean;
-            /**
-             * @description ID of the project content. 
-             * @example 79sd8-3n2a4-e3t24
-             */
-            id: string;
-          })[];
-        /** @default [] */
-        executionOptions: ({
-            /**
-             * @description Custom function the options are for. 
-             * @example steady state
-             */
-            customFunction: string;
-            /**
-             * @description Key-value pairs of compilation options. 
-             * @example {
-             *   "generate_html_diagnostics": true,
-             *   "halt_on_warning": true
-             * }
-             */
-            compiler: {
-              [key: string]: (number | number | string | boolean) | undefined;
-            };
-            /**
-             * @description Key-value pairs of run-time options. 
-             * @example {
-             *   "use_Brent_in_1d": false
-             * }
-             */
-            runtime: {
-              [key: string]: (number | number | string | boolean) | undefined;
-            };
-            /**
-             * @description Key-value pairs of simulation options. 
-             * @example {
-             *   "ncp": 2000
-             * }
-             */
-            simulation: {
-              [key: string]: (number | number | string | boolean) | undefined;
-            };
-            /**
-             * @description Key-value pairs of solver options. 
-             * @example {
-             *   "rtol": 0.0001
-             * }
-             */
-            solver: {
-              [key: string]: (number | number | string | boolean) | undefined;
-            };
-          })[];
-        /**
-         * @description The icon for the project. 
-         * @example .impact/icon.png
-         */
-        icon?: string;
-      };
+      definition: components["schemas"]["ProjectDefinitionModel"];
+      projectType: components["schemas"]["ProjectType"];
+      storageLocation: components["schemas"]["StorageLocation"];
       /**
-       * @description The type of the project. 
-       * @enum {unknown}
+       * @description URI to a version control repository where the project is hosted.
+       * @default null
        */
-      projectType: "LOCAL" | "RELEASED" | "SYSTEM";
-      /** @description URI to a version control repository where the project is hosted. */
-      vcsUri?: {
-        /**
-         * @description Supported Version Control System services. 
-         * @enum {unknown}
-         */
-        serviceKind: "GIT" | "SVN" | "NONE";
-        /**
-         * @description Service URL. 
-         * @example https://github.com
-         */
-        serviceUrl: string;
-        /** @description URL to the repository. */
-        repoUrl: {
-          /**
-           * @description The URL of the repository without schema part. 
-           * @example gitlab.com/group/project
-           */
-          url: string;
-          /**
-           * @description A refname in the repository. 
-           * @example main
-           */
-          refname: string;
-          /**
-           * @description Commit hash in the repository. Can be an empty string. 
-           * @example 3486a89
-           */
-          sha1: string;
-        } | {
-          /**
-           * @description Root URL of the repository without schema part. 
-           * @example svn.company.com/Project01
-           */
-          rootUrl: string;
-          /**
-           * @description The trunk, branch or tag part of the URL. 
-           * @example branches/someBranch
-           */
-          branch: string;
-          /**
-           * @description Relative url after branch. 
-           * @example rest/of/url
-           */
-          urlFromRoot: string;
-          /**
-           * @description SVN revision of the repository (number of HEAD). 
-           * @example 1000
-           */
-          revision: string;
-        };
-        /**
-         * @description Protocol of the URI. 
-         * @example https
-         */
-        protocol: string;
-        /**
-         * @description Sub-directory of the repository. 
-         * @example src
-         */
-        subdir: string;
-      };
-      /** @description Disk space (in bytes) taken by the project. */
-      size?: number;
+      vcsUri: components["schemas"]["VcsUriProtocol"] | null;
+      /**
+       * @description Disk space (in bytes) taken by the project.
+       * @default null
+       */
+      size: number | null;
     };
     /** @description The definition of a workspace. */
     WorkspaceDefinitionProtocol: {
       /**
-       * @description The name of the workspace. 
-       * @default New Workspace 
-       * @example My workspace
+       * @description The name of the workspace.
+       * @default New Workspace
        */
       name: string;
       /**
-       * @description A description for the workspace. 
-       * @default  
-       * @example Workspace with all my projects
+       * @description A description for the workspace.
+       * @default
        */
       description: string;
       /**
-       * @description The ID of the default project for the workspace. 
-       * @default  
-       * @example 79sd8-3n2a4-e3t24
+       * @description The ID of the default project for the workspace.
+       * @default
        */
       defaultProjectId: string;
       /** @default [] */
-      projects: ({
-          /** @description A reference to a local project used by the workspace. */
-          reference: {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The name of the released project. 
-             * @example Hydralics
-             */
-            name: string;
-            /**
-             * @description The semantic version of the released project. 
-             * @example 2.0.3
-             */
-            version?: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The version control URI for the project. 
-             * @example git+https://gitlab.com/group/project@main#SubDir
-             */
-            vcsUri: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-          };
-          /**
-           * @description If the project is disable for the workspace. 
-           * @default false 
-           * @example true
-           */
-          disabled: boolean;
-          /**
-           * @description List of content IDs for content entries that are disabled in the project. 
-           * @example [
-           *   "79sd8-3n2a4-e3t24",
-           *   "t24e3-a43n2-d879s"
-           * ]
-           */
-          disabledContent?: (string)[];
-        })[];
+      projects: components["schemas"]["ProjectEntryProtocol"][];
       /** @default [] */
-      dependencies: ({
-          /** @description A reference to a local project used by the workspace. */
-          reference: {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The name of the released project. 
-             * @example Hydralics
-             */
-            name: string;
-            /**
-             * @description The semantic version of the released project. 
-             * @example 2.0.3
-             */
-            version?: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The version control URI for the project. 
-             * @example git+https://gitlab.com/group/project@main#SubDir
-             */
-            vcsUri: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-          };
-          /**
-           * @description If the project is disable for the workspace. 
-           * @default false 
-           * @example true
-           */
-          disabled: boolean;
-          /**
-           * @description List of content IDs for content entries that are disabled in the project. 
-           * @example [
-           *   "79sd8-3n2a4-e3t24",
-           *   "t24e3-a43n2-d879s"
-           * ]
-           */
-          disabledContent?: (string)[];
-        })[];
+      dependencies: components["schemas"]["ProjectEntryProtocol"][];
       /**
-       * @description The semantic schema version of the workspace definition. 
-       * @default 1.0.0 
-       * @example 1.0.0
+       * @description The semantic schema version of the workspace definition.
+       * @default 1.0.0
        */
       format: string;
-      /**
-       * @description Global unique ID for workspace. Used to access global Impact resources assocciated with workspace. 
-       * @example 6d8ae8b3b0594125a0cb7acd6adbb0f9
-       */
+      /** @description Global unique ID for workspace. Used to access global Impact resources assocciated with workspace. */
       guid: string;
-      /**
-       * @description The ID of the user that has created this workspace. 
-       * @example 98dy-a82a-s8tg
-       */
+      /** @description The ID of the user that has created this workspace. */
       createdBy: string;
-      /**
-       * @description The unix time at which the workspace was created. 
-       * @example 1549552749
-       */
+      /** @description The unix time at which the workspace was created. */
       createdAt: number;
-      /** @description If field exists, workspace is shared in App Mode. App Mode results in read only view of a single model in workspace. */
-      appMode?: {
-        /** @description The model to view in the App Mode workspace. */
-        model: string;
-      };
+      /**
+       * @description If field exists, workspace is shared in App Mode. App Mode results in read only view of a single model in workspace.
+       * @default null
+       */
+      appMode: components["schemas"]["AppModeProtocol"] | null;
+      /**
+       * @description If field exists, workspace is imported from cloud.
+       * @default null
+       */
+      receivedFrom: components["schemas"]["ReceivedFromModel"] | null;
     };
     ProjectContentCreationModel: {
       /**
-       * Format: path 
-       * @description Relative path in the project. Can be file or folder. 
-       * @example SomeLib.mo
+       * Format: path
+       * @description Relative path in the project. Can be file or folder.
        */
       relpath: string;
+      contentType: components["schemas"]["ContentType"];
       /**
-       * @description Type of content. 
-       * @enum {unknown}
+       * @description Modelica library name or other name for display.
+       * @default null
        */
-      contentType: "MODELICA" | "VIEWS" | "FAVORITES" | "CUSTOM_FUNCTIONS" | "REFERENCE_RESULTS" | "GENERIC" | "EXPERIMENT_DEFINITIONS";
+      name: string | null;
       /**
-       * @description Modelica library name or other name for display. 
-       * @example SomeLib
-       */
-      name?: string;
-      /**
-       * @description If content entry gets disabled by default when included into a new workspace. 
-       * @default false 
-       * @example true
+       * @description If content entry gets disabled by default when included into a new workspace.
+       * @default false
        */
       defaultDisabled: boolean;
     };
     /** @description A content entry of a project. */
     ProjectContentModel: {
       /**
-       * Format: path 
-       * @description Relative path in the project. Can be file or folder. 
-       * @example SomeLib.mo
+       * Format: path
+       * @description Relative path in the project. Can be file or folder.
        */
       relpath: string;
+      contentType: components["schemas"]["ContentType"];
       /**
-       * @description Type of content. 
-       * @enum {unknown}
+       * @description Modelica library name or other name for display.
+       * @default null
        */
-      contentType: "MODELICA" | "VIEWS" | "FAVORITES" | "CUSTOM_FUNCTIONS" | "REFERENCE_RESULTS" | "GENERIC" | "EXPERIMENT_DEFINITIONS";
+      name: string | null;
       /**
-       * @description Modelica library name or other name for display. 
-       * @example SomeLib
-       */
-      name?: string;
-      /**
-       * @description If content entry gets disabled by default when included into a new workspace. 
-       * @default false 
-       * @example true
+       * @description If content entry gets disabled by default when included into a new workspace.
+       * @default false
        */
       defaultDisabled: boolean;
-      /**
-       * @description ID of the project content. 
-       * @example 79sd8-3n2a4-e3t24
-       */
+      /** @description ID of the project content. */
       id: string;
     };
     /**
-     * @description Existing local projects matching a project entry in workspace definition
-     * during import.
+     * @description Existing local projects matching a project entry in workspace definition during
+     * import.
      */
     VcsMatchingProtocol: {
-      /**
-       * @description ID of project entry in workspace definition. 
-       * @example 79sd8-3n2a4-e3t24
-       */
+      /** @description ID of project entry in workspace definition. */
       entryId: string;
       /** @description The URI in the project entry the matching is done against. */
-      uri: {
-        /**
-         * @description Supported Version Control System services. 
-         * @enum {unknown}
-         */
-        serviceKind: "GIT" | "SVN" | "NONE";
-        /**
-         * @description Service URL. 
-         * @example https://github.com
-         */
-        serviceUrl: string;
-        /** @description URL to the repository. */
-        repoUrl: {
-          /**
-           * @description The URL of the repository without schema part. 
-           * @example gitlab.com/group/project
-           */
-          url: string;
-          /**
-           * @description A refname in the repository. 
-           * @example main
-           */
-          refname: string;
-          /**
-           * @description Commit hash in the repository. Can be an empty string. 
-           * @example 3486a89
-           */
-          sha1: string;
-        } | {
-          /**
-           * @description Root URL of the repository without schema part. 
-           * @example svn.company.com/Project01
-           */
-          rootUrl: string;
-          /**
-           * @description The trunk, branch or tag part of the URL. 
-           * @example branches/someBranch
-           */
-          branch: string;
-          /**
-           * @description Relative url after branch. 
-           * @example rest/of/url
-           */
-          urlFromRoot: string;
-          /**
-           * @description SVN revision of the repository (number of HEAD). 
-           * @example 1000
-           */
-          revision: string;
-        };
-        /**
-         * @description Protocol of the URI. 
-         * @example https
-         */
-        protocol: string;
-        /**
-         * @description Sub-directory of the repository. 
-         * @example src
-         */
-        subdir: string;
-      };
+      uri: components["schemas"]["VcsUriProtocol"];
       /** @description Local projects matching the project entry. */
-      projects: ({
-          /**
-           * @description ID of the project. 
-           * @example 79sd8-3n2a4-e3t24
-           */
-          id: string;
-          /** @description The definition of a project. */
-          definition: {
-            /**
-             * @description Case sensitive project name. Must start with a letter and only use letters, numbers, underscores and dashes. 
-             * @example MyProject
-             */
-            name: string;
-            /**
-             * @description The semantic version of the project. 
-             * @example 2.0.3-beta.3+build.5
-             */
-            version?: string;
-            /**
-             * @description The semantic schema version of the project definition. 
-             * @default 1.0.0 
-             * @example 1.0.0
-             */
-            format: string;
-            /** @default [] */
-            dependencies: ({
-                /**
-                 * @description The name of the project dependency. 
-                 * @example Modelica
-                 */
-                name: string;
-                /**
-                 * @description Version specifier. 
-                 * @example 4.0.0
-                 */
-                versionSpecifier?: string;
-              })[];
-            /** @default [] */
-            content: ({
-                /**
-                 * Format: path 
-                 * @description Relative path in the project. Can be file or folder. 
-                 * @example SomeLib.mo
-                 */
-                relpath: string;
-                /**
-                 * @description Type of content. 
-                 * @enum {unknown}
-                 */
-                contentType: "MODELICA" | "VIEWS" | "FAVORITES" | "CUSTOM_FUNCTIONS" | "REFERENCE_RESULTS" | "GENERIC" | "EXPERIMENT_DEFINITIONS";
-                /**
-                 * @description Modelica library name or other name for display. 
-                 * @example SomeLib
-                 */
-                name?: string;
-                /**
-                 * @description If content entry gets disabled by default when included into a new workspace. 
-                 * @default false 
-                 * @example true
-                 */
-                defaultDisabled: boolean;
-                /**
-                 * @description ID of the project content. 
-                 * @example 79sd8-3n2a4-e3t24
-                 */
-                id: string;
-              })[];
-            /** @default [] */
-            executionOptions: ({
-                /**
-                 * @description Custom function the options are for. 
-                 * @example steady state
-                 */
-                customFunction: string;
-                /**
-                 * @description Key-value pairs of compilation options. 
-                 * @example {
-                 *   "generate_html_diagnostics": true,
-                 *   "halt_on_warning": true
-                 * }
-                 */
-                compiler: {
-                  [key: string]: (number | number | string | boolean) | undefined;
-                };
-                /**
-                 * @description Key-value pairs of run-time options. 
-                 * @example {
-                 *   "use_Brent_in_1d": false
-                 * }
-                 */
-                runtime: {
-                  [key: string]: (number | number | string | boolean) | undefined;
-                };
-                /**
-                 * @description Key-value pairs of simulation options. 
-                 * @example {
-                 *   "ncp": 2000
-                 * }
-                 */
-                simulation: {
-                  [key: string]: (number | number | string | boolean) | undefined;
-                };
-                /**
-                 * @description Key-value pairs of solver options. 
-                 * @example {
-                 *   "rtol": 0.0001
-                 * }
-                 */
-                solver: {
-                  [key: string]: (number | number | string | boolean) | undefined;
-                };
-              })[];
-            /**
-             * @description The icon for the project. 
-             * @example .impact/icon.png
-             */
-            icon?: string;
-          };
-          /**
-           * @description The type of the project. 
-           * @enum {unknown}
-           */
-          projectType: "LOCAL" | "RELEASED" | "SYSTEM";
-          /** @description URI to a version control repository where the project is hosted. */
-          vcsUri?: {
-            /**
-             * @description Supported Version Control System services. 
-             * @enum {unknown}
-             */
-            serviceKind: "GIT" | "SVN" | "NONE";
-            /**
-             * @description Service URL. 
-             * @example https://github.com
-             */
-            serviceUrl: string;
-            /** @description URL to the repository. */
-            repoUrl: {
-              /**
-               * @description The URL of the repository without schema part. 
-               * @example gitlab.com/group/project
-               */
-              url: string;
-              /**
-               * @description A refname in the repository. 
-               * @example main
-               */
-              refname: string;
-              /**
-               * @description Commit hash in the repository. Can be an empty string. 
-               * @example 3486a89
-               */
-              sha1: string;
-            } | {
-              /**
-               * @description Root URL of the repository without schema part. 
-               * @example svn.company.com/Project01
-               */
-              rootUrl: string;
-              /**
-               * @description The trunk, branch or tag part of the URL. 
-               * @example branches/someBranch
-               */
-              branch: string;
-              /**
-               * @description Relative url after branch. 
-               * @example rest/of/url
-               */
-              urlFromRoot: string;
-              /**
-               * @description SVN revision of the repository (number of HEAD). 
-               * @example 1000
-               */
-              revision: string;
-            };
-            /**
-             * @description Protocol of the URI. 
-             * @example https
-             */
-            protocol: string;
-            /**
-             * @description Sub-directory of the repository. 
-             * @example src
-             */
-            subdir: string;
-          };
-          /** @description Disk space (in bytes) taken by the project. */
-          size?: number;
-        })[];
+      projects: components["schemas"]["LocalProjectProtocol"][];
     };
     /** @description All selections to use during import of a workspace. */
     SelectedMatchingsProtocol: {
-      entries: ({
-          /**
-           * @description ID of project entry the selection is for. 
-           * @example 79sd8-3n2a4-e3t24
-           */
-          id: string;
-          /** @description Selected local project. */
-          project: {
-            /**
-             * @description ID of project. 
-             * @example 79sd8-3n2a4-e3t24
-             */
-            id: string;
-          };
-        })[];
+      entries: components["schemas"]["SelectedMatchingProtocol"][];
     };
     /** @description The definition of a workspace. */
     WorkspaceDefinitionCreationProtocol: {
       /**
-       * @description The name of the workspace. 
-       * @default New Workspace 
-       * @example My workspace
+       * @description The name of the workspace.
+       * @default New Workspace
        */
       name: string;
       /**
-       * @description A description for the workspace. 
-       * @default  
-       * @example Workspace with all my projects
+       * @description A description for the workspace.
+       * @default
        */
       description: string;
       /**
-       * @description The ID of the default project for the workspace. 
-       * @default  
-       * @example 79sd8-3n2a4-e3t24
+       * @description The ID of the default project for the workspace.
+       * @default
        */
       defaultProjectId: string;
       /** @default [] */
-      projects: ({
-          /** @description A reference to a local project used by the workspace. */
-          reference: {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The name of the released project. 
-             * @example Hydralics
-             */
-            name: string;
-            /**
-             * @description The semantic version of the released project. 
-             * @example 2.0.3
-             */
-            version?: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The version control URI for the project. 
-             * @example git+https://gitlab.com/group/project@main#SubDir
-             */
-            vcsUri: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-          };
-          /**
-           * @description If the project is disable for the workspace. 
-           * @default false 
-           * @example true
-           */
-          disabled: boolean;
-          /**
-           * @description List of content IDs for content entries that are disabled in the project. 
-           * @example [
-           *   "79sd8-3n2a4-e3t24",
-           *   "t24e3-a43n2-d879s"
-           * ]
-           */
-          disabledContent?: (string)[];
-        })[];
+      projects: components["schemas"]["ProjectEntryProtocol"][];
       /** @default [] */
-      dependencies: ({
-          /** @description A reference to a local project used by the workspace. */
-          reference: {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The name of the released project. 
-             * @example Hydralics
-             */
-            name: string;
-            /**
-             * @description The semantic version of the released project. 
-             * @example 2.0.3
-             */
-            version?: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-            /**
-             * @description The version control URI for the project. 
-             * @example git+https://gitlab.com/group/project@main#SubDir
-             */
-            vcsUri: string;
-          } | {
-            /**
-             * @description Identifier for the local project. 
-             * @example ac2d-47ca-a5d5
-             */
-            id: string;
-          };
-          /**
-           * @description If the project is disable for the workspace. 
-           * @default false 
-           * @example true
-           */
-          disabled: boolean;
-          /**
-           * @description List of content IDs for content entries that are disabled in the project. 
-           * @example [
-           *   "79sd8-3n2a4-e3t24",
-           *   "t24e3-a43n2-d879s"
-           * ]
-           */
-          disabledContent?: (string)[];
-        })[];
+      dependencies: components["schemas"]["ProjectEntryProtocol"][];
+    };
+    PublishedWorkspaceProtocol: {
+      /** @description Name of the published workspace. */
+      workspaceName: string;
+      /**
+       * @description If field exists, workspace is published as a read only app mode workspace.
+       * @default null
+       */
+      appMode: components["schemas"]["AppModeProtocol"] | null;
+      /** @description ID of the published workspace. */
+      id: string;
+      /** @description Id of the tenant the published workspace creator belongs to. */
+      tenantId: string;
+      /** @description Timestamp of the published workspace at creation. */
+      createdAt: number;
+      /** @description Status of the published workspace export. Possible values are initializing, created and deleting. */
+      status: string;
+      /** @description Size of the published workspace. */
+      size: number;
+      /** @description ID of the creator of the published workspace. */
+      ownerId: string;
+      /** @description Username of the creator of the published workspace. */
+      ownerUsername: string;
+    };
+    PublishedWorkspaceDataProtocol: {
+      data: components["schemas"]["PublishedWorkspaceItemsProtocol"];
+    };
+    PublishedWorkspaceUpdateProtocol: {
+      /** @description Name of the published workspace. */
+      workspaceName: string;
+    };
+    PublishedWorkspaceQuotaProtocol: {
+      /** @description Storage capacity in bytes consumed by the user. */
+      used: number;
+      /** @description Storage quota in bytes allocated for the user. */
+      quota: number;
+    };
+    PublishedWorkspaceImportProtocol: {
+      /** @description ID of published workspace to import. */
+      id: string;
+      /** @default null */
+      update: {
+        /** @description ID of workspace to update. */
+        workspaceId: string;
+      } | null;
+    };
+    /**
+     * @description Type of content.
+     * @enum {string}
+     */
+    ContentType: "MODELICA" | "VIEWS" | "FAVORITES" | "CUSTOM_FUNCTIONS" | "REFERENCE_RESULTS" | "GENERIC" | "EXPERIMENT_DEFINITIONS" | "CUSTOM_WEB_APPS";
+    /** @description URL to a git repository. */
+    GitRepoURLProtocol: {
+      /** @description The URL of the repository without schema part. */
+      url: string;
+      /** @description A refname in the repository. */
+      refname: string;
+      /** @description Commit hash in the repository. Can be an empty string. */
+      sha1: string;
+    };
+    /** @description The definition of a project. */
+    ProjectDefinitionModel: {
+      /** @description Case sensitive project name. Must start with a letter and only use letters, numbers, underscores and dashes. */
+      name: string;
+      /**
+       * @description The semantic version of the project.
+       * @default null
+       */
+      version: string | null;
+      /**
+       * @description The semantic schema version of the project definition.
+       * @default 1.0.0
+       */
+      format: string;
+      /** @default [] */
+      dependencies: components["schemas"]["ProjectDependencyModel"][];
+      /** @default [] */
+      content: components["schemas"]["ProjectContentModel"][];
+      /** @default [] */
+      executionOptions: components["schemas"]["ProjectExecutionOptionsModel"][];
+      /**
+       * @description The icon for the project.
+       * @default null
+       */
+      icon: string | null;
+    };
+    /** @description A dependency of another project to this project. */
+    ProjectDependencyModel: {
+      /** @description The name of the project dependency. */
+      name: string;
+      /**
+       * @description Version specifier.
+       * @default null
+       */
+      versionSpecifier: string | null;
+    };
+    /** @description Execution options for a custom function in a project. */
+    ProjectExecutionOptionsModel: {
+      /** @description Custom function the options are for. */
+      customFunction: string;
+      /** @description Key-value pairs of compilation options. */
+      compiler: {
+        [key: string]: number | string | boolean;
+      };
+      /** @description Key-value pairs of run-time options. */
+      runtime: {
+        [key: string]: number | string | boolean;
+      };
+      /** @description Key-value pairs of simulation options. */
+      simulation: {
+        [key: string]: number | string | boolean;
+      };
+      /** @description Key-value pairs of solver options. */
+      solver: {
+        [key: string]: number | string | boolean;
+      };
+    };
+    /**
+     * @description The type of the project.
+     * @enum {string}
+     */
+    ProjectType: "LOCAL" | "RELEASED" | "SYSTEM";
+    /**
+     * @description The storage location of the project.
+     * @enum {string}
+     */
+    StorageLocation: "APPMODE" | "USERSPACE" | "SYSTEM";
+    /** @description URL to a svn repository. */
+    SvnRepoURLProtocol: {
+      /** @description Root URL of the repository without schema part. */
+      rootUrl: string;
+      /** @description The trunk, branch or tag part of the URL. */
+      branch: string;
+      /** @description Relative url after branch. */
+      urlFromRoot: string;
+      /** @description SVN revision of the repository (number of HEAD). */
+      revision: string;
+    };
+    /**
+     * @description Supported Version Control System services.
+     * @enum {string}
+     */
+    VCSServiceKind: "GIT" | "SVN" | "NONE";
+    VcsUriProtocol: {
+      serviceKind: components["schemas"]["VCSServiceKind"];
+      /** @description Service URL. */
+      serviceUrl: string;
+      /** @description URL to the repository. */
+      repoUrl: components["schemas"]["GitRepoURLProtocol"] | components["schemas"]["SvnRepoURLProtocol"];
+      /** @description Protocol of the URI. */
+      protocol: string;
+      /** @description Sub-directory of the repository. */
+      subdir: string;
+    };
+    AppModeProtocol: {
+      /** @description The model to view in the App Mode workspace. */
+      model: string;
+    };
+    /** @description Reference to local editable project. */
+    IdReferenceProtocol: {
+      /** @description Identifier for the local project. */
+      id: string;
+    };
+    OwnerDataModel: {
+      /** @description The username of the published workspace creator. */
+      username: string;
+      /** @description The tenant, the published workspace creator belongs to. */
+      tenant: string;
+    };
+    /** @description Project entry. */
+    ProjectEntryProtocol: {
+      /** @description A reference to a local project used by the workspace. */
+      reference: components["schemas"]["ReleaseReferenceProtocol"] | components["schemas"]["VcsReferenceProtocol"] | components["schemas"]["IdReferenceProtocol"];
+      /**
+       * @description If the project is disable for the workspace.
+       * @default false
+       */
+      disabled: boolean;
+      /** @description List of content IDs for content entries that are disabled in the project. */
+      disabledContent?: string[];
+    };
+    ReceivedFromModel: {
+      /** @description The ID of the published workspace. */
+      sharingId: string;
+      /** @description The name of the published workspace. */
+      workspaceName: string;
+      owner: components["schemas"]["OwnerDataModel"];
+      /** @description The unix time at which the workspace was last published. */
+      createdAt: number;
+    };
+    /** @description Reference to a released project. */
+    ReleaseReferenceProtocol: {
+      /** @description Identifier for the local project. */
+      id: string;
+      /** @description The name of the released project. */
+      name: string;
+      /**
+       * @description The semantic version of the released project.
+       * @default null
+       */
+      version: string | null;
+    };
+    /** @description Reference to a version controlled project. */
+    VcsReferenceProtocol: {
+      /** @description Identifier for the local project. */
+      id: string;
+      /** @description The version control URI for the project. */
+      vcsUri: string;
+    };
+    /** @description Selected local project. */
+    ProjectSelectedProtocol: {
+      /** @description ID of project. */
+      id: string;
+    };
+    /** @description Selected local project for a project entry in workspace definition. */
+    SelectedMatchingProtocol: {
+      /** @description ID of project entry the selection is for. */
+      id: string;
+      project: components["schemas"]["ProjectSelectedProtocol"];
+    };
+    PublishedWorkspaceItemsProtocol: {
+      items: components["schemas"]["PublishedWorkspaceProtocol"][];
+    };
+    /** @enum {string} */
+    CustomWebAppKind: "STATIC" | "VOILA";
+    CustomWebAppMetaProtocol: {
+      /** @description Name of the custom web app folder. */
+      id: string;
+    };
+    CustomWebAppProjectMetaProtocol: {
+      /** @description ID of the project. */
+      id: string;
+      /** @description Name of the project. */
+      name: string;
+    };
+    /** @description A custom web app protocol. */
+    CustomWebAppProtocol: {
+      app: components["schemas"]["CustomWebAppMetaProtocol"];
+      project: components["schemas"]["CustomWebAppProjectMetaProtocol"];
+      /**
+       * @description A description for the custom web app.
+       * @default
+       */
+      description: string;
+      /**
+       * @description A category grouping for the custom web app.
+       * @default
+       */
+      category: string;
+      /**
+       * @description Flag to enable/disable custom web app.
+       * @default false
+       */
+      disabled: boolean;
+      /**
+       * @description Flag to enable/disable custom web app only for a workspace.
+       * @default true
+       */
+      requireWorkspace: boolean;
+      /**
+       * @description Flag to enable/disable custom web app only when a model is active.
+       * @default true
+       */
+      requireModel: boolean;
+      /**
+       * @description Flag to enable/disable custom web app for app mode workspaces.
+       * @default false
+       */
+      appModeEnabled: boolean;
+      kind: components["schemas"]["CustomWebAppKind"];
+      /** @description Relative path to the default page of the app. For frontend-only apps defaults to index.html, for Voila apps to notebook.ipynb */
+      defaultPage: string;
+    };
+    SignatureParameter: {
+      /** @description Name of the custom function parameter. */
+      name: string;
+      /** @description Data type of the custom function parameter, supported types are: <ul><li>*Number* - value is real or integer.</li><li>*String* - value is a string.</li><li>*Boolean* - value is true or false.</li><li>*Enumeration* -  **values** should specify the array of allowed choices, value is a string.</li><li>*CaseResult* - value is a string of the form **<experiment_id>/<case_id>**.</li><li>*ExperimentResult* - value is a string of the form **<experiment_id>**.</li><li>*FileURI* - value is a string with the form **\<scheme\>://\<netloc\>/\<path\>** pointing to an existing file, where supported schemes are **modelica** and **impact-artifact**.</li><li>*VariableNames* - value is a list of strings where each string is a name of a model variable.</li></ul> */
+      type: components["schemas"]["DataTypes"];
+      /**
+       * @description Description of the custom function parameter.
+       * @default
+       */
+      description: string;
+      /**
+       * @description A list specifying values to choose the parameter from (applicable only for parameters of type Enumeration).
+       * @default null
+       */
+      values: string[] | null;
+      /**
+       * @description If this custom function parameter is optional when calling this custom function. Default: False.
+       * @default false
+       */
+      optional: boolean;
+      /**
+       * @description Default value for this custom function parameter, its data type should be as specified in 'type' (except for enumeration parameters, where the default value should be one of the enumerated values).
+       * @default null
+       */
+      defaultValue: boolean | number | string | string[] | null;
+      /**
+       * @description Filters files that fulfill the given pattern defined by 'text1 (\*.ext1);;text2 (\*.ext2);' to show only files with fileextension *.ext1 or *.ext2 and displaying a description text 'text1' and 'text2', respectively.(applicable only for parameters of type FileURI).
+       * @default null
+       */
+      filter: string | null;
+      /**
+       * @description Defines the graphical layout of the parameter.
+       * @default null
+       */
+      dialog: components["schemas"]["Dialog"] | null;
+    };
+    Signature: {
+      /** @description Name of the custom function. */
+      name: string;
+      /**
+       * @description Custom function signature schema version.
+       * @default 0.0.1
+       */
+      version: string;
+      /**
+       * @description Description of the custom function.
+       * @default
+       */
+      description: string;
+      /**
+       * @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment.
+       * @default false
+       */
+      can_initialize_from: boolean;
+      /**
+       * @description The resource the custom function will run on.
+       * @default EXECUTOR
+       */
+      kind: components["schemas"]["Kind"];
+      /**
+       * @description A list of parameters that should be supplied in the experiment definition if this custom function is used.
+       * @default []
+       */
+      parameters: components["schemas"]["SignatureParameter"][];
+    };
+    /** @enum {string} */
+    DataTypes: "Number" | "String" | "Boolean" | "Enumeration" | "CaseResult" | "ExperimentResult" | "FileURI" | "VariableNames";
+    Analysisv1: {
+      /** @description The name of the custom function that will be executed. */
+      analysis_function: string;
+      /** @description Parameters to the custom function. */
+      parameters?: {
+        [key: string]: boolean | number | string | string[];
+      };
+      /** @description Key-value pairs of simulation options. */
+      simulation_options?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description Key-value pairs of solver options. */
+      solver_options?: {
+        [key: string]: boolean | number | string;
+      };
+      /**
+       * @description The simulation log level.
+       * @default WARNING
+       */
+      simulation_log_level: components["schemas"]["SimulationLogLevel"];
+    };
+    Modifiersv1: {
+      /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified, a full factorial expansion is used to determine all different parameterizations for the experiment. */
+      variables?: {
+        [key: string]: boolean | number | string;
+      };
+      /**
+       * @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function.
+       * @default null
+       */
+      initializeFrom: string | null;
+    };
+    /** @enum {string} */
+    SimulationLogLevel: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
+    ExperimentDefinitionV1: {
+      /** @description Reference ID to the compiled model. */
+      fmu_id: string;
+      modifiers?: components["schemas"]["Modifiersv1"];
+      /** @description The analysis object. */
+      analysis: components["schemas"]["Analysisv1"];
+    };
+    AnalysisExtensionV2: {
+      /** @description Parameters to the custom function. */
+      parameters?: {
+        [key: string]: boolean | number | string | string[];
+      };
+      /** @description Key-value pairs of simulation options. */
+      simulationOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description Key-value pairs of solver options. */
+      solverOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /**
+       * @description The simulation log level.
+       * @default null
+       */
+      simulationLogLevel: components["schemas"]["SimulationLogLevel"] | null;
+    };
+    Analysisv2: {
+      /** @description Parameters to the custom function. */
+      parameters?: {
+        [key: string]: boolean | number | string | string[];
+      };
+      /** @description Key-value pairs of simulation options. */
+      simulationOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description Key-value pairs of solver options. */
+      solverOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description The name of the custom function that will be executed. */
+      type: string;
+      /**
+       * @description The simulation log level.
+       * @default WARNING
+       */
+      simulationLogLevel: components["schemas"]["SimulationLogLevel"];
+    };
+    CaseData: {
+      /**
+       * @description Specifies case label.
+       * @default null
+       */
+      label: string | null;
+    };
+    ExperimentDefinitionBaseV2: {
+      /** @description The model to use for the experiment. */
+      model: components["schemas"]["FmuEnvelop"] | components["schemas"]["ModelicaEnvelop"];
+      /** @description The analysis object. */
+      analysis: components["schemas"]["Analysisv2"];
+      modifiers?: components["schemas"]["Modifiersv2"];
+      /** @description Specifies expansion algorithm and its parameters. */
+      expansion?: components["schemas"]["FullFactorial"] | components["schemas"]["LatinHypercube"] | components["schemas"]["Sobol"] | components["schemas"]["Saltelli"];
+    };
+    Extension: {
+      modifiers?: components["schemas"]["Modifiersv2"];
+      /** @description An array of case data. Only the first index in the case data array will be used for extensions currently. */
+      caseData?: components["schemas"]["CaseData"][];
+      /** @description The analysis object. */
+      analysis?: components["schemas"]["AnalysisExtensionV2"];
+    };
+    FmuEnvelop: {
+      fmu: components["schemas"]["FmuModel"];
+    };
+    FmuModel: {
+      /** @description Reference ID to the compiled model. */
+      id: string;
+    };
+    FullFactorial: {
+      /**
+       * @description Full factorial expansion algorithm.
+       * @default FULLFACTORIAL
+       * @constant
+       * @enum {string}
+       */
+      algorithm: "FULLFACTORIAL";
+    };
+    InitializeFromCase: {
+      /** @description Experiment ID to initialize from. */
+      experimentId: string;
+      /** @description Case ID to initialize from. */
+      caseId: string;
+    };
+    LatinHypercube: {
+      /**
+       * @description Latin hypercube sampling expansion algorithm.
+       * @default LATINHYPERCUBE
+       * @constant
+       * @enum {string}
+       */
+      algorithm: "LATINHYPERCUBE";
+      /** @description Latin hypercube expansion algorithm parameters. */
+      parameters: components["schemas"]["LatinHypercubeParameters"];
+    };
+    LatinHypercubeParameters: {
+      /** @description The number of samples. Must be an integer greater than 1. */
+      samples: number;
+      /**
+       * @description The seed for random number generation. Default: None.
+       * @default null
+       */
+      seed: number | null;
+    };
+    ModelicaEnvelop: {
+      modelica: components["schemas"]["ModelicaModel"];
+    };
+    ModelicaModel: {
+      /** @description Model class name. */
+      className: string;
+      /**
+       * @description Key-value pairs of compilation options.
+       * @default {
+       *   "c_compiler": "gcc"
+       * }
+       */
+      compilerOptions: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description Key-value pairs of run-time options. */
+      runtimeOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /**
+       * @description Compiler log level.
+       * @default warning
+       */
+      compilerLogLevel: string;
+      /**
+       * @description Flavour of the FMU.
+       * @default me
+       * @enum {string}
+       */
+      fmiTarget: "me" | "cs" | "me+cd";
+      /**
+       * @description Version of FMI for the FMU.
+       * @default 2.0
+       * @enum {string}
+       */
+      fmiVersion: "1.0" | "2.0";
+      /**
+       * @description Platform for FMU binary.
+       * @default auto
+       * @enum {string}
+       */
+      platform: "linux64" | "win32" | "win64" | "auto";
+    };
+    Modifiersv2: {
+      /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified, a full factorial expansion is used to determine all different parameterizations for the experiment. */
+      variables?: {
+        [key: string]: boolean | number | string;
+      };
+      /**
+       * @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function.
+       * @default null
+       */
+      initializeFrom: string | null;
+      /**
+       * @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases.
+       * @default null
+       */
+      initializeFromCase: components["schemas"]["InitializeFromCase"] | null;
+      /**
+       * @description The ID of the result import.
+       * @default null
+       */
+      initializeFromExternalResult: string | null;
+    };
+    Saltelli: {
+      /**
+       * @description Saltelli expansion algorithm.
+       * @default SALTELLI
+       * @constant
+       * @enum {string}
+       */
+      algorithm: "SALTELLI";
+      /** @description Saltelli expansion algorithm parameters. */
+      parameters: WithRequired<{
+        /** @description The number of samples per (non-singular) modifier in the following sensitivity analysis. Must be a positive integer. It corresponds to the accuracy/resolution of the following sensisivity analysis and depends on the number of non-singular modifiers D. The number of cases in the resulting experiment expansion will be - N*(2*D + 2) if secondOrderAnalysis == true and N*(D + 2) if secondOrderAnalysis == false, where N is samplesPerModifier and D is the number of non-singular modifiers. */
+        samplesPerModifier: number;
+        /** @description Set to true if the resulting samples are to be used for second order sensitivity analysis, otherwise set to false. */
+        secondOrderAnalysis: boolean;
+      } & components["schemas"]["SaltelliParameters"], "samplesPerModifier" | "secondOrderAnalysis">;
+    };
+    SaltelliParameters: {
+      /** @description The number of samples per (non-singular) modifier in the following sensitivity analysis. Must be a positive integer. It corresponds to the accuracy/resolution of the following sensisivity analysis and depends on the number of non-singular modifiers D. The number of cases in the resulting experiment expansion will be - N*(2*D + 2) if secondOrderAnalysis == true and N*(D + 2) if secondOrderAnalysis == false, where N is samplesPerModifier and D is the number of non-singular modifiers. */
+      samplesPerModifier: number;
+      /** @description Set to true if the resulting samples are to be used for second order sensitivity analysis, otherwise set to false. */
+      secondOrderAnalysis: boolean;
+    };
+    Sobol: {
+      /**
+       * @description Sobol expansion algorithm.
+       * @default SOBOL
+       * @constant
+       * @enum {string}
+       */
+      algorithm: "SOBOL";
+      /** @description Sobol expansion algorithm parameters. */
+      parameters: WithRequired<{
+        /** @description The number of samples. Must be an integer greater than 1. */
+        samples: number;
+      } & components["schemas"]["SobolParameters"], "samples">;
+    };
+    SobolParameters: {
+      /** @description The number of samples. Must be an integer greater than 1. */
+      samples: number;
+    };
+    ExperimentDefinitionV2: {
+      /**
+       * @description Experiment version, should be '2'.
+       * @default 2
+       * @constant
+       * @enum {integer}
+       */
+      version: 2;
+      base: components["schemas"]["ExperimentDefinitionBaseV2"];
+      /** @description List of extensions to define cases. Each 'extension' defined will be merged with 'base' to create a case. When merging 'base' with an 'extension', the 'extension' will override the corresponding definitions in 'base'. It is not possible to use any operators (like the range operator) when using extensions. */
+      extensions?: components["schemas"]["Extension"][];
+    };
+    AnalysisExtensionV3: {
+      /** @description Parameters to the custom function. */
+      parameters?: components["schemas"]["CustomFunctionParameter"][];
+      /** @description Key-value pairs of simulation options. */
+      simulationOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description Key-value pairs of solver options. */
+      solverOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /**
+       * @description The simulation log level.
+       * @default null
+       */
+      simulationLogLevel: components["schemas"]["SimulationLogLevel"] | null;
+    };
+    AnalysisV3: {
+      /** @description Parameters to the custom function. */
+      parameters?: components["schemas"]["CustomFunctionParameter"][];
+      /** @description Key-value pairs of simulation options. */
+      simulationOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description Key-value pairs of solver options. */
+      solverOptions?: {
+        [key: string]: boolean | number | string;
+      };
+      /** @description The name of the custom function that will be executed. */
+      type: string;
+      /**
+       * @description The simulation log level.
+       * @default WARNING
+       */
+      simulationLogLevel: components["schemas"]["SimulationLogLevel"];
+    };
+    /**
+     * @description Beta distribution.
+     *
+     * For a mathematical background, see e.g.,
+     * https://en.wikipedia.org/wiki/Beta_distribution.
+     * Depending on the 'expansion'
+     * configured, a numer of cases with values choosen from the normal distribution will
+     * be created.
+     */
+    BetaOperatorModifier: {
+      /**
+       * @default beta
+       * @constant
+       * @enum {string}
+       */
+      kind: "beta";
+      /** @description The name of the model variable that the operator is modifying. */
+      name: string;
+      /**
+       * @description Alpha parameter of beta distribution.
+       * @default 2
+       */
+      alpha: number;
+      /**
+       * @description Beta parameter of beta distribution.
+       * @default 2
+       */
+      beta: number;
+    };
+    /** @description The choices operator defines a list of specified values. */
+    ChoicesOperatorModifier: {
+      /**
+       * @default choices
+       * @constant
+       * @enum {string}
+       */
+      kind: "choices";
+      /**
+       * @description The data type of the values.
+       * @default REAL
+       */
+      dataType: components["schemas"]["DataType"];
+      /** @description The name of the model variable that the operator is modifying. */
+      name: string;
+      /** @description The values. */
+      values: (boolean | number | string)[];
+    };
+    CustomFunctionParameter: {
+      /** @description The name of the parameter. */
+      name: string;
+      /** @description The value of the parameter. */
+      value: boolean | number | string | string[];
+    };
+    /**
+     * DataType
+     * @enum {string}
+     */
+    DataType: "STRING" | "REAL" | "INTEGER" | "BOOLEAN" | "ENUMERATION";
+    ExperimentDefinitionBaseV3: {
+      /** @description The model to use for the experiment. */
+      model: components["schemas"]["FmuEnvelop"] | components["schemas"]["ModelicaEnvelop"];
+      /** @description The analysis object. */
+      analysis: components["schemas"]["AnalysisV3"];
+      modifiers?: components["schemas"]["ModifiersV3"];
+      /** @description Specifies expansion algorithm and its parameters. */
+      expansion?: components["schemas"]["FullFactorial"] | components["schemas"]["LatinHypercube"] | components["schemas"]["Sobol"] | components["schemas"]["Saltelli"];
+    };
+    ExtensionV3: {
+      modifiers?: components["schemas"]["ModifiersV3"];
+      /** @description An array of case data. Only the first index in the case data array will be used for extensions currently. */
+      caseData?: components["schemas"]["CaseData"][];
+      /** @description The analysis object. */
+      analysis?: components["schemas"]["AnalysisExtensionV3"];
+    };
+    ModifiersV3: {
+      /** @description Specifies variable modifiers. These might be single values or operators that are expanded to multiple cases. */
+      variables?: (components["schemas"]["ValueModifier"] | components["schemas"]["ChoicesOperatorModifier"] | components["schemas"]["RangeOperatorModifier"] | components["schemas"]["UniformOperatorModifier"] | components["schemas"]["NormalOperatorModifier"] | components["schemas"]["BetaOperatorModifier"])[];
+      /**
+       * @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function.
+       * @default null
+       */
+      initializeFrom: string | null;
+      /**
+       * @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases.
+       * @default null
+       */
+      initializeFromCase: components["schemas"]["InitializeFromCase"] | null;
+      /**
+       * @description The ID of the result import.
+       * @default null
+       */
+      initializeFromExternalResult: string | null;
+    };
+    /**
+     * @description Normal distribution.
+     *
+     * For a mathematical background, see e.g.,
+     * https://en.wikipedia.org/wiki/Normal_distribution
+     * and
+     * https://en.wikipedia.org/wiki/Truncated_normal_distribution.
+     * Supports both the standard and truncated Normal distribution. The standard Normal
+     * distribution is the default, add additional 'start' and 'end' parameters for
+     * truncation. Depending on the 'expansion' configured, a numer of cases with values
+     * choosen from the normal distribution will be created.
+     */
+    NormalOperatorModifier: {
+      /**
+       * @default normal
+       * @constant
+       * @enum {string}
+       */
+      kind: "normal";
+      /** @description The name of the model variable that the operator is modifying. */
+      name: string;
+      /**
+       * @description Mean of the distribution.
+       * @default 0
+       */
+      mean: number;
+      /**
+       * @description Variance of the normal distribution. (> 0)
+       * @default 1
+       */
+      variance: number;
+      /**
+       * @description Lower bound. (Default: -inf)
+       * @default null
+       */
+      start: number | null;
+      /**
+       * @description Upper bound, requires end > start. (Default: inf)
+       * @default null
+       */
+      end: number | null;
+    };
+    /**
+     * @description The range operator allows a range of values to be described: e.g.
+     * start=0, end=1, steps=5 describes 5 evenly spaced values between 0 and 1:
+     * [0,0.25,0.5,0.75,1].
+     */
+    RangeOperatorModifier: {
+      /**
+       * @default range
+       * @constant
+       * @enum {string}
+       */
+      kind: "range";
+      /** @description The name of the model variable that the operator is modifying. */
+      name: string;
+      /** @description Starting point of interval. */
+      start: number;
+      /** @description End point of interval. */
+      end: number;
+      /** @description Number of samples. (> 0) */
+      steps: number;
+    };
+    /**
+     * @description Uniform distribution.
+     *
+     * For a mathematical background, see e.g.,
+     * https://en.wikipedia.org/wiki/Continuous_uniform_distribution.
+     * Depending on
+     * the 'expansion' configured, a numer of cases with values choosen from the uniform
+     * distribution will be created.
+     */
+    UniformOperatorModifier: {
+      /**
+       * @default uniform
+       * @constant
+       * @enum {string}
+       */
+      kind: "uniform";
+      /**
+       * @description Starting point of interval.
+       * @default 0
+       */
+      start: number;
+      /**
+       * @description End point of interval, requires end > start.
+       * @default 1
+       */
+      end: number;
+      /** @description The name of the model variable that the operator is modifying. */
+      name: string;
+    };
+    /**
+     * @description Single value modifier.
+     *
+     * Does not add any additional cases during expansion but changes the value for all
+     * cases.
+     */
+    ValueModifier: {
+      /**
+       * @default value
+       * @constant
+       * @enum {string}
+       */
+      kind: "value";
+      /**
+       * @description The data type of the value.
+       * @default REAL
+       */
+      dataType: components["schemas"]["DataType"];
+      /** @description The name of the model variable that the operator is modifying. */
+      name: string;
+      /** @description Value of modifier. */
+      value: boolean | number | string;
+    };
+    ExperimentDefinitionV3: {
+      /**
+       * @description Experiment version, should be '3'.
+       * @default 3
+       * @constant
+       * @enum {integer}
+       */
+      version: 3;
+      base: components["schemas"]["ExperimentDefinitionBaseV3"];
+      /** @description List of extensions to define cases. Each 'extension' defined will be merged with 'base' to create a case. When merging 'base' with an 'extension', the 'extension' will override the corresponding definitions in 'base'. It is not possible to use any operators (like the range operator) when using extensions. */
+      extensions?: components["schemas"]["ExtensionV3"][];
+    };
+    Dialog: {
+      /**
+       * @description The name of the tab, the parameter should be placed in.
+       * @default null
+       */
+      tab: string | null;
+      /**
+       * @description The name of the group, the parameter should be placed in.
+       * @default null
+       */
+      group: string | null;
+    };
+    /** @enum {string} */
+    Kind: "EXECUTOR" | "ORCHESTRATOR";
+    /** ParameterProtocol */
+    ParameterProtocol: {
+      /** @description Data type of the parameter */
+      dataType: components["schemas"]["DataType"];
+      /**
+       * Name
+       * @description The name of the parameter.
+       */
+      name: string;
+      /**
+       * Value
+       * @description Value of the parameter
+       */
+      value: boolean | number | string;
     };
     Error: {
       error?: {
         /**
-         * @description Error message describing what went wrong. 
+         * @description Error message describing what went wrong.
          * @example There was an error X because of Y
          */
         message?: string;
         /**
-         * @description Error code for identifying specific errors. 
+         * @description Error code for identifying specific errors.
          * @example 12012
          */
         code?: number;
@@ -2172,18 +2558,18 @@ export interface components {
     };
     TrajectoriesProtocol: {
       /**
-       * @description The variable names trajectories should be fetched for. 
+       * @description The variable names trajectories should be fetched for.
        * @example [
        *   "variable1",
        *   "variable2"
        * ]
        */
-      variable_names: (string)[];
+      variable_names: string[];
       /** @description The filter options to apply on the trajectories. */
       filter?: {
         /**
-         * @description If true, only the last point in the trajectory is returned. 
-         * @default false 
+         * @description If true, only the last point in the trajectory is returned.
+         * @default false
          * @example false
          */
         lastPointOnly: boolean;
@@ -2192,13 +2578,13 @@ export interface components {
     /** @description Workspace meta-data. */
     Workspace: {
       /**
-       * @description Unique workspace identifier. 
+       * @description Unique workspace identifier.
        * @example my_workspace
        */
       id: string;
       conversion?: {
         /**
-         * @description IS_REQUIRED, if the workspace is of an old version and needs to be converted, else UP_TO_DATE. 
+         * @description IS_REQUIRED, if the workspace is of an old version and needs to be converted, else UP_TO_DATE.
          * @enum {string}
          */
         state: "UP_TO_DATE" | "IS_REQUIRED";
@@ -2207,33 +2593,40 @@ export interface components {
       /** @description If field exists, workspace is a backup created from another workspace. */
       backup?: {
         /**
-         * @description The name of backup. 
+         * @description The name of backup.
          * @example My Workspace backup
          */
         name: string;
         /**
-         * @description The ID of another workspace this workspace is a backup of. 
+         * @description The ID of another workspace this workspace is a backup of.
          * @example my_workspace
          */
         workspaceId: string;
       };
-      /** @description Total size(in bytes) of the workspace. The total size is computed as the sum of disk space taken by the workspace meta files, generated workspace resources (FMU's and experiments), and local workspace projects and dependencies. */
+      /** @description Size(in bytes) of the workspace. The total size is computed as the sum of disk space taken by the workspace meta files, generated workspace resources (FMU's and experiments), and local workspace projects and dependencies. */
       sizeInfo?: {
         /**
-         * @description Total size of the workspace in bytes. 
+         * @description Total size of the workspace in bytes.
          * @example 7014
          */
         total: number;
+        /**
+         * @description Total size of the workspace generated fmus in bytes.
+         * @example 2000
+         */
+        fmus: number;
+        /**
+         * @description Total size of the workspace generated experiment in bytes.
+         * @example 3014
+         */
+        experiments: number;
       };
     };
     WorkspaceExportCreationProtocol: {
-      /**
-       * @description The ID of the workspace to export. 
-       * @example my_workspace
-       */
+      /** @description The ID of the workspace to export. */
       workspaceId: string;
       /**
-       * @description The contents to include in the workspace to be exported. If not specified, all the projects, dependencies, FMU's and experiments associated with the workspaced will be packaged for export. 
+       * @description The contents to include in the workspace to be exported. If not specified, all the projects, dependencies, FMU's and experiments associated with the workspaced will be packaged for export.
        * @default {
        *   "projects": {
        *     "includes": null
@@ -2251,127 +2644,143 @@ export interface components {
        */
       contents: {
         /**
-         * @description Projects to include when exporting the workspace. If not specified or 'includes' set to None, all the workspace projects are added to export. To include specific projects, a list of project ID's can be specified as 'includes'. To exclude all projects, an empty list can be specified as 'includes'. 
+         * @description Projects to include when exporting the workspace. If not specified or 'includes' set to None, all the workspace projects are added to export. To include specific projects, a list of project ID's can be specified as 'includes'. To exclude all projects, an empty list can be specified as 'includes'.
          * @default {
          *   "includes": null
          * }
          */
         projects: {
-          includes?: ({
-              /**
-               * @description ID of a project to include. 
-               * @example b97e912af9804d26
-               */
-              id: string;
-            })[];
+          /** @default null */
+          includes: {
+            /** @description ID of a project to include. */
+            id: string;
+          }[] | null;
         };
         /**
-         * @description Projects dependencies to include when exporting the workspace. If not specified or 'includes' set to None, all the workspace dependencies are added to export. To include specific dependencies, a list of dependency ID's can be specified as 'includes'. To exclude all dependencies, an empty list can be specified as 'includes'. 
+         * @description Projects dependencies to include when exporting the workspace. If not specified or 'includes' set to None, all the workspace dependencies are added to export. To include specific dependencies, a list of dependency ID's can be specified as 'includes'. To exclude all dependencies, an empty list can be specified as 'includes'.
          * @default {
          *   "includes": null
          * }
          */
         dependencies: {
-          includes?: ({
-              /**
-               * @description ID of a project dependency to include. 
-               * @example c863600ce46f4474
-               */
-              id: string;
-            })[];
+          /** @default null */
+          includes: {
+            /** @description ID of a project dependency to include. */
+            id: string;
+          }[] | null;
         };
         /**
-         * @description Experiments to include when exporting the workspace. If not specified or 'includes' set to None, all the experiment's associated with the workspace are added to export. To include specific experiments, a list of experiment ID's can be specified as 'includes'. To exclude all experiments, an empty list can be specified as 'includes'. 
+         * @description Experiments to include when exporting the workspace. If not specified or 'includes' set to None, all the experiment's associated with the workspace are added to export. To include specific experiments, a list of experiment ID's can be specified as 'includes'. To exclude all experiments, an empty list can be specified as 'includes'.
          * @default {
          *   "includes": null
          * }
          */
         experiments: {
-          includes?: ({
-              /**
-               * @description ID of an experiment to include. 
-               * @example 12b5cf9b94b14aee
-               */
-              id: string;
-            })[];
+          /** @default null */
+          includes: {
+            /** @description ID of an experiment to include. */
+            id: string;
+          }[] | null;
         };
         /**
-         * @description FMU's to include when exporting the workspace. If not specified or 'includes' set to None, all the FMU's associated with the workspace are added to export. To include specific FMU's, a list of FMU ID's can be specified as 'includes'. To exclude all FMU's, an empty list can be specified as 'includes'. 
+         * @description FMU's to include when exporting the workspace. If not specified or 'includes' set to None, all the FMU's associated with the workspace are added to export. To include specific FMU's, a list of FMU ID's can be specified as 'includes'. To exclude all FMU's, an empty list can be specified as 'includes'.
          * @default {
          *   "includes": null
          * }
          */
         fmus: {
-          includes?: ({
-              /**
-               * @description ID of an FMU to include. 
-               * @example 4cb6cedc73a040d1
-               */
-              id: string;
-            })[];
+          /** @default null */
+          includes: {
+            /** @description ID of an FMU to include. */
+            id: string;
+          }[] | null;
         };
       };
-      /** @description If field exists, workspace is exported as a read only app mode workspace. App Mode results in read only view of single model in workspace. If workspace is exported in app mode and no filters are specified in 'contents' for FMU or experiments, the latest FMU and experiment available for the model specified in app mode are packaged for export. */
-      appMode?: {
+      /**
+       * @description If field exists, workspace is exported as a read only app mode workspace. App Mode results in read only view of single model in workspace. If workspace is exported in app mode and no filters are specified in 'contents' for FMU or experiments, the latest FMU and experiment available for the model specified in app mode are packaged for export.
+       * @default null
+       */
+      appMode: {
         /** @description The model to view in the App Mode workspace. */
         model: string;
-      };
+      } | null;
+      /**
+       * @description If True, workspace is exported and published, else if will be exported and available for download.
+       * @default false
+       */
+      publish: boolean | null;
+      /**
+       * @description Access control settings for a published workspace
+       * @default null
+       */
+      access: ({
+        /**
+         * @description List of group names, the user wants to share the published workspace with. If not specified, the workspace is shared within tenant the user belongs to on publishing. If an empty array is specified, the workspace is uploaded but not shared.
+         * @default null
+         */
+        groupNames: string[] | null;
+      }) | null;
     };
     Case: {
       /**
-       * @description Case ID. 
+       * @description Case ID.
        * @example case_1
        */
       id?: string;
       run_info: {
         /**
-         * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'. 
+         * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'.
          * @example successful
          */
         status?: string;
         /**
-         * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null. 
+         * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null.
          * @example simulation
          */
         failed_at?: string;
         /**
-         * @description The unix time the case started running. 
+         * @description The unix time the case started running.
          * @example 1549552749
          */
         datetime_started?: number;
         /**
-         * @description The unix time the case finshed running. 
+         * @description The unix time the case finished running.
          * @example 1549552338
          */
         datetime_finished?: number;
         /**
-         * @description Describes if the case 'input' is consistent with the latest case run. Will be false if the case has been updated and not executed since then. 
+         * @description Describes if the case 'input' is consistent with the latest case run. Will be false if the case has been updated and not executed since then.
          * @example false
          */
         consistent?: boolean;
       };
       meta: {
         /**
-         * @description Case label. 
+         * @description Case label.
          * @example Cruise operating point
          */
-        label?: OneOf<[string, null]>;
+        label?: string | null;
+        /**
+         * @description If true, indicates that this is an Orchestrator case which creates and runs other cases in this experiment.
+         * @example false
+         */
+        orchestrator?: boolean;
       };
       input: {
         /**
-         * @description Reference ID to the compiled model used running the case. 
+         * @description Reference ID to the compiled model used running the case.
          * @example workspace_pid_controller_20090615_134530_as86g32
          */
         fmu_id?: string;
         /** @description The analysis object. */
         analysis: {
           /**
-           * @description the name of the function to run. 
+           * @description the name of the function to run.
            * @example dynamic
            */
           analysis_function: string;
           /**
-           * @description parameters to the function. 
+           * @description parameters to the function.
            * @example {
            *   "start_time": 0,
            *   "final_time": 1
@@ -2380,14 +2789,14 @@ export interface components {
           parameters?: Record<string, never>;
           /** @description Key-value pairs of simulation options. */
           simulation_options?: {
-            [key: string]: (number | string | boolean) | undefined;
+            [key: string]: number | string | boolean;
           };
           /** @description Key-value pairs of solver options. */
           solver_options?: {
-            [key: string]: (number | string | boolean) | undefined;
+            [key: string]: number | string | boolean;
           };
           /**
-           * @description The simulation log level. 
+           * @description The simulation log level.
            * @enum {string}
            */
           simulation_log_level?: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
@@ -2399,65 +2808,65 @@ export interface components {
         /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU. */
         fmu_base_parametrization?: Record<string, never>;
         /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID and case ID. Details on how the initialization is done depend on the custom function. */
-        initialize_from_case?: OneOf<[{
+        initialize_from_case?: {
           /** @description Experiment ID to initialize from. */
           experimentId: string;
           /** @description Case ID to initialize from. */
           caseId: string;
-        }, null]>;
+        } | null;
         /** @description Initialize the simulation using an uploaded result file. Details on how the initialization is done depends upon the custom function. */
-        initialize_from_external_result?: OneOf<[{
+        initialize_from_external_result?: {
           /**
-           * @description The ID of the result import. 
+           * @description The ID of the result import.
            * @example 2f036b9fab6f45c788cc466da327cc78workspace
            */
           uploadId: string;
-        }, null]>;
+        } | null;
       };
     };
     CaseExecutionOptions: {
       options: {
         /**
-         * @description Key-value pairs of compilation options. 
+         * @description Key-value pairs of compilation options.
          * @example {
          *   "generate_html_diagnostics": true,
          *   "halt_on_warning": true
          * }
          */
         compiler?: {
-          [key: string]: (number | string | boolean) | undefined;
+          [key: string]: number | string | boolean;
         };
         /**
-         * @description Key-value pairs of run-time options. 
+         * @description Key-value pairs of run-time options.
          * @example {
          *   "use_Brent_in_1d": false
          * }
          */
         runtime?: {
-          [key: string]: (number | string | boolean) | undefined;
+          [key: string]: number | string | boolean;
         };
         /**
-         * @description Key-value pairs of simulation options. 
+         * @description Key-value pairs of simulation options.
          * @example {
          *   "ncp": 2000
          * }
          */
         simulation?: {
-          [key: string]: (number | string | boolean) | undefined;
+          [key: string]: number | string | boolean;
         };
         /**
-         * @description Key-value pairs of solver options. 
+         * @description Key-value pairs of solver options.
          * @example {
          *   "rtol": 0.0001
          * }
          */
         solver?: {
-          [key: string]: (number | string | boolean) | undefined;
+          [key: string]: number | string | boolean;
         };
       };
     };
     /**
-     * @description Specifies expansion algorithm and its parameters. 
+     * @description Specifies expansion algorithm and its parameters.
      * @example {
      *   "algorithm": "LatinHyperCube",
      *   "parameters": {
@@ -2467,16 +2876,9 @@ export interface components {
      * }
      */
     Expansion: components["schemas"]["LatinHyperCube"] | components["schemas"]["Sobol"] | components["schemas"]["FullFactorial"] | components["schemas"]["Saltelli"];
-    FullFactorial: {
-      /**
-       * @description Full factorial expansion algorithm. 
-       * @enum {string}
-       */
-      algorithm?: "FULLFACTORIAL";
-    };
     LatinHyperCube: {
       /**
-       * @description Latin hypercube sampling expansion algorithm. 
+       * @description Latin hypercube sampling expansion algorithm.
        * @enum {string}
        */
       algorithm: "LATINHYPERCUBE";
@@ -2488,36 +2890,10 @@ export interface components {
         seed?: number;
       };
     };
-    Sobol: {
-      /**
-       * @description Latin hypercube sampling expansion algorithm. 
-       * @enum {string}
-       */
-      algorithm: "SOBOL";
-      /** @description Latin hypercube expansion algorithm parameters. */
-      parameters: {
-        /** @description The number of samples. Must be an integer greater than 1. */
-        samples: number;
-      };
-    };
-    Saltelli: {
-      /**
-       * @description Saltelli expansion algorithm. 
-       * @enum {string}
-       */
-      algorithm: "SALTELLI";
-      /** @description Latin hypercube expansion algorithm parameters. */
-      parameters: {
-        /** @description The number of samples per (non-singular) modifier in the following sensitivity analysis. Must be a positive integer. It corresponds to the accuracy/resolution of the following sensisivity analysis and depends on the number of non-singular modifiers D. The number of cases in the resulting experiment expansion will be - N*(2*D + 2) if secondOrderAnalysis == true and N*(D + 2) if secondOrderAnalysis == false, where N is samplesPerModifier and D is the number of non-singular modifiers. */
-        samplesPerModifier: number;
-        /** @description Set to true if the resulting samples are to be used for second order sensitivity analysis, otherwise set to false. */
-        secondOrderAnalysis: boolean;
-      };
-    };
     /** @description A compilation error with file and class location info. */
     ErrorWithFileAndClassLocation: {
       /**
-       * @description The compilation error. 
+       * @description The compilation error.
        * @example The binding expression of the variable x does not match the declared type of the variable
        */
       msg?: string;
@@ -2534,7 +2910,7 @@ export interface components {
           /** @example 2 */
           endLine?: number;
           /**
-           * @description Class name. 
+           * @description Class name.
            * @example Workspace.Example
            */
           qualifiedName?: string;
@@ -2545,7 +2921,7 @@ export interface components {
     /** @description A compilation error with file location info. */
     ErrorWithFileLocation: {
       /**
-       * @description The compilation error. 
+       * @description The compilation error.
        * @example Compilation error
        */
       msg?: string;
@@ -2556,7 +2932,7 @@ export interface components {
     /** @description A compilation error without location info. */
     ErrorWithNoLocation: {
       /**
-       * @description The compilation error. 
+       * @description The compilation error.
        * @example Compilation error
        */
       msg?: string;
@@ -2566,7 +2942,7 @@ export interface components {
     /** @description A compilation error with path location info. */
     ErrorWithPathLocation: {
       /**
-       * @description The compilation error. 
+       * @description The compilation error.
        * @example Compilation error
        */
       msg?: string;
@@ -2574,7 +2950,7 @@ export interface components {
       locationType?: "PathLocation";
       location?: {
         /**
-         * @description Path to a file used in compilation. 
+         * @description Path to a file used in compilation.
          * @example /impact/libraries/BrokenLib/BrokenFile.moc
          */
         path?: string;
@@ -2586,56 +2962,51 @@ export interface components {
       /** @description The input for how the compilation was done. */
       input?: {
         /**
-         * @description Model class name. 
+         * @description Model class name.
          * @example Workspace.PID_Controller
          */
         class_name?: string;
         /**
-         * @description Compiler options settings. 
+         * @description Compiler options settings.
          * @example {
          *   "generate_html_diagnostics": true
          * }
          */
         compiler_options?: Record<string, never>;
         /**
-         * @description Runtime options settings. 
+         * @description Runtime options settings.
          * @example {
          *   "log_level": 4
          * }
          */
         runtime_options?: Record<string, never>;
         /**
-         * @description Compiler log level. 
+         * @description Compiler log level.
          * @example info
          */
         compiler_log_level?: string;
         /**
-         * @description Flavour of the FMU. 
+         * @description Flavour of the FMU.
          * @example me
          */
         fmi_target?: string;
         /**
-         * @description Version of FMI for the FMU. 
+         * @description Version of FMI for the FMU.
          * @example 2.0
          */
         fmi_version?: string;
         /**
-         * @description Platform for FMU binary. 
+         * @description Platform for FMU binary.
          * @example win64
          */
         platform?: string;
         /**
-         * @description An unique identifier representing some state of all models and libraries used when compiling. 
+         * @description An unique identifier representing some state of all models and libraries used when compiling.
          * @example 2b3a4-adf3
          */
         model_snapshot?: string;
         /**
-         * @description List of libraries not used when compiling. 
-         * @example [VDL, ML]
-         */
-        disabled_libs?: (string)[];
-        /**
-         * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1. 
+         * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1.
          * @example 0.0.1
          */
         toolchain_version?: string;
@@ -2643,19 +3014,19 @@ export interface components {
       /** @description The run info of the compilation. */
       run_info?: {
         /**
-         * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully. 
+         * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully.
          * @example failed
          */
         status?: string;
         /**
-         * @description The unix time the compilation was started. 
+         * @description The unix time the compilation was started.
          * @example 1549552749
          */
         datetime_started?: number;
         /** @description An array containing the compilation errors in case status is 'failed'. */
         errors?: (components["schemas"]["ErrorWithFileAndClassLocation"] | components["schemas"]["ErrorWithFileLocation"] | components["schemas"]["ErrorWithNoLocation"] | components["schemas"]["ErrorWithPathLocation"])[];
         /**
-         * @description The unix time the compilation was finished. 
+         * @description The unix time the compilation was finished.
          * @example 1549552338
          */
         datetime_finished?: number;
@@ -2664,7 +3035,7 @@ export interface components {
     ModelExecutableListV2: {
       data?: {
         /** @description List of all model executables. */
-        items?: (components["schemas"]["ModelExecutableItemV2"])[];
+        items?: components["schemas"]["ModelExecutableItemV2"][];
       };
     };
     ModelExecutableItemV1: {
@@ -2673,56 +3044,51 @@ export interface components {
       /** @description The input for how the compilation was done. */
       input?: {
         /**
-         * @description Model class name. 
+         * @description Model class name.
          * @example Workspace.PID_Controller
          */
         class_name?: string;
         /**
-         * @description Compiler options settings. 
+         * @description Compiler options settings.
          * @example {
          *   "generate_html_diagnostics": true
          * }
          */
         compiler_options?: Record<string, never>;
         /**
-         * @description Runtime options settings. 
+         * @description Runtime options settings.
          * @example {
          *   "log_level": 4
          * }
          */
         runtime_options?: Record<string, never>;
         /**
-         * @description Compiler log level. 
+         * @description Compiler log level.
          * @example info
          */
         compiler_log_level?: string;
         /**
-         * @description Flavour of the FMU. 
+         * @description Flavour of the FMU.
          * @example me
          */
         fmi_target?: string;
         /**
-         * @description Version of FMI for the FMU. 
+         * @description Version of FMI for the FMU.
          * @example 2.0
          */
         fmi_version?: string;
         /**
-         * @description Platform for FMU binary. 
+         * @description Platform for FMU binary.
          * @example win64
          */
         platform?: string;
         /**
-         * @description An unique identifier representing some state of all models and libraries used when compiling. 
+         * @description An unique identifier representing some state of all models and libraries used when compiling.
          * @example 2b3a4-adf3
          */
         model_snapshot?: string;
         /**
-         * @description List of libraries not used when compiling. 
-         * @example [VDL, ML]
-         */
-        disabled_libs?: (string)[];
-        /**
-         * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1. 
+         * @description Representing an aggregated version of all tooling used when compiling, will now always be 0.0.1.
          * @example 0.0.1
          */
         toolchain_version?: string;
@@ -2730,25 +3096,25 @@ export interface components {
       /** @description The run info of the compilation. */
       run_info?: {
         /**
-         * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully. 
+         * @description String that is 'cancelled', 'failed' or 'successful' depending on if the compilation finished successfully.
          * @example failed
          */
         status?: string;
         /**
-         * @description The unix time the compilation was started. 
+         * @description The unix time the compilation was started.
          * @example 1549552749
          */
         datetime_started?: number;
         /**
-         * @description An array containing the compilation errors in case status is 'failed'. 
+         * @description An array containing the compilation errors in case status is 'failed'.
          * @example [
          *   "Could not match 'variable1' with any equation",
          *   "Nominal of 'variable2' is 0"
          * ]
          */
-        errors?: (string)[];
+        errors?: string[];
         /**
-         * @description The unix time the compilation was finished. 
+         * @description The unix time the compilation was finished.
          * @example 1549552338
          */
         datetime_finished?: number;
@@ -2757,145 +3123,90 @@ export interface components {
     ModelExecutableListV1: {
       data?: {
         /** @description List of all model executables. */
-        items?: (components["schemas"]["ModelExecutableItemV1"])[];
+        items?: components["schemas"]["ModelExecutableItemV1"][];
       };
     };
     ExperimentItemV2: {
       /** @example workspace_pid_controller_20200705_170234_546ccba */
       id?: string;
-      experiment?: components["schemas"]["ExperimentDefinition"];
-      run_info?: {
-        /**
-         * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run. 
-         * @example failed
-         */
-        status?: string;
-        /**
-         * @description An array containing errors if status is 'failed'. 
-         * @example [
-         *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-         * ]
-         */
-        errors?: (string)[];
-        /**
-         * @description Number of cases that are failed. 
-         * @example 0
-         */
-        failed?: number;
-        /**
-         * @description Number of cases that are successful. 
-         * @example 15
-         */
-        successful?: number;
-        /**
-         * @description Number of cases that are not started. 
-         * @example 0
-         */
-        not_started?: number;
-        /**
-         * @description Number of cases that are cancelled. 
-         * @example 0
-         */
-        cancelled?: number;
-      };
+      experiment?: components["schemas"]["ExperimentDefinitionV2"];
+      run_info?: components["schemas"]["ExperimentRunInfo"];
       meta_data?: components["schemas"]["ExperimentMetaData"];
+    };
+    ExperimentItemV3: {
+      /** @example workspace_pid_controller_20200705_170234_546ccba */
+      id?: string;
+      experiment?: components["schemas"]["ExperimentDefinitionV3"];
+      run_info?: components["schemas"]["ExperimentRunInfo"];
+      meta_data?: components["schemas"]["ExperimentMetaData"];
+    };
+    ExperimentRunInfo: {
+      /**
+       * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run.
+       * @example failed
+       */
+      status?: string;
+      /**
+       * @description An array containing errors if status is 'failed'.
+       * @example [
+       *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
+       * ]
+       */
+      errors?: string[];
+      /**
+       * @description The unix time the experiment started running.
+       * @example 1549552749
+       */
+      datetime_started?: number;
+      /**
+       * @description The unix time the experiment finished running.
+       * @example 1549552338
+       */
+      datetime_finished?: number;
+      /**
+       * @description Number of cases that are failed.
+       * @example 0
+       */
+      failed?: number;
+      /**
+       * @description Number of cases that are successful.
+       * @example 15
+       */
+      successful?: number;
+      /**
+       * @description Number of cases that are not started.
+       * @example 0
+       */
+      not_started?: number;
+      /**
+       * @description Number of cases that are cancelled.
+       * @example 0
+       */
+      cancelled?: number;
+    };
+    ExperimentListV3: {
+      data?: {
+        /** @description List of all experiments. */
+        items?: components["schemas"]["ExperimentItemV3"][];
+      };
     };
     ExperimentListV2: {
       data?: {
         /** @description List of all experiments. */
-        items?: (components["schemas"]["ExperimentItemV2"])[];
+        items?: components["schemas"]["ExperimentItemV2"][];
       };
     };
     ExperimentItemV1: {
       /** @example workspace_pid_controller_20200705_170234_546ccba */
       id?: string;
-      experiment?: {
-        /**
-         * @description Reference ID to the compiled model. 
-         * @example workspace_pid_controller_20090615_134530_as86g32
-         */
-        fmu_id: string;
-        /**
-         * @example {
-         *   "variables": {
-         *     "integrator.k": 1,
-         *     "inertia1.J": "range(1,5,5)",
-         *     "inertia2.J": "range(5,10,3)"
-         *   },
-         *   "initializeFrom": ""
-         * }
-         */
-        modifiers?: {
-          /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified a full factorial is used to determine all different parameterizations for the experiment. */
-          variables?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
-          initializeFrom?: string;
-        };
-        /** @description The analysis object. */
-        analysis: {
-          /**
-           * @description The name of the custom function that will be executed. 
-           * @example dynamic
-           */
-          analysis_function: string;
-          /**
-           * @description Parameters to the custom function. 
-           * @example {
-           *   "start_time": 0,
-           *   "final_time": 1
-           * }
-           */
-          parameters?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /** @description Key-value pairs of simulation options. */
-          simulation_options?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /** @description Key-value pairs of solver options. */
-          solver_options?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /**
-           * @description The simulation log level. 
-           * @default WARNING 
-           * @enum {string}
-           */
-          simulation_log_level: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
-        };
-      };
-      run_info?: {
-        /**
-         * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run. 
-         * @example failed
-         */
-        status?: string;
-        /**
-         * @description An array containing errors if status is 'failed'. 
-         * @example [
-         *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-         * ]
-         */
-        errors?: (string)[];
-        /**
-         * @description Number of cases that are failed. 
-         * @example 0
-         */
-        failed?: number;
-        /**
-         * @description Number of cases that are successful. 
-         * @example 15
-         */
-        successful?: number;
-      };
+      experiment?: components["schemas"]["ExperimentDefinitionV1"];
+      run_info?: components["schemas"]["ExperimentRunInfo"];
       meta_data?: components["schemas"]["ExperimentMetaData"];
     };
     ExperimentListV1: {
       data?: {
         /** @description List of all experiments. */
-        items?: (components["schemas"]["ExperimentItemV1"])[];
+        items?: components["schemas"]["ExperimentItemV1"][];
       };
     };
     FileLocation: {
@@ -2908,228 +3219,26 @@ export interface components {
       /** @example 2 */
       endLine?: number;
       /**
-       * @description Modelica code snippet from error location. Entire lines of location, no consideration to columns is done. 
+       * @description Modelica code snippet from error location. Entire lines of location, no consideration to columns is done.
        * @example   Real x = "asdf";
        */
       context?: string;
       /**
-       * @description Filename. 
+       * @description Filename.
        * @example /impact/workspaces/example_workspace/model_libraries/editable/Workspace/Example.mo
        */
       file?: string;
     };
-    /** @description The analysis object. */
-    Analysis: {
-      /**
-       * @description The name of the custom function that will be executed. 
-       * @example dynamic
-       */
-      type: string;
-      /**
-       * @description Parameters to the custom function. 
-       * @example {
-       *   "start_time": 0,
-       *   "final_time": 1
-       * }
-       */
-      parameters?: {
-        [key: string]: (number | string | boolean) | undefined;
-      };
-      /** @description Key-value pairs of simulation options. */
-      simulationOptions?: {
-        [key: string]: (number | string | boolean) | undefined;
-      };
-      /** @description Key-value pairs of solver options. */
-      solverOptions?: {
-        [key: string]: (number | string | boolean) | undefined;
-      };
-      /**
-       * @description The simulation log level. 
-       * @default WARNING 
-       * @enum {string}
-       */
-      simulationLogLevel: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
-    };
-    /**
-     * @example {
-     *   "variables": {
-     *     "integrator.k": 1,
-     *     "inertia1.J": "uniform(1,5)",
-     *     "inertia2.J": 2
-     *   },
-     *   "initializeFrom": ""
-     * }
-     */
-    Modifiers: {
-      /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified, a full factorial expansion is used to determine all different parameterizations for the experiment. */
-      variables?: {
-        [key: string]: (number | string | boolean) | undefined;
-      };
-      /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
-      initializeFrom?: string;
-      /** @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases. */
-      initializeFromCase?: {
-        /** @description Experiment ID to initialize from. */
-        experimentId: string;
-        /** @description Case ID to initialize from. */
-        caseId: string;
-      };
-      /**
-       * @description The ID of the result import. 
-       * @example 2f036b9fab6f45c788cc466da327cc78workspace
-       */
-      initializeFromExternalResult?: string;
-    };
-    /** @description List of extensions to define cases. Each 'extension' defined will be merged with 'base' to create a case. When merging 'base' with an 'extension', the 'extension' will override the corresponding definitions in 'base'. It is not possible to use any operators (like the range operator) when using extensions. */
-    Extensions: ({
-        /**
-         * @example {
-         *   "variables": {
-         *     "inertia2.J": 5
-         *   }
-         * }
-         */
-        modifiers?: {
-          /** @description Specifies parameter values. */
-          variables?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
-          initializeFrom?: string;
-          /** @description Same as 'initializeFrom' but also the case ID to initialize from must be specified. Can be reference a case from an experiment with multiple cases. */
-          initializeFromCase?: {
-            /** @description Experiment ID to initialize from. */
-            experimentId: string;
-            /** @description Case ID to initialize from. */
-            caseId: string;
-          };
-        };
-        /** @description An array of case data. Only the first index in the case data array will be used for extensions currently. */
-        caseData?: ({
-            /** @description Specifies case label. */
-            label?: OneOf<[string, null]>;
-          })[];
-        /** @description The analysis object. */
-        analysis?: {
-          /**
-           * @description Parameters to the custom function. 
-           * @example {
-           *   "start_time": 0,
-           *   "final_time": 1
-           * }
-           */
-          parameters?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /** @description Key-value pairs of simulation options. */
-          simulationOptions?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /** @description Key-value pairs of solver options. */
-          solverOptions?: {
-            [key: string]: (number | string | boolean) | undefined;
-          };
-          /**
-           * @description The simulation log level. 
-           * @default WARNING 
-           * @enum {string}
-           */
-          simulationLogLevel: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
-        };
-      })[];
-    FmuModel: {
-      fmu: {
-        /**
-         * @description Reference ID to the compiled model. 
-         * @example workspace_pid_controller_20090615_134530_as86g32
-         */
-        id: string;
-      };
-    };
-    ModelicaModel: {
-      modelica: {
-        /**
-         * @description Model class name. 
-         * @example Modelica.Fluid.Examples.PumpingSystem
-         */
-        className: string;
-        /**
-         * @description Key-value pairs of compilation options. 
-         * @default {
-         *   "c_compiler": "gcc"
-         * } 
-         * @example {
-         *   "generate_html_diagnostics": true
-         * }
-         */
-        compilerOptions: {
-          [key: string]: (number | string | boolean) | undefined;
-        };
-        /**
-         * @description Key-value pairs of run-time options. 
-         * @default {} 
-         * @example {
-         *   "log_level": 4
-         * }
-         */
-        runtimeOptions: {
-          [key: string]: (number | string | boolean) | undefined;
-        };
-        /**
-         * @description Compiler log level. 
-         * @default warning 
-         * @example info
-         */
-        compilerLogLevel: string;
-        /**
-         * @description Flavour of the FMU. 
-         * @default me 
-         * @example me 
-         * @enum {string}
-         */
-        fmiTarget: "me" | "cs" | "me+cs";
-        /**
-         * @description Version of FMI for the FMU. 
-         * @default 2.0 
-         * @example 2.0 
-         * @enum {string}
-         */
-        fmiVersion: "1.0" | "2.0";
-        /**
-         * @description Platform for FMU binary. 
-         * @default auto 
-         * @example win64 
-         * @enum {string}
-         */
-        platform: "linux64" | "win32" | "win64" | "auto";
-      };
-    };
-    /** @description The model to use for the experiment. */
-    Model: components["schemas"]["FmuModel"] | components["schemas"]["ModelicaModel"];
-    ExperimentDefinition: {
-      /**
-       * @description Experiment version, should be '2'. 
-       * @example 2
-       */
-      version: number;
-      base: {
-        model: components["schemas"]["Model"];
-        modifiers?: components["schemas"]["Modifiers"];
-        expansion?: components["schemas"]["Expansion"];
-        analysis: components["schemas"]["Analysis"];
-      };
-      extensions?: components["schemas"]["Extensions"];
-    };
     ExperimentMetaData: {
       /** @example workspace_pid_controller_20090615_134530_as86g32 */
       experiment_hash?: string;
-      model_names?: (string)[];
+      model_names?: string[];
       /** @example 1550836039 */
       created_epoch?: number;
       /** @example my label */
       label?: string;
       /**
-       * @description Up to 2048 bytes of custom data to be associated with the experiment. 
+       * @description Up to 2048 bytes of custom data to be associated with the experiment.
        * @example {
        *   "parametrizationFrom": "specification 3.4",
        *   "externalToolVersion": "9.0"
@@ -3140,19 +3249,19 @@ export interface components {
     ExternalResultUploadStatus: {
       data?: {
         /**
-         * @description The ID of the result import. 
+         * @description The ID of the result import.
          * @example 2f036b9fab6f45c788cc466da327cc78workspace
          */
         id?: string;
         /**
-         * @description current status of the upload. 
+         * @description current status of the upload.
          * @example ready
          */
         status?: string;
         /** @description Data for access to the meta data for the given upload, only exists in response if the upload was successful. Use the field 'status' to see if this is the case. */
         data?: {
           /**
-           * @description URI for the result resource. 
+           * @description URI for the result resource.
            * @example api/external-result/2f036b9fab6f45c788cc466da327cc78workspace
            */
           resourceUri?: string;
@@ -3160,12 +3269,12 @@ export interface components {
         /** @description Error message if the upload fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
         error?: {
           /**
-           * @description Error message describing what went wrong. 
+           * @description Error message describing what went wrong.
            * @example Could not upload given result file to the specified workspace. Could not read version number of the workspace 'my_workspace' or unsupported file type given.
            */
           message?: string;
           /**
-           * @description Error code for identifying specific errors. 
+           * @description Error code for identifying specific errors.
            * @example 12015
            */
           code?: number;
@@ -3174,135 +3283,135 @@ export interface components {
     };
     ConversionSpecProtocol: {
       /**
-       * @description ID of workspace to convert. 
+       * @description ID of workspace to convert.
        * @example my_workspace
        */
       workspaceId: string;
       backup?: {
         /**
-         * @description The name of the backup workspace to create. 
+         * @description The name of the backup workspace to create.
          * @example my_workspace_backup
          */
         name: string;
       };
       /**
-       * @description List of issue IDs to ignore when converting the workspace. 
+       * @description List of issue IDs to ignore when converting the workspace.
        * @example [
        *   "t24e3-sd879-2a43n"
        * ]
        */
-      ignores?: (string)[];
+      ignores?: string[];
     };
     ExecutionDataProtocol: {
       data: {
-        items: (OneOf<[{
+        items: ({
+          /**
+           * @description The status of the execution.
+           * @example running
+           */
+          status: string;
+          workspace: {
             /**
-             * @description The status of the execution. 
-             * @example running
+             * @description Workspace ID.
+             * @example somemodel_1515we151fwe51w
              */
-            status: string;
-            workspace: {
-              /**
-               * @description Workspace ID. 
-               * @example somemodel_1515we151fwe51w
-               */
-              id: string;
-            };
+            id: string;
+          };
+          /**
+           * @default EXPERIMENT
+           * @enum {string}
+           */
+          kind: "EXPERIMENT";
+          experiment: {
             /**
-             * @default EXPERIMENT 
-             * @enum {string}
+             * @description Experiment ID.
+             * @example somemodel_1gghhjffffe51w
              */
-            kind: "EXPERIMENT";
-            experiment: {
-              /**
-               * @description Experiment ID. 
-               * @example somemodel_1gghhjffffe51w
-               */
-              id: string;
-            };
-          }, {
+            id: string;
+          };
+        } | {
+          /**
+           * @description The status of the execution.
+           * @example running
+           */
+          status: string;
+          workspace: {
             /**
-             * @description The status of the execution. 
-             * @example running
+             * @description Workspace ID.
+             * @example somemodel_1515we151fwe51w
              */
-            status: string;
-            workspace: {
-              /**
-               * @description Workspace ID. 
-               * @example somemodel_1515we151fwe51w
-               */
-              id: string;
-            };
+            id: string;
+          };
+          /**
+           * @default COMPILATION
+           * @enum {string}
+           */
+          kind: "COMPILATION";
+          fmu: {
             /**
-             * @default COMPILATION 
-             * @enum {string}
+             * @description FMU ID.
+             * @example somemodel_1gggwe151fwe51w
              */
-            kind: "COMPILATION";
-            fmu: {
-              /**
-               * @description FMU ID. 
-               * @example somemodel_1gggwe151fwe51w
-               */
-              id: string;
-            };
-          }]>)[];
+            id: string;
+          };
+        })[];
       };
     };
     ConversionsChecksProtocol: {
       /** @description List of all conversions that needs to be done for the workspace. */
       conversions: ({
+        /**
+         * @description The version the conversion is done from.
+         * @example 0.8
+         */
+        from: string;
+        /**
+         * @description The version the conversion is done to.
+         * @example 0.9
+         */
+        to: string;
+        /** @description List of all isses found for conversion. */
+        issues: ({
           /**
-           * @description The version the conversion is done from. 
-           * @example 0.8
+           * @description ID of the issue. Can be used to later ignore it.
+           * @example t24e3-sd879-2a43n
            */
-          from: string;
+          id: string;
           /**
-           * @description The version the conversion is done to. 
-           * @example 0.9
+           * @description A readable string on what the issue is.
+           * @example Symbolic link for library Hydralics 4.10 cannot be converted, you need to checkout svn.company.com/Project01 in the new structure
            */
-          to: string;
-          /** @description List of all isses found for conversion. */
-          issues: ({
-              /**
-               * @description ID of the issue. Can be used to later ignore it. 
-               * @example t24e3-sd879-2a43n
-               */
-              id: string;
-              /**
-               * @description A readable string on what the issue is. 
-               * @example Symbolic link for library Hydralics 4.10 cannot be converted, you need to checkout svn.company.com/Project01 in the new structure
-               */
-              message: string;
-              details: OneOf<[{
-                /**
-                 * @default GIT_CHECKOUT_MISSING 
-                 * @enum {string}
-                 */
-                type: "GIT_CHECKOUT_MISSING";
-                /**
-                 * @description The URL of the repository. 
-                 * @example gitlab.com/group/project
-                 */
-                url: string;
-                /**
-                 * @description The branch of the the repository. 
-                 * @example main
-                 */
-                branch: string;
-              }, {
-                /**
-                 * @default SVN_CHECKOUT_MISSING 
-                 * @enum {string}
-                 */
-                type: "SVN_CHECKOUT_MISSING";
-                /**
-                 * @description The URL of the repository. 
-                 * @example svn.company.com/Project01
-                 */
-                url: string;
-              }]>;
-            })[];
+          message: string;
+          details: {
+            /**
+             * @default GIT_CHECKOUT_MISSING
+             * @enum {string}
+             */
+            type: "GIT_CHECKOUT_MISSING";
+            /**
+             * @description The URL of the repository.
+             * @example gitlab.com/group/project
+             */
+            url: string;
+            /**
+             * @description The branch of the the repository.
+             * @example main
+             */
+            branch: string;
+          } | {
+            /**
+             * @default SVN_CHECKOUT_MISSING
+             * @enum {string}
+             */
+            type: "SVN_CHECKOUT_MISSING";
+            /**
+             * @description The URL of the repository.
+             * @example svn.company.com/Project01
+             */
+            url: string;
+          };
         })[];
+      })[];
       /** @description Backup information for the workspace. */
       backup: {
         /** @description Disk information for creating a backup. */
@@ -3358,7 +3467,9 @@ export interface components {
         "application/json": components["schemas"]["Error"];
       };
     };
-    SecretUserProtocol: never;
+    SecretUserProtocol: {
+      content: never;
+    };
   };
   parameters: never;
   requestBodies: never;
@@ -3366,15 +3477,17 @@ export interface components {
   pathItems: never;
 }
 
+export type $defs = Record<string, never>;
+
 export type external = Record<string, never>;
 
 export interface operations {
 
+  /**
+   * Returns an object with meta data for this API
+   * @description Can be used by client to check that the API is of a version it supports. The APIs version is semantic.
+   */
   getAPIMetaData: {
-    /**
-     * Returns an object with meta data for this API 
-     * @description Can be used by client to check that the API is of a version it supports. The APIs version is semantic.
-     */
     responses: {
       /** @description A JSON object consisting of the APIs meta data, most notably the semantic version of it. */
       200: {
@@ -3388,11 +3501,11 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns the HTML documentation page.
+   * @description The HTML documentation page for all the Modelon Impact REST API's.
+   */
   getDocs: {
-    /**
-     * Returns the HTML documentation page. 
-     * @description The HTML documentation page for all the Modelon Impact REST API's.
-     */
     responses: {
       /** @description The HTML documentation page. */
       200: {
@@ -3403,18 +3516,23 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Logs in a user
+   * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created in the 'IMPACT API KEY' section of the <a class="visible-link" href="__IMPACT_SERVER_MANAGEMENT_URL__"> 'Server management'</a> page. By default this endpoint uses cookies but can be toggled using no_cookies parameter.
+   */
   login: {
-    /**
-     * Logs in a user 
-     * @description When the login succeeds, the response includes a cookie containing an access token which is used for further identification with the REST API. The login is managed by a third party authorization service. To authenticate against the REST API, an API key may be included in the optional request body. The API key can be created in the 'IMPACT API KEY' section of the <a class="visible-link" href="__IMPACT_SERVER_MANAGEMENT_URL__"> 'Server management'</a> page.
-     */
-    parameters?: {
+    parameters: {
+      query?: {
         /**
-         * @description The OAuth grant type to use for the login, one of refresh_token or client_credentials (default). 
+         * @description The OAuth grant type to use for the login, one of refresh_token or client_credentials (default).
          * @example refresh_token
          */
-      query?: {
-        grant_type?: string;
+        grant_type?: "refresh_token" | "client_credentials";
+        /**
+         * @description Toggle if you want to the response tokens as only request body without cookies. By default, tokens are sent as both cookies and response body
+         * @example false
+         */
+        no_cookies?: boolean;
       };
     };
     /** @description Optional request body for logging in with an API key. */
@@ -3422,7 +3540,7 @@ export interface operations {
       content: {
         "application/json": {
           /**
-           * @description An API key. 
+           * @description An API key.
            * @example secret-api-key
            */
           secretKey?: string;
@@ -3430,7 +3548,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description The user is already logged in and the JWT is valid. */
+      /** @description The API Key is validated and the JWT is valid. */
       200: {
         content: {
           "application/json": {
@@ -3449,25 +3567,40 @@ export interface operations {
         };
       };
       400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get all projects
+   * @description Returns a list of all local projects that exists. The query parameter vcsInfo can be used to also get info on how projects are version controlled.
+   */
   getProjects: {
-    /**
-     * Get all projects 
-     * @description Returns a list of all local projects that exists. The query parameter vcsInfo can be used to also get info on how projects are version controlled.
-     */
+    parameters: {
+      query?: {
+        /**
+         * @description If true, returned projects vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for any returned project. Default is false.
+         * @example true
+         */
+        vcsInfo?: "true" | "false";
+        /**
+         * @description Used to filter so only projects of a specified projectType are returned. If not given all project types are returned.
+         * @example RELEASED
+         */
+        type?: "LOCAL" | "RELEASED" | "SYSTEM";
+        /**
+         * @description Used to filter so only projects stored in a specific location are returned. If not given all project stored in all locations are returned.
+         * @example USERSPACE
+         */
+        storageLocation?: "SYSTEM" | "USERSPACE" | "APPMODE";
+      };
+    };
     responses: {
       /** @description OK: The projects were returned. */
       200: {
         content: {
           "application/json": {
             data?: {
-              items?: (components["schemas"]["LocalProjectProtocol"])[];
+              items?: components["schemas"]["LocalProjectProtocol"][];
             };
           };
         };
@@ -3478,11 +3611,11 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get all 'running' and 'pending' executions
+   * @description Returns a list of all 'running' and 'pending' executions.
+   */
   getExecutions: {
-    /**
-     * Get all 'running' and 'pending' executions 
-     * @description Returns a list of all 'running' and 'pending' executions.
-     */
     responses: {
       /** @description OK: The active executions were returned. */
       200: {
@@ -3496,18 +3629,18 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Start import of a project
+   * @description Will initiate import of a project. After a successful completion of a call to this endpoint, call GET /project-imports/{importId} to check status.
+   */
   importProject: {
-    /**
-     * Start import of a project 
-     * @description Will initiate import of a project. After a successful completion of a call to this endpoint, call GET /project-imports/{importId} to check status.
-     */
     /** @description A zip file of a project given with multipart/form-data to import a project. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The zip-file. 
+           * Format: binary
+           * @description The zip-file.
            * @example my_project.zip
            */
           file?: string;
@@ -3521,7 +3654,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The location of the project import. 
+               * @description The location of the project import.
                * @example api/project-imports/fd90-4gkl-vf89
                */
               location?: string;
@@ -3535,11 +3668,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for a project import. Also returns data for the imported resource when ready
+   * @description The project needs to be setup for import by calling POST /project-imports, before calling this API endpoint.
+   */
   importProjectStatus: {
-    /**
-     * Returns status for a project import. Also returns data for the imported resource when ready 
-     * @description The project needs to be setup for import by calling POST /project-imports, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description Status for a project import and data to resource if import is done and project is ready to be used. */
       200: {
@@ -3547,7 +3689,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for project import. 
+               * @description ID for project import.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -3556,12 +3698,12 @@ export interface operations {
               /** @description Data for the project imported, only exists in response if project is imported and ready to use. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for the imported project resource. 
+                 * @description URI for the imported project resource.
                  * @example api/projects/72d3969cca3fc912aca1097bcc49dda0a4481a06
                  */
                 resourceUri?: string;
                 /**
-                 * @description The ID for the project imported. 
+                 * @description The ID for the project imported.
                  * @example 72d3969cca3fc912aca1097bcc49dda0a4481a06
                  */
                 projectId?: string;
@@ -3569,12 +3711,12 @@ export interface operations {
               /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not import project 'my_project'. Could not read version number of the project 'my_project'. Either the project is corrupt or needs to be updated using an older version of Modelon Impact
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12015
                  */
                 code?: number;
@@ -3591,14 +3733,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a project import
+   * @description This API end point can be be called after a project has been imported.
+   */
   deleteProjectImport: {
-    /**
-     * Deletes a project import 
-     * @description This API end point can be be called after a project has been imported.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description OK: The project import with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -3607,17 +3760,17 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Prepares a project for download as a zip file
+   * @description The compressed project will be prepared. After a successful completion of a call to this endpoint, call GET /project-exports/{exportId} to check status.
+   */
   prepareExportProjectAsync: {
-    /**
-     * Prepares a project for download as a zip file 
-     * @description The compressed project will be prepared. After a successful completion of a call to this endpoint, call GET /project-exports/{exportId} to check status.
-     */
     /** @description Project to export. */
     requestBody: {
       content: {
         "application/json": {
           /**
-           * @description The ID for the project to export. 
+           * @description The ID for the project to export.
            * @example my_project
            */
           projectId: string;
@@ -3631,7 +3784,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description location for checking status of project compression. 
+               * @description location for checking status of project compression.
                * @example api/project-exports/79sd8-3n2a4-e3t24
                */
               location?: string;
@@ -3647,11 +3800,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for preparing a project for download. Also returns data for download when ready
+   * @description The project needs to be setup for export by calling POST /project-exports, before calling this API endpoint.
+   */
   exportProjectAsync: {
-    /**
-     * Returns status for preparing a project for download. Also returns data for download when ready 
-     * @description The project needs to be setup for export by calling POST /project-exports, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the compressed project to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        exportId: string;
+      };
+    };
     responses: {
       /** @description Status for a project export and data to download it if ready. */
       200: {
@@ -3659,7 +3821,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for project export. 
+               * @description ID for project export.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -3668,12 +3830,12 @@ export interface operations {
               /** @description Data for the project to download, only exists in response if project is ready to be downloaded. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for downloading the project. 
+                 * @description URI for downloading the project.
                  * @example api/exports/79sd8-3n2a4-e3t24
                  */
                 downloadUri?: string;
                 /**
-                 * @description The size of the compressed project, in bytes. 
+                 * @description The size of the compressed project, in bytes.
                  * @example 10481015
                  */
                 size?: number;
@@ -3681,12 +3843,12 @@ export interface operations {
               /** @description Error message if the export fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not export project 'my_project'. Maximum allowed zip file size of 95MB exceeded
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12072
                  */
                 code?: number;
@@ -3703,14 +3865,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a project export, including the compressed zip
+   * @description This API end point can be be called after a compressed project has been downloaded.
+   */
   deleteExportedProjectAsync: {
-    /**
-     * Deletes a project export, including the compressed zip 
-     * @description This API end point can be be called after a compressed project has been downloaded.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the compressed project to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        exportId: string;
+      };
+    };
     responses: {
       /** @description OK: The project export with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -3719,23 +3892,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get a project
+   * @description Returns a project given a project ID. The query parameter vcsInfo can be used to also get info on how the project is version controlled.
+   */
   getProject: {
-    /**
-     * Get a project 
-     * @description Returns a project given a project ID. The query parameter vcsInfo can be used to also get info on how the project is version controlled.
-     */
-    parameters?: {
-        /**
-         * @description If true, returned project vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for the returned project. Default is false. 
-         * @example vcsInfo=true
-         */
-        /**
-         * @description If true, returned project size field will be set. If false, size will not be set for the returned project. Default is false. 
-         * @example sizeInfo=true
-         */
+    parameters: {
       query?: {
-        vcsInfo?: string;
-        sizeInfo?: string;
+        /**
+         * @description If true, returned project vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for the returned project. Default is false.
+         * @example true
+         */
+        vcsInfo?: "true" | "false";
+        /**
+         * @description If true, returned project size field will be set. If false, size will not be set for the returned project. Default is false.
+         * @example true
+         */
+        sizeInfo?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
       };
     };
     responses: {
@@ -3752,11 +3932,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Update a project
+   * @description Updates a project given project data and a project ID. Only the project definition is allowed to be updated and content entries cannot be added or deleted. Content ID or project format cannot be updated.
+   */
   updateProject: {
-    /**
-     * Update a project 
-     * @description Updates a project given project data and a project ID. Only the project definition is allowed to be updated and content entries cannot be added or deleted. Content ID or project format cannot be updated.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     /** @description The project data that should be used to update the entity server side. */
     requestBody: {
       content: {
@@ -3778,11 +3967,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Delete a project
+   * @description Deletes a project given a project ID. Will also delete any reference from workspaces to this project.
+   */
   deleteProject: {
-    /**
-     * Delete a project 
-     * @description Deletes a project given a project ID. Will also delete any reference from workspaces to this project.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     responses: {
       /** @description OK: The project were deleted. */
       200: {
@@ -3797,11 +3995,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get the project icon.
+   * @description Returns the icon(if it exists) for the project.
+   */
   getIcon: {
-    /**
-     * Get the project icon. 
-     * @description Returns the icon(if it exists) for the project.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     responses: {
       /** @description OK: The image was returned. */
       200: {
@@ -3816,11 +4023,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Create new content entry
+   * @description Will create a new content entry for a project. For MODELICA content entries an empty structured modelica library will also be created on disk.
+   */
   createContent: {
-    /**
-     * Create new content entry 
-     * @description Will create a new content entry for a project. For MODELICA content entries an empty structured modelica library will also be created on disk.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is created in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     /** @description Specification for the new content entry. */
     requestBody: {
       content: {
@@ -3843,11 +4059,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get a content entry
+   * @description Returns a content entry given project and content IDs.
+   */
   getContent: {
-    /**
-     * Get a content entry 
-     * @description Returns a content entry given project and content IDs.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        content: string;
+      };
+    };
     responses: {
       /** @description OK: The content entry were returned. */
       200: {
@@ -3862,11 +4092,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Delete a content entry
+   * @description Deletes a content entry from a project. Any files on disk that exists for this content is also deleted.
+   */
   deleteContent: {
-    /**
-     * Delete a content entry 
-     * @description Deletes a content entry from a project. Any files on disk that exists for this content is also deleted.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        content: string;
+      };
+    };
     responses: {
       /** @description OK: The content were deleted. */
       200: {
@@ -3881,25 +4125,34 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Start import of existing content
+   * @description Will initiate import of existing content. After a successful completion of a call to this endpoint, call GET /projects/{project}/content-imports/{importId} to check status.
+   */
   importContent: {
-    /**
-     * Start import of existing content 
-     * @description Will initiate import of existing content. After a successful completion of a call to this endpoint, call GET /projects/{project}/content-imports/{importId} to check status.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     /** @description A zip file or a .mo file (For MODELICA content) given with multipart/form-data is used to import content. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The zip-file. 
+           * Format: binary
+           * @description The zip-file.
            * @example modelica.zip
            */
           file?: string;
           /** @description Import options. */
           options?: {
             /**
-             * @description Type of content. Only MODELICA is supported as of now. 
+             * @description Type of content. Only MODELICA is supported as of now.
              * @enum {unknown}
              */
             contentType?: "MODELICA" | "VIEWS" | "FAVOURITES" | "CUSTOM_FUNCTIONS" | "REFERENCE_RESULTS" | "GENERIC";
@@ -3914,7 +4167,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The ID of the workspace import. 
+               * @description The ID of the workspace import.
                * @example api/projects/79sd8-3n2a4-e3t24/content-imports/fd90-4gkl-vf89
                */
               location?: string;
@@ -3928,11 +4181,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for a content import. Also returns data for the imported resource when ready
+   * @description The content needs to be setup for import by calling POST /content-imports, before calling this API endpoint.
+   */
   importContentStatus: {
-    /**
-     * Returns status for a content import. Also returns data for the imported resource when ready 
-     * @description The content needs to be setup for import by calling POST /content-imports, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description Status for a content import and data to resource if import is done and content is ready to be used. */
       200: {
@@ -3940,7 +4207,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for content import. 
+               * @description ID for content import.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -3949,12 +4216,12 @@ export interface operations {
               /** @description Data for the content imported, only exists in response if content is imported and ready to use. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for the imported workspace resource. 
+                 * @description URI for the imported workspace resource.
                  * @example api/projects/a9g0-adfd/contents/u760-u095-gu45
                  */
                 resourceUri?: string;
                 /**
-                 * @description The ID for the content imported. 
+                 * @description The ID for the content imported.
                  * @example u760-u095-gu45
                  */
                 contentId?: string;
@@ -3962,12 +4229,12 @@ export interface operations {
               /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not import MODELICA content, file must end with .mo or .zip.
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12015
                  */
                 code?: number;
@@ -3984,14 +4251,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a content import
+   * @description This API end point can be be called after a content has been imported.
+   */
   deleteContentImport: {
-    /**
-     * Deletes a content import 
-     * @description This API end point can be be called after a content has been imported.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is imported into.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description OK: The content import with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -4000,61 +4283,75 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Imports an co-simulation FMU */
   importFMU: {
-    /** Imports an co-simulation FMU */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        content: string;
+      };
+    };
     /** @description The file with a .fmu extension and options to import. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The FMU file. 
+           * Format: binary
+           * @description The FMU file.
            * @example PID.fmu
            */
           file: string;
           /**
-           * @description Import options. 
+           * @description Import options.
            * @default {}
            */
           options: {
             /**
-             * @description Qualified name of generated class. By default, 'className' is set to the name of the Modelica library content followed by a name based on the filename of the imported FMU. 
+             * @description Qualified name of generated class. By default, 'className' is set to the name of the Modelica library content followed by a name based on the filename of the imported FMU.
              * @example Workspace.Modelica_Electrical_Spice3_Examples_Spice3BenchmarkRtlInverter
              */
             className?: string;
             /**
-             * @description Version of the Modelica standard library (MSL) that the target library is compatible with. This value must be a string of format 'x.y.z' where x,y and z are non-negative integers. Only MSL version 3.2.3 and above are supported. By default, the MSL version is set to 4.0.0. 
+             * @description Version of the Modelica standard library (MSL) that the target library is compatible with. This value must be a string of format 'x.y.z' where x,y and z are non-negative integers. Only MSL version 3.2.3 and above are supported. By default, the MSL version is set to 4.0.0.
              * @example 4.0.0
              */
             mslVersion?: string;
             /** @description Determines if any already existing files in the library should be overwritten. By default, the existing files are not overwritten. */
             overwrite?: boolean;
             /**
-             * @description Specifies what variables from the FMU to include in the wrapper model. By default, all the variables will be included in the wrapper model. 
+             * @description Specifies what variables from the FMU to include in the wrapper model. By default, all the variables will be included in the wrapper model.
              * @example [
              *   "variable1",
              *   "variable2"
              * ]
              */
-            includePatterns?: (string)[];
+            includePatterns?: string[];
             /**
-             * @description Specifies what variables from the FMU to exclude in the wrapper model. By default, all the variables will be included in the wrapper model. 
+             * @description Specifies what variables from the FMU to exclude in the wrapper model. By default, all the variables will be included in the wrapper model.
              * @example [
              *   "variable1",
              *   "variable2"
              * ]
              */
-            excludePatterns?: (string)[];
+            excludePatterns?: string[];
             /**
-             * @description Specify which variables in the imported FMU will be inputs in the created Modelica wrapper model. By default, all the inputs are kept as inputs. 
+             * @description Specify which variables in the imported FMU will be inputs in the created Modelica wrapper model. By default, all the inputs are kept as inputs.
              * @example [
              *   "variable1",
              *   "variable2"
              * ]
              */
-            topLevelInputs?: (string)[];
+            topLevelInputs?: string[];
             /**
-             * @description Specifies the value for the 'step size' parameter in the generated model. By default, the parameter is set to zero, which in turn means that the step size will be set during simulation based on simulation properties such as the time interval. 
+             * @description Specifies the value for the 'step size' parameter in the generated model. By default, the parameter is set to zero, which in turn means that the step size will be set during simulation based on simulation properties such as the time interval.
              * @example 0.1
              */
             stepSize?: number;
@@ -4069,7 +4366,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The ID of the FMU import. 
+               * @description The ID of the FMU import.
                * @example api/projects/79sd8-3n2a4-e3t24/content/fd90-4gkl-vf89/fmu-imports/123d-4g56-67tr
                */
               location?: string;
@@ -4086,11 +4383,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for a FMU import. Also returns data for the imported resource when ready
+   * @description The content needs to be setup for import by calling POST /fmu-imports, before calling this API endpoint.
+   */
   importFMUStatus: {
-    /**
-     * Returns status for a FMU import. Also returns data for the imported resource when ready 
-     * @description The content needs to be setup for import by calling POST /fmu-imports, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        content: string;
+        /**
+         * @description ID of the content import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description Status for a FMU import and data to resource if import is done and FMU is ready to be used. */
       200: {
@@ -4098,7 +4414,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for FMU import. 
+               * @description ID for FMU import.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -4107,32 +4423,32 @@ export interface operations {
               /** @description Data for the FMU imported, only exists in response if FMU is imported and ready to use. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for the imported FMU resource. 
+                 * @description URI for the imported FMU resource.
                  * @example api/projects/a9g0-adfd/contents/u760-u095-gu45
                  */
                 resourceUri?: string;
                 /**
-                 * @description The modelica class path for the imported FMU. 
+                 * @description The modelica class path for the imported FMU.
                  * @example Workspace.PID_Controller.Model
                  */
                 fmuClassPath?: string;
                 /**
-                 * @description An array containing warnings generated during FMU import. 
+                 * @description An array containing warnings generated during FMU import.
                  * @example [
                  *   "Specified argument for 'top_level_inputs=['a']' does not match any variable"
                  * ]
                  */
-                importWarnings?: (string)[];
+                importWarnings?: string[];
               };
               /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not generate class MyPackage.PID because there is already a class by that name.
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12099
                  */
                 code?: number;
@@ -4149,14 +4465,35 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a FMU import
+   * @description This API end point can be be called after a FMU has been imported.
+   */
   deleteFMUImport: {
-    /**
-     * Deletes a FMU import 
-     * @description This API end point can be be called after a FMU has been imported.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project the content is defined in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description ID of the content entry.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        content: string;
+        /**
+         * @description ID of the content import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description OK: The FMU import with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -4165,11 +4502,11 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns an object containing the template for the workspace.
+   * @description The response from this endpoint can be used as a template to create a new workspace by sending it as the request body for the POST /workspaces endpoint.
+   */
   getWorkspaceTemplate: {
-    /**
-     * Returns an object containing the template for the workspace. 
-     * @description The response from this endpoint can be used as a template to create a new workspace by sending it as the request body for the POST /workspaces endpoint.
-     */
     responses: {
       /** @description Workspace definition template. */
       200: {
@@ -4185,18 +4522,37 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns an object containing a list of all available workspaces together with metadata
+   * @description The workspace ID in the returned object serve as unique IDs that can be used in other API calls to perform operations for a specific workspace.
+   */
   getWorkspaces: {
-    /**
-     * Returns an object containing a list of all available workspaces together with metadata 
-     * @description The workspace ID in the returned object serve as unique IDs that can be used in other API calls to perform operations for a specific workspace.
-     */
+    parameters: {
+      query?: {
+        /**
+         * @description If true, only App Mode workspace are returned else all workspaces are returned. Default is false.
+         * @example true
+         */
+        onlyAppMode?: "true" | "false";
+        /**
+         * @description If specified, only the workspaces with the specified name are returned else all workspaces are returned.
+         * @example MyWorkspace
+         */
+        name?: string;
+        /**
+         * @description If specified, only the workspaces with the specified sharing ID are returned else all workspaces are returned.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        sharingId?: string;
+      };
+    };
     responses: {
       /** @description All workspaces meta-data and their IDs. The object meta-data contains the workspace id. */
       200: {
         content: {
           "application/json": {
             data?: {
-              items?: (components["schemas"]["Workspace"])[];
+              items?: components["schemas"]["Workspace"][];
             };
           };
         };
@@ -4208,11 +4564,11 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Creates a new workspace
+   * @description Creates a new workspace with some name.
+   */
   createWorkspace: {
-    /**
-     * Creates a new workspace 
-     * @description Creates a new workspace with some name.
-     */
     /** @description Specification for creating a new workspace. */
     requestBody: {
       content: {
@@ -4221,12 +4577,12 @@ export interface operations {
           /** @description Configuration options for creating the workspace. */
           config?: {
             /**
-             * @description If true, creates a default project and adds it to the workspace. Also sets the project as the default project for the workspace if defaultProjectId is not set for the workpace. 
+             * @description If true, creates a default project and adds it to the workspace. Also sets the project as the default project for the workspace if defaultProjectId is not set for the workpace.
              * @default true
              */
             addDefaultProject: boolean;
             /**
-             * @description If true, adds the system libraries(Modelica Standard Library and libraries stored in impact/libraries folder) as dependencies to the workspace. 
+             * @description If true, adds the system libraries(Modelica Standard Library and libraries stored in impact/libraries folder) as dependencies to the workspace.
              * @default true
              */
             addSystemProjects: boolean;
@@ -4247,15 +4603,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Returns an object containing the metadata of the specified ID */
   getWorkspaceId: {
-    /** Returns an object containing the metadata of the specified ID */
-    parameters?: {
-        /**
-         * @description If true, returned workspace size field will be set. If false, size will not be set for the returned workspace. Default is false. 
-         * @example sizeInfo=true
-         */
+    parameters: {
       query?: {
-        sizeInfo?: string;
+        /**
+         * @description If true, returned workspace size field will be set. If false, size will not be set for the returned workspace. Default is false.
+         * @example true
+         */
+        sizeInfo?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
       };
     };
     responses: {
@@ -4273,11 +4636,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * This end-point can be used to update a workspace configuration. This can be used to modify the workspace definition. Only fields under 'definition' can be updated. Also, the fields 'createdAt', 'format' and 'guid' cannot be updated. The recomended way to update the workspace is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data.
+   * @description Updates the configuration of the workspace.
+   */
   updateWorkspaceConfiguration: {
-    /**
-     * This end-point can be used to update a workspace configuration. This can be used to modify the workspace definition. Only fields under 'definition' can be updated. Also, the fields 'createdAt', 'format' and 'guid' cannot be updated. The recomended way to update the workspace is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data. 
-     * @description Updates the configuration of the workspace.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     /** @description Workspace configuration. */
     requestBody: {
       content: {
@@ -4299,11 +4671,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Deletes a workspace with the specified ID */
   deleteWorkspace: {
-    /** Deletes a workspace with the specified ID */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description OK: The workspace was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -4312,8 +4695,17 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Returns what conversions are needed for a workspace and what potential issues there are */
   getWorkspaceConversionCheckId: {
-    /** Returns what conversions are needed for a workspace and what potential issues there are */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description List of conversions that would occur if the POST /workspace-conversions was called. Also lists potential issues with conversions. These issues can be ignore by giving the ID when starting the conversion process. Note that this can lead to the converted workspace missing some content. */
       200: {
@@ -4331,18 +4723,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get workspace dependencies
+   * @description Get workspace dependencies.
+   */
   getWorkspaceDependencies: {
-    /**
-     * Get workspace dependencies 
-     * @description Get workspace dependencies.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description OK: The workspace dependencies were returned. */
       200: {
         content: {
           "application/json": {
             data?: {
-              items?: (components["schemas"]["LocalProjectProtocol"])[];
+              items?: components["schemas"]["LocalProjectProtocol"][];
             };
           };
         };
@@ -4355,18 +4756,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Start import of a project and add it as a dependency to the workspace
+   * @description Will initiate import of a project and add it as a dependency to the workspace. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/dependency-imports/{importId} to check status.
+   */
   importWorkspaceDependency: {
-    /**
-     * Start import of a project and add it as a dependency to the workspace 
-     * @description Will initiate import of a project and add it as a dependency to the workspace. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/dependency-imports/{importId} to check status.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of workspace the project will be added to as a dependency.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     /** @description A mol or zip file given with multipart/form-data is used to import the project as dependency. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The mol or zip file. 
+           * Format: binary
+           * @description The mol or zip file.
            * @example myProject.mol
            */
           file?: string;
@@ -4380,7 +4790,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The location of the workspace dependency import. 
+               * @description The location of the workspace dependency import.
                * @example api/workspaces/MyWorkspace/dependency-imports/fd90-4gkl-vf89
                */
               location?: string;
@@ -4394,11 +4804,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for a dependency import. Also returns data for the imported resource when ready
+   * @description The project to be added as a dependency needs to be setup for import by calling POST /dependency-imports, before calling this API endpoint.
+   */
   importWorkspaceDependencyStatus: {
-    /**
-     * Returns status for a dependency import. Also returns data for the imported resource when ready 
-     * @description The project to be added as a dependency needs to be setup for import by calling POST /dependency-imports, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of workspace the project will be added to as a dependency.
+         * @example MyWorkspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the dependency import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description Status for a project import and data to resource if import is done and the project is ready to be used. */
       200: {
@@ -4406,7 +4830,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for project import. 
+               * @description ID for project import.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -4415,12 +4839,12 @@ export interface operations {
               /** @description Data for the project imported, only exists in response if project is imported and ready to use. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for the imported project resource. 
+                 * @description URI for the imported project resource.
                  * @example api/projects/u760-u095-gu45
                  */
                 resourceUri?: string;
                 /**
-                 * @description The ID for the imported project. 
+                 * @description The ID for the imported project.
                  * @example u760-u095-gu45
                  */
                 projectId?: string;
@@ -4428,12 +4852,12 @@ export interface operations {
               /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not import project, file must end with .mol or .zip.
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12015
                  */
                 code?: number;
@@ -4450,14 +4874,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a workspace dependency import
+   * @description This API end point can be be called after a project has been imported and added as a workspace depenendency.
+   */
   deleteWorkspaceDependencyImport: {
-    /**
-     * Deletes a workspace dependency import 
-     * @description This API end point can be be called after a project has been imported and added as a workspace depenendency.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of workspace the project will be added to as a dependency.
+         * @example MyWorkspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the dependency import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description OK: The project import with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -4466,18 +4906,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Start import of an editable project to be added to the workspace
+   * @description Will initiate import of a project and add it to the workspace. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/project-imports/{importId} to check status.
+   */
   importWorkspaceProject: {
-    /**
-     * Start import of an editable project to be added to the workspace 
-     * @description Will initiate import of a project and add it to the workspace. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/project-imports/{importId} to check status.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of workspace the editable project will be added to.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     /** @description A zip file given with multipart/form-data is used to import the editable project. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The zip file. 
+           * Format: binary
+           * @description The zip file.
            * @example myProject.zip
            */
           file?: string;
@@ -4491,7 +4940,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The location of the editable project import. 
+               * @description The location of the editable project import.
                * @example api/workspaces/MyWorkspace/project-imports/fd90-4gkl-vf89
                */
               location?: string;
@@ -4505,11 +4954,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for a project import. Also returns data for the imported resource when ready
+   * @description The editable project to be added to the workspace needs to be setup for import by calling POST /project-imports, before calling this API endpoint.
+   */
   importWorkspaceProjectStatus: {
-    /**
-     * Returns status for a project import. Also returns data for the imported resource when ready 
-     * @description The editable project to be added to the workspace needs to be setup for import by calling POST /project-imports, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of workspace the editable project will be added to.
+         * @example MyWorkspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the editable project import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description Status for a project import and data to resource if import is done and the project is ready to be used. */
       200: {
@@ -4517,7 +4980,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for project import. 
+               * @description ID for project import.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -4526,12 +4989,12 @@ export interface operations {
               /** @description Data for the project imported, only exists in response if project is imported and ready to use. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for the imported project resource. 
+                 * @description URI for the imported project resource.
                  * @example api/projects/u760-u095-gu45
                  */
                 resourceUri?: string;
                 /**
-                 * @description The ID for the imported project. 
+                 * @description The ID for the imported project.
                  * @example u760-u095-gu45
                  */
                 projectId?: string;
@@ -4539,12 +5002,12 @@ export interface operations {
               /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not import project, file must end with .mol or .zip.
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12015
                  */
                 code?: number;
@@ -4561,14 +5024,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a workspace project import
+   * @description This API end point can be be called after a project has been imported and added to the workspace.
+   */
   deleteWorkspaceProjectImport: {
-    /**
-     * Deletes a workspace project import 
-     * @description This API end point can be be called after a project has been imported and added to the workspace.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of workspace the editable project will be added to.
+         * @example MyWorkspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the editable project import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
       /** @description OK: The project import with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -4577,23 +5056,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get workspace projects
+   * @description Get workspace projects.
+   */
   getWorkspaceProjects: {
-    /**
-     * Get workspace projects 
-     * @description Get workspace projects.
-     */
-    parameters?: {
-        /**
-         * @description If true, returned projects vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for any returned project. Default is false. 
-         * @example vcsInfo=true
-         */
-        /**
-         * @description If true, projects disabled in the workspace are also lsited. Default is true. 
-         * @example includeDisabled=true
-         */
+    parameters: {
       query?: {
-        vcsInfo?: string;
-        includeDisabled?: string;
+        /**
+         * @description If true, returned projects vcsUri field will be set if the project is version controlled. If false, vscUri will not be set for any returned project. Default is false.
+         * @example true
+         */
+        vcsInfo?: "true" | "false";
+        /**
+         * @description If true, projects disabled in the workspace are also lsited. Default is true.
+         * @example true
+         */
+        includeDisabled?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
       };
     };
     responses: {
@@ -4602,7 +5088,7 @@ export interface operations {
         content: {
           "application/json": {
             data?: {
-              items?: (components["schemas"]["LocalProjectProtocol"])[];
+              items?: components["schemas"]["LocalProjectProtocol"][];
             };
           };
         };
@@ -4615,18 +5101,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Create and add a project to workspace.
+   * @description Create an empty projects and adds it to workspace.
+   */
   createAndAddProjectsToWorkspace: {
-    /**
-     * Create and add a project to workspace. 
-     * @description Create an empty projects and adds it to workspace.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     /** @description Specification for the new content entry. */
     requestBody: {
       content: {
         "application/json": {
           new: {
             /**
-             * @description Project name. 
+             * @description Project name.
              * @example MyProject
              */
             name?: string;
@@ -4648,15 +5143,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get project generated experiments for a workspace.
+   * @description Get project generated experiments for a workspace.
+   */
   getWorkspaceProjectExperiments: {
-    /**
-     * Get project generated experiments for a workspace. 
-     * @description Get project generated experiments for a workspace.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the project.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     responses: {
       /** @description The experiment setups and run info for all project generated experiments in a workspace. The objects contain the experiment ids, and additional values are what would be returned from GET /workspaces/{workspace}/experiments/{experimentId}. */
       200: {
         content: {
+          "application/vnd.impact.experiment.v3+json": components["schemas"]["ExperimentListV3"];
           "application/vnd.impact.experiment.v2+json": components["schemas"]["ExperimentListV2"];
         };
       };
@@ -4669,11 +5179,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get project generated FMUs for a workspace.
+   * @description Get project generated FMUs for a workspace.
+   */
   getWorkspaceProjectFmus: {
-    /**
-     * Get project generated FMUs for a workspace. 
-     * @description Get project generated FMUs for a workspace.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the project.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
     responses: {
       /** @description The results and run info for all project generated FMUs in a workspace. The response objects contain the FMU ID and the additional fields are what would be returned from GET /workspaces/{workspace}/model-executables/{fmuId}. */
       200: {
@@ -4689,11 +5213,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns a workspaces sharing defintion
+   * @description Will create a workspace definition that can be shared with other users. This requires that all projects used in the workspace is either version controlled or a released projcet. The 'strict' query parameter can be used to specify if the version control URIs are to specific commits or not. The end-point /workspace-imports is used to import a workspace based on the shared definition returned from this end-point.
+   */
   getWorkspaceSharingId: {
-    /**
-     * Returns a workspaces sharing defintion 
-     * @description Will create a workspace definition that can be shared with other users. This requires that all projects used in the workspace is either version controlled or a released projcet. The 'strict' query parameter can be used to specify if the version control URIs are to specific commits or not. The end-point /workspace-imports is used to import a workspace based on the shared definition returned from this end-point.
-     */
+    parameters: {
+      query?: {
+        /**
+         * @description If true, version control references will be to a specific commit. If false, version control references will not contain specific commit. Default is false.
+         * @example true
+         */
+        strict?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example MyWorkspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description A workspace definition for sharing. */
       200: {
@@ -4711,71 +5251,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get the custom function meta-data
+   * @description Gets the meta-data for a custom function describing which parameters the custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center.
+   */
   getCustomFunction: {
-    /**
-     * Get the custom function meta-data 
-     * @description Gets the meta-data for a custom function describing which parameters the custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Name of the custom function.
+         * @example steady state
+         */
+        "custom-function": string;
+      };
+    };
     responses: {
       /** @description A custom function and its meta-data. */
       200: {
         content: {
-          "application/json": {
-            /**
-             * @description Custom function signature schema version. 
-             * @example 0.0.1
-             */
-            version?: string;
-            /**
-             * @description Name of the custom function. 
-             * @example my_custom_function
-             */
-            name?: string;
-            /**
-             * @description Description of the custom function 
-             * @example This is my custom function!
-             */
-            description?: string;
-            /** @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment. */
-            can_initialize_from?: boolean;
-            /** @description A list of parameters that should be supplied in the experiment definition if this custom function is used. */
-            parameters?: ({
-                /**
-                 * @description Name of the custom function parameter. 
-                 * @example my_custom_function_parameter
-                 */
-                name: string;
-                /**
-                 * @description Data type of the custom function parameter, supported types are 'Number', 'String', 'Boolean' and 'Enumeration'. 
-                 * @example Number
-                 */
-                type: string;
-                /**
-                 * @description A list specifying values to choose the parameter from (applicable only for parameters of type Enumeration). 
-                 * @example [
-                 *   "small",
-                 *   "medium",
-                 *   "large"
-                 * ]
-                 */
-                values?: (string)[];
-                /**
-                 * @description Description of the custom function parameter 
-                 * @example This is my custom function parameter, supports values of '1', '2' and '3'
-                 */
-                description: string;
-                /**
-                 * @description If this custom function parameter is optional when calling this custom function, supported values are 'true' and 'false'. 
-                 * @example true
-                 */
-                optional?: string;
-                /**
-                 * @description Default value for this custom function parameter, its data type should be as specified in 'type' (except for enumeration parameters, where the default value should be one of the enumerated values). 
-                 * @example 2
-                 */
-                defaultValue?: string | number | boolean;
-              })[];
-          };
+          "application/json": components["schemas"]["Signature"];
         };
       };
       401: components["responses"]["Unauthenticated"];
@@ -4786,11 +5285,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets the execution options
+   * @description Gets the (aggregated) options for a custom function. This includes: Workspace specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the workspace specific options, secondarily from the application default options and in third hand from the custom function default options.
+   */
   getExecutionOptions: {
-    /**
-     * Gets the execution options 
-     * @description Gets the (aggregated) options for a custom function. This includes: Workspace specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the workspace specific options, secondarily from the application default options and in third hand from the custom function default options.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Name of the custom function.
+         * @example steady state
+         */
+        "custom-function": string;
+      };
+    };
     responses: {
       /** @description The aggregated execution option set for a custom function. */
       200: {
@@ -4807,11 +5320,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Sets execution option values
+   * @description The values for the options are saved for a specific custom function and workspace.
+   */
   putExecutionOptions: {
-    /**
-     * Sets execution option values 
-     * @description The values for the options are saved for a specific custom function and workspace.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Name of the custom function.
+         * @example steady state
+         */
+        "custom-function": string;
+      };
+    };
     /** @description Execution options to set for custom function. */
     requestBody: {
       content: {
@@ -4820,7 +5347,9 @@ export interface operations {
     };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -4830,11 +5359,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets the default execution options
+   * @description Gets the application level default options for a custom function. This includes: Options configured as defaults for the application and default options specified in the custom function. For options specified on both levels, the value is taken from the application default options.
+   */
   getDefaultExecutionOptions: {
-    /**
-     * Gets the default execution options 
-     * @description Gets the application level default options for a custom function. This includes: Options configured as defaults for the application and default options specified in the custom function. For options specified on both levels, the value is taken from the application default options.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Name of the custom function.
+         * @example steady state
+         */
+        "custom-function": string;
+      };
+    };
     responses: {
       /** @description The application level default execution options for a custom function. */
       200: {
@@ -4851,11 +5394,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets the execution options
+   * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
+   */
   getExecutionOptionsProjects: {
-    /**
-     * Gets the execution options 
-     * @description Gets the (aggregated) options for a custom function. This includes: Project specific options, options configured as defaults for the application, default options specified in the custom function. For options specified on multiple levels, the value is taken primarily from the project specific options, secondarily from the application default options and in third hand from the custom function default options.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the project execution options are located in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description Name of the custom function.
+         * @example steady state
+         */
+        "custom-function": string;
+      };
+    };
     responses: {
       /** @description The aggregated execution option set for a custom function. */
       200: {
@@ -4872,11 +5434,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Sets execution option values
+   * @description The values for the options are saved for a specific custom function and project.
+   */
   putProjectExecutionOptions: {
-    /**
-     * Sets execution option values 
-     * @description The values for the options are saved for a specific custom function and project.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description ID of the project execution options are located in.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+        /**
+         * @description Name of the custom function.
+         * @example steady state
+         */
+        "custom-function": string;
+      };
+    };
     /** @description Execution options to set for custom function. */
     requestBody: {
       content: {
@@ -4885,7 +5466,9 @@ export interface operations {
     };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -4895,73 +5478,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get a list of custom functions meta-data
+   * @description Which custom functions that exists are useful when setting up an experiment using POST /workspaces/{workspace}/experiments. The name of a custom function is used for the field 'analysis_function' which specifies that it should be used for the experiment. The meta-data also describes which parameters each custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center.
+   */
   getCustomFunctions: {
-    /**
-     * Get a list of custom functions meta-data 
-     * @description Which custom functions that exists are useful when setting up an experiment using POST /workspaces/{workspace}/experiments. The name of a custom function is used for the field 'analysis_function' which specifies that it should be used for the experiment. The meta-data also describes which parameters each custom function accepts (read more about the response for details). Note that the system comes with default custom functions thar are always available. Furthermore, you can read more about custom functions and setting up the system with your own in the Modelon Impact help center.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description A list of custom functions and their meta-data. */
       200: {
         content: {
           "application/json": {
             data?: {
-              items?: ({
-                  /**
-                   * @description Custom function signature schema version. 
-                   * @example 0.0.1
-                   */
-                  version: string;
-                  /**
-                   * @description Name of the custom function. 
-                   * @example my_custom_function
-                   */
-                  name: string;
-                  /**
-                   * @description Description of the custom function 
-                   * @example This is my custom function!
-                   */
-                  description: string;
-                  /** @description Indicates whether the custom function support the 'initialize from' functionality when setting up an experiment. */
-                  can_initialize_from: boolean;
-                  /** @description A list of parameters that should be supplied in the experiment definition if this custom function is used. */
-                  parameters: ({
-                      /**
-                       * @description Name of the custom function parameter. 
-                       * @example my_custom_function_parameter
-                       */
-                      name: string;
-                      /**
-                       * @description Data type of the custom function parameter, supported types are 'Number', 'String', 'Boolean' and 'Enumeration'. 
-                       * @example Number
-                       */
-                      type: string;
-                      /**
-                       * @description A list specifying values to choose the parameter from (applicable only for parameters of type Enumeration). 
-                       * @example [
-                       *   "small",
-                       *   "medium",
-                       *   "large"
-                       * ]
-                       */
-                      values?: (string)[];
-                      /**
-                       * @description Description of the custom function parameter 
-                       * @example This is my custom function parameter, supports values of '1', '2' and '3'
-                       */
-                      description: string;
-                      /**
-                       * @description If this custom function parameter is optional when calling this custom function, supported values are 'true' and 'false'. 
-                       * @example true
-                       */
-                      optional?: string;
-                      /**
-                       * @description Default value for this custom function parameter, its data type should be as specified in 'type' (except for enumeration parameters, where the default value should be one of the enumerated values). 
-                       * @example 2
-                       */
-                      defaultValue?: string | number | boolean;
-                    })[];
-                })[];
+              items?: components["schemas"]["Signature"][];
             };
           };
         };
@@ -4974,35 +5511,44 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Returns the set of unit conversion factors */
   getUnitConversionFactors: {
-    /** Returns the set of unit conversion factors */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description A dictionary specifying the unit conversion factors for SI units and for imperial units. */
       200: {
         content: {
           "application/json": {
             /** @description SI unit conversions. */
-            si?: ({
-                /** @example K */
-                unit: string;
-                /** @example degC */
-                displayUnit: string;
-                /** @example 1 */
-                multiplier: number;
-                /** @example -273.15 */
-                offset: number;
-              })[];
+            si?: {
+              /** @example K */
+              unit: string;
+              /** @example degC */
+              displayUnit: string;
+              /** @example 1 */
+              multiplier: number;
+              /** @example -273.15 */
+              offset: number;
+            }[];
             /** @description Imperial unit conversions. */
-            imperial?: ({
-                /** @example K */
-                unit: string;
-                /** @example degF */
-                displayUnit: string;
-                /** @example 1.8 */
-                multiplier: number;
-                /** @example -459.67 */
-                offset: number;
-              })[];
+            imperial?: {
+              /** @example K */
+              unit: string;
+              /** @example degF */
+              displayUnit: string;
+              /** @example 1.8 */
+              multiplier: number;
+              /** @example -459.67 */
+              offset: number;
+            }[];
           };
         };
       };
@@ -5014,15 +5560,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Returns all model executables input and run info */
   getAllModelExecutableInfo: {
-    /** Returns all model executables input and run info */
-    parameters?: {
-        /**
-         * @description Modelica class path of the model. If given, only FMUs generated by the 'classPath' are returned. 
-         * @example classPath=Modelica.Blocks.Examples.PID_Controller
-         */
+    parameters: {
       query?: {
+        /**
+         * @description Modelica class path of the model. If given, only FMUs generated by the 'classPath' are returned.
+         * @example Modelica.Blocks.Examples.PID_Controller
+         */
         classPath?: string;
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
       };
     };
     responses: {
@@ -5041,23 +5594,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Sets up a model executable to be compiled
+   * @description The name of the model to be compiled is specified by the field 'class_name'. The remaining fields in the input are options for the compilation process. For a reference of what options can be used in the field 'compiler_options' and 'runtime_option' see the OCT User's Guide, which can be found in the Modelon Impact help center. If the FMU should be executed in Impact (rather than exported) it is recommended that 'fmi_target' is 'me', 'fmi_version' is '2.0' and 'platform' is 'auto'. If this end-point is called with the query parameter 'getCached' set to true, then a previously compiled model executable is returned, if such an FMU exists. To get a cached model executable (FMU) there must exists a successfully compiled model executable that was compiled with the same inputs as in the current call. Furthermore, if the Modelica model for which the FMU compilation is requested has been changed in a structural way, or at least one of its dependent models have changed, then a cached FMU will not be returned. Setting non-structural parameters and making graphical changes to the Modelica model will not break the cache for its compiled FMU.
+   */
   modelExecutableSetup: {
-    /**
-     * Sets up a model executable to be compiled 
-     * @description The name of the model to be compiled is specified by the field 'class_name'. The remaining fields in the input are options for the compilation process. For a reference of what options can be used in the field 'compiler_options' and 'runtime_option' see the OCT User's Guide, which can be found in the Modelon Impact help center. If the FMU should be executed in Impact (rather than exported) it is recommended that 'fmi_target' is 'me', 'fmi_version' is '2.0' and 'platform' is 'auto'. If this end-point is called with the query parameter 'getCached' set to true, then a previously compiled model executable is returned, if such an FMU exists. To get a cached model executable (FMU) there must exists a successfully compiled model executable that was compiled with the same inputs as in the current call. Furthermore, if the Modelica model for which the FMU compilation is requested has been changed in a structural way, or at least one of its dependent models have changed, then a cached FMU will not be returned. Setting non-structural parameters and making graphical changes to the Modelica model will not break the cache for its compiled FMU.
-     */
-    parameters?: {
-        /**
-         * @description If true, returns, if available, a reusable model executable previously compiled. Also returns any non-structural parameters to be set on it. 
-         * @example getCached=true
-         */
-        /**
-         * @description If true, a cached FMU can be found even if the FMU was compiled with some non-structural parameters with unknown value. If this is the case, parametersMissing in the response will contain a list of these parameters and the caller should ensure to specify some values for these parameters when using the cached FMU. 
-         * @example allowNonStructuralMissing=true
-         */
+    parameters: {
       query?: {
-        getCached?: string;
-        allowNonStructuralMissing?: string;
+        /**
+         * @description If true, returns, if available, a reusable model executable previously compiled. Also returns any non-structural parameters to be set on it.
+         * @example true
+         */
+        getCached?: "true" | "false";
+        /**
+         * @description If true, a cached FMU can be found even if the FMU was compiled with some non-structural parameters with unknown value. If this is the case, parametersMissing in the response will contain a list of these parameters and the caller should ensure to specify some values for these parameters when using the cached FMU.
+         * @example true
+         */
+        allowNonStructuralMissing?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
       };
     };
     /** @description Compilation parameters. */
@@ -5067,48 +5627,48 @@ export interface operations {
           /** @description The input for how the compilation was done. */
           input: {
             /**
-             * @description Model class name. 
+             * @description Model class name.
              * @example Workspace.PID_Controller
              */
             class_name: string;
             /**
-             * @description Key-value pairs of compilation options. 
+             * @description Key-value pairs of compilation options.
              * @example {
              *   "generate_html_diagnostics": true
              * }
              */
             compiler_options: {
-              [key: string]: (number | string | boolean) | undefined;
+              [key: string]: number | string | boolean;
             };
             /**
-             * @description Key-value pairs of run-time options. 
+             * @description Key-value pairs of run-time options.
              * @example {
              *   "log_level": 4
              * }
              */
             runtime_options: {
-              [key: string]: (number | string | boolean) | undefined;
+              [key: string]: number | string | boolean;
             };
             /**
-             * @description Compiler log level. 
+             * @description Compiler log level.
              * @example info
              */
             compiler_log_level: string;
             /**
-             * @description Flavour of the FMU. 
-             * @example me 
+             * @description Flavour of the FMU.
+             * @example me
              * @enum {string}
              */
             fmi_target: "me" | "cs" | "me+cs";
             /**
-             * @description Version of FMI for the FMU. 
-             * @example 2.0 
+             * @description Version of FMI for the FMU.
+             * @example 2.0
              * @enum {string}
              */
             fmi_version: "1.0" | "2.0";
             /**
-             * @description Platform for FMU binary. 
-             * @example win64 
+             * @description Platform for FMU binary.
+             * @example win64
              * @enum {string}
              */
             platform: "linux64" | "win32" | "win64" | "auto";
@@ -5122,19 +5682,28 @@ export interface operations {
         content: {
           "application/json": {
             /**
-             * @description A unique identifier for an FMU. Will be null if getCached=true and no cached FMU is available. 
-             * @example workspace_pid_controller_20090615_134530_as86g32
+             * Id
+             * @description A unique identifier for an FMU. Will be null if getCached=true and no cached FMU is available.
              */
-            id?: string;
+            id: string | null;
             /**
-             * @description Parameter values to be set on the FMU referenced by the 'id', for it to represent current model setup. Empty if getCached=false. 
-             * @example {
-             *   "inertia1.J": 2
-             * }
+             * Parameters
+             * @deprecated
+             * @description Parameter values to be set on the FMU referenced by the 'id', for it to represent current model setup. Empty if getCached=false.
              */
-            parameters?: Record<string, never>;
-            /** @description Parameters to be set for the FMU referenced by the 'id', default value is otherwise not guaranteed to represent current model setup. Empty if getCached=false or allowNonStructuralMissing=false. */
-            parametersMissing?: (string)[];
+            parameters: {
+              [key: string]: boolean | number | string;
+            };
+            /**
+             * Parametersmissing
+             * @description Parameters to be set for the FMU referenced by the 'id', default value is otherwise not guaranteed to represent current model setup. Empty if getCached=false or allowNonStructuralMissing=false.
+             */
+            parametersMissing: string[];
+            /**
+             * Parametersresolved
+             * @description Resolved scalar parameters to be set on the FMU referenced by the 'id', for it to represent current model setup. Empty if getCached=false.
+             */
+            parametersResolved: components["schemas"]["ParameterProtocol"][];
           };
         };
       };
@@ -5145,11 +5714,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns the supported platforms for FMU generation
+   * @description Can be used to find which values are supported for the field 'platform' when calling the POST method on '/workspaces/{workspace}/model-executables'.
+   */
   getFmuPlatforms: {
-    /**
-     * Returns the supported platforms for FMU generation 
-     * @description Can be used to find which values are supported for the field 'platform' when calling the POST method on '/workspaces/{workspace}/model-executables'.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+      };
+    };
     responses: {
       /** @description A list of the supported FMU's generation platforms. */
       200: {
@@ -5157,13 +5735,13 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description An array containing the list of platforms in which the FMU can be generated. 
+               * @description An array containing the list of platforms in which the FMU can be generated.
                * @example [
                *   "win32",
                *   "win64"
                * ]
                */
-              platforms?: (string)[];
+              platforms?: string[];
             };
           };
         };
@@ -5177,8 +5755,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Returns the compilation input and run info */
   getModelExecutableInfo: {
-    /** Returns the compilation input and run info */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The FMU ID.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description The result from a compilation. The 'status' and 'errors' in 'run_info' should be checked to see if compilation finished successfully. */
       200: {
@@ -5196,11 +5788,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Deletes the FMU with the specified ID */
   deleteModelExecutable: {
-    /** Deletes the FMU with the specified ID */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The FMU ID.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5210,51 +5818,65 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get compilation status */
   getCompilationStatus: {
-    /** Get compilation status */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the model to be compiled.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description Status of the compilation. */
       200: {
         content: {
           "application/json": {
             /**
-             * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string. 
+             * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string.
              * @example 27
              */
             finished_executions?: number;
             /**
-             * @description Total number of executions. 
+             * @description Total number of executions.
              * @example 50
              */
             total_executions?: number;
             /**
-             * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'. 
+             * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
              * @example running
              */
             status?: string;
             /** @description An array containing progress information about all executions. */
-            progresses?: ({
-                /**
-                 * @description A message about the progress of the execution. 
-                 * @example Simulation at time 3.45
-                 */
-                message?: string;
-                /**
-                 * @description A number between 0 and 1 indicating how the execution is progressing. 
-                 * @example 0.43
-                 */
-                percentage?: number;
-                /**
-                 * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'. 
-                 * @example compilation
-                 */
-                stage?: string;
-                /**
-                 * @description True if the compilation is done. 
-                 * @example true
-                 */
-                done?: boolean;
-              })[];
+            progresses?: {
+              /**
+               * @description A message about the progress of the execution.
+               * @example Simulation at time 3.45
+               */
+              message?: string;
+              /**
+               * @description A number between 0 and 1 indicating how the execution is progressing.
+               * @example 0.43
+               */
+              percentage?: number;
+              /**
+               * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'.
+               * @example compilation
+               */
+              stage?: string;
+              /**
+               * @description True if the compilation is done.
+               * @example true
+               */
+              done?: boolean;
+            }[];
           };
         };
       };
@@ -5267,14 +5889,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Compiles a model
+   * @description First call POST /workspaces/{workspace}/model-executables to setup what should be compiled.
+   */
   modelExecutableCompile: {
-    /**
-     * Compiles a model 
-     * @description First call POST /workspaces/{workspace}/model-executables to setup what should be compiled.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the model to be compiled.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5284,11 +5922,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Cancel a running compilation */
   cancelCompilation: {
-    /** Cancel a running compilation */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the model to be compiled.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5298,8 +5952,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Downloads the model executable compilation log */
   downloadCompilationLog: {
-    /** Downloads the model executable compilation log */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the compiled model.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description A compilation log. */
       200: {
@@ -5316,8 +5984,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Downloads the model description file for an FMU */
   downloadModelDescription: {
-    /** Downloads the model description file for an FMU */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the compiled model.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description A model description XML file. */
       200: {
@@ -5334,8 +6016,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Downloads an FMU binary that is compiled */
   downloadCompiledFMU: {
-    /** Downloads an FMU binary that is compiled */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the compiled model.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description An FMU file. */
       200: {
@@ -5352,14 +6048,28 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Gets the FMU meta-data */
   getFmuMeta: {
-    /** Gets the FMU meta-data */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the compiled model.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     /** @description The current parameter state of the FMU. */
     requestBody?: {
       content: {
         "application/json": {
           /**
-           * @description The current parameter state of the FMU. 
+           * @description The current parameter state of the FMU.
            * @example {
            *   "foo": 1,
            *   "bar": 2
@@ -5377,12 +6087,12 @@ export interface operations {
             /** @description The steady state meta-data. */
             steady_state?: {
               /**
-               * @description Number of residual variables. 
+               * @description Number of residual variables.
                * @example 1
                */
               residual_variable_count?: number;
               /**
-               * @description Number of iteration variables. 
+               * @description Number of iteration variables.
                * @example 2
                */
               iteration_variable_count?: number;
@@ -5399,16 +6109,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets the parameters that can be set on the FMU
+   * @description Can be used to find what parameters are feasible to have as modifiers in an experiment.
+   */
   getFmuParameters: {
-    /**
-     * Gets the parameters that can be set on the FMU 
-     * @description Can be used to find what parameters are feasible to have as modifiers in an experiment.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the compiled model.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description A list of the FMU's settable parameters. */
       200: {
         content: {
-          "application/json": (string)[];
+          "application/json": string[];
         };
       };
       400: components["responses"]["BadRequest"];
@@ -5420,11 +6144,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets parameters that have string values together with those values
+   * @description Gets a list of parameters whose values are strings and one list with respective value in order. Can be used when requiring string parameters that don't come with the result.
+   */
   getFmuStringParametersAndValues: {
-    /**
-     * Gets parameters that have string values together with those values 
-     * @description Gets a list of parameters whose values are strings and one list with respective value in order. Can be used when requiring string parameters that don't come with the result.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description Reference ID to the compiled model.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        fmuId: string;
+      };
+    };
     responses: {
       /** @description An object containing a list of two lists. The first list is the names of the parameters, and the second is a list of the parameter values in the same order. */
       200: {
@@ -5432,7 +6170,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description An array containing two arrays, the first containing parameter names and the second containing respective string values. 
+               * @description An array containing two arrays, the first containing parameter names and the second containing respective string values.
                * @example [
                *   [
                *     "var1",
@@ -5444,7 +6182,7 @@ export interface operations {
                *   ]
                * ]
                */
-              items?: ((string)[])[];
+              items?: string[][];
             };
           };
         };
@@ -5458,21 +6196,29 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get all experiments meta-data */
   getAllExperimentInfo: {
-    /** Get all experiments meta-data */
-    parameters?: {
-        /**
-         * @description Modelica class path of the model. If given, only experiments generated by the 'classPath' are returned. 
-         * @example classPath=Modelica.Blocks.Examples.PID_Controller
-         */
+    parameters: {
       query?: {
+        /**
+         * @description Modelica class path of the model. If given, only experiments generated by the 'classPath' are returned.
+         * @example Modelica.Blocks.Examples.PID_Controller
+         */
         classPath?: string;
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
       };
     };
     responses: {
       /** @description The experiment setups and run info for all experiments. The objects contain the experiment ids, and additional values are what would be returned from .../experiments/{experimentId}. */
       200: {
         content: {
+          "application/vnd.impact.experiment.v3+json": components["schemas"]["ExperimentListV3"];
           "application/vnd.impact.experiment.v2+json": components["schemas"]["ExperimentListV2"];
           "application/vnd.impact.experiment.v1+json": components["schemas"]["ExperimentListV1"];
         };
@@ -5486,57 +6232,87 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Sets up an experiment for execution
+   * @description The required inputs for setting up a multi-execution experiment is either 'id' in 'base/model/fmu' OR 'className' in 'base/model/modelica', along with 'type' in 'base/analysis'. These can be obtained from POST /workspaces/{workspace}/model-executables and GET /workspaces/{workspace}/custom-functions respectively. The FMU 'id' specifies what FMU the experiment is based on, and analysis 'type' specifies what analysis custom function is used for each case of the experiment. Furthermore, experiments support multi-execution, i.e., batch computations where each case executes a custom function. Multi-execution experiments can be set up in two ways.
+   *
+   * The first way to setup multi-execution experiments is to specify 'operators' for 'modifiers' which are applied to the base experiment. An example experiment for this could contain the 'modifiers': {'variables': [{'kind': 'range', 'name' : 'x', 'start' : 1, 'end' : 2, 'steps' : 3}]},  which would result in a multi-execution  experiment with three cases: x=1, x=1.5, and x=2. Note that if multiple 'operators' are used for different variables, the experiment will be expand to cases with all combinations of parametrizations, i.e., full factorial is used to expand the experiment. Here is a full example using the range operator to create cases:
+   *
+   * <pre>
+   * {
+   *   "experiment": {
+   *     "version": 3,
+   *     "base": {
+   *       "model": {
+   *         "fmu": {
+   *           "id": "workspace_pid_controller_20090615_134530_as86g32"
+   *         }
+   *       },
+   *       "modifiers": {
+   *         "variables": [{
+   *           "kind": "range",
+   *           "name" : "inertia1.J",
+   *           "start" : 0,
+   *           "end" : 2,
+   *           "steps" : 10
+   *           }]
+   *          },
+   *       "analysis": {
+   *         "type": "dynamic",
+   *         "parameters": [
+   *          {
+   *           "name": start_time,
+   *           "value": 0
+   *          },
+   *          {
+   *           "name": final_time,
+   *           "value": 1
+   *         },
+   *         ]
+   *       }
+   *     }
+   *   }
+   * }
+   * </pre>
+   *
+   * The other way of defining an experiment is to specify 'extensions' to the 'base' definition, where each 'extension' is combined with 'base' to create a case. For example, an experiment with the 'extensions': [{'modifiers':  {'variables': [{'kind': 'value', 'dataType': 'REAL', 'name': 'x', 'value': 1}]}}, {'modifiers': {'variables': [{'kind': 'value', 'dataType': 'REAL', 'name': 'x',  'value': 1.5}]}}, {'modifiers': {'variables': [{'kind': 'value', 'dataType':  'REAL', 'name': 'x', 'value': 2}]}}], would result in the same multi-execution as above (if no modifiers are defined in 'base'). This way of creating cases gives more freedom to the client to set up a multi-execution experiment, since cases are defined by parameter configurations, as opposed to operators (like the range operator). This approach also allows different options and custom function parameters to be used for the different cases. These two methods of setting up a multi-execution cannot be combined. So, if any extensions are given, it is not allowed to include any 'operators' anywhere in the experiment. It is however allowed to provide parameter values (with no operators) in 'base' in combination with defining cases with 'extensions'. In this case, parameters set in 'extensions' overrides those set in 'base'.
+   *
+   * The following example shows how 'extensions' are used to set options and parameters for separate cases and thereby overriding the values in the 'base' definition. The 'base' definition in the example have 'analysis': {'type': 'dynamic', 'parameters': [{'name': 'start_time', 'value': 0}, {'name': 'final_time', 'value': 3}]},  and 'modifiers': {'variables': [{'kind': 'value', 'dataType': 'REAL', 'name': 'x', 'value': 1},  {'kind': 'value', 'dataType': 'REAL', 'name': 'y', 'value': 3}]}}.  If used with the 'extensions':
+   *
+   * [{'analysis': {'parameters': [{'name': 'final_time', 'value': 3}]}}, 'modifiers': {'variables':  [{'kind': 'value', 'dataType': 'REAL', 'name': 'y', 'value': 5}]}}, {'analysis': {'parameters': [{'name': 'start_time', 'value': 1}]}}, 'modifiers': {'variables':  [{'kind': 'value', 'dataType': 'REAL', 'name': 'x', 'value': 2}]}}],
+   *
+   * we will get two cases. The first case will use 2 for 'start_time' from the 'base' and 4 for 'final_time' as it is overridden by the 'extension', in the same way it will use 'x'=1 and 'y'=5 as modifiers. The second case overrides 'start_time' and 'x' and will result in 'start_time'=1, 'final_time'=3, 'x'=2, and 'y'=3.
+   *
+   * The old (version 1 and version 2) experiment formats are deprecated and will be removed in a future version.
+   */
   setupExperiment: {
-    /**
-     * Sets up an experiment for execution 
-     * @description The required inputs for setting up a multi-execution experiment is either 'id' in 'base/model/fmu' OR 'className' in 'base/model/modelica', along with 'type' in 'base/analysis'. These can be obtained from POST /workspaces/{workspace}/model-executables and GET /workspaces/{workspace}/custom-functions respectively. The FMU 'id' specifies what FMU the experiment is based on, and analysis 'type' specifies what analysis custom function is used for each case of the experiment. Furthermore, experiments support multi-execution, i.e., batch computations where each case executes a custom function. Multi-execution experiments can be set up in two ways.
-     * 
-     * The first way to setup multi-execution experiments is to specify 'operators' for 'modifiers' which are applied to the base experiment. An example experiment for this could contain the 'modifiers': {'variables': {'x': 'range(1, 2, 3)'}}, which would result in a multi-execution experiment with three cases: x=1, x=1.5, and x=2. Note that if multiple 'operators' are used for different variables, the experiment will be expand to cases with all combinations of parametrizations, i.e., full factorial is used to expand the experiment. Here is a full example using the range operator to create cases:
-     * 
-     * <pre>
-     * {
-     *   "experiment": {
-     *     "version": 2,
-     *     "base": {
-     *       "model": {
-     *         "fmu": {
-     *           "id": "workspace_pid_controller_20090615_134530_as86g32"
-     *         }
-     *       },
-     *       "modifiers": {
-     *         "variables": {
-     *           "inertia1.J": "range(1, 2, 10)",
-     *         }
-     *       },
-     *       "analysis": {
-     *         "type": "dynamic",
-     *         "parameters": {
-     *           "start_time": 0,
-     *           "final_time": 1
-     *         }
-     *       }
-     *     }
-     *   }
-     * }
-     * </pre>
-     * 
-     * The other way of defining an experiment is to specify 'extensions' to the 'base' definition, where each 'extension' is combined with 'base' to create a case. For example, an experiment with the 'extensions': [{'modifiers': {'variables': {'x': 1}}}, {'modifiers': {'variables': {'x': 1.5}}}, {'modifiers': {'variables': {'x': 2}}}], would result in the same multi-execution as above (if no modifiers are defined in 'base'). This way of creating cases gives more freedom to the client to set up a multi-execution experiment, since cases are defined by parameter configurations, as opposed to operators (like the range operator). This approach also allows different options and custom function parameters to be used for the different cases. These two methods of setting up a multi-execution cannot be combined. So, if any extensions are given, it is not allowed to include any 'operators' anywhere in the experiment. It is however allowed to provide parameter values (with no operators) in 'base' in combination with defining cases with 'extensions'. In this case, parameters set in 'extensions' overrides those set in 'base'.
-     * 
-     * The following example shows how 'extensions' are used to set options and parameters for separate cases and thereby overriding the values in the 'base' definition. The 'base' definition in the example have 'analysis': {'type': 'dynamic', 'parameters': {'start_time': 2, 'final_time': 3}}, and 'modifiers': {'variables': {'x': 1, 'y': 3}}}. If used with the 'extensions':
-     * 
-     * [{'analysis': {'parameters': {'final_time': 4}}}, 'modifiers': {'variables': {'y': 5}}}, {'analysis': {'parameters': {'start_time': 1}}}, 'modifiers': {'variables': {'x': 2}}}],
-     * 
-     * we will get two cases. The first case will use 2 for 'start_time' from the 'base' and 4 for 'final_time' as it is overridden by the 'extension', in the same way it will use 'x'=1 and 'y'=5 as modifiers. The second case overrides 'start_time' and 'x' and will result in 'start_time'=1, 'final_time'=3, 'x'=2, and 'y'=3.
-     * 
-     * The old (version 1) experiment format can still be used but will be removed in a future version.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+      };
+    };
     /** @description Experiment parameters. */
     requestBody: {
       content: {
-        "application/vnd.impact.experiment.v2+json": {
-          experiment: components["schemas"]["ExperimentDefinition"];
+        "application/vnd.impact.experiment.v3+json": {
+          experiment: components["schemas"]["ExperimentDefinitionV3"];
           /**
-           * @description Up to 2048 bytes of custom data to be associated with the experiment. 
+           * @description Up to 2048 bytes of custom data to be associated with the experiment.
+           * @example {
+           *   "parametrizationFrom": "specification 3.4",
+           *   "externalToolVersion": "9.0"
+           * }
+           */
+          userData?: Record<string, never>;
+        };
+        "application/vnd.impact.experiment.v2+json": {
+          experiment: components["schemas"]["ExperimentDefinitionV2"];
+          /**
+           * @description Up to 2048 bytes of custom data to be associated with the experiment.
            * @example {
            *   "parametrizationFrom": "specification 3.4",
            *   "externalToolVersion": "9.0"
@@ -5545,65 +6321,9 @@ export interface operations {
           userData?: Record<string, never>;
         };
         "application/vnd.impact.experiment.v1+json": {
-          experiment: {
-            /**
-             * @description Reference ID to the compiled model. 
-             * @example workspace_pid_controller_20090615_134530_as86g32
-             */
-            fmu_id: string;
-            /**
-             * @example {
-             *   "variables": {
-             *     "integrator.k": 1,
-             *     "inertia1.J": "range(1,5,5)",
-             *     "inertia2.J": "range(5,10,3)"
-             *   },
-             *   "initializeFrom": ""
-             * }
-             */
-            modifiers?: {
-              /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified a full factorial is used to determine all different parameterizations for the experiment. */
-              variables?: {
-                [key: string]: (number | string | boolean) | undefined;
-              };
-              /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
-              initializeFrom?: string;
-            };
-            /** @description The analysis object. */
-            analysis: {
-              /**
-               * @description The name of the custom function that will be executed. 
-               * @example dynamic
-               */
-              analysis_function: string;
-              /**
-               * @description Parameters to the custom function. 
-               * @example {
-               *   "start_time": 0,
-               *   "final_time": 1
-               * }
-               */
-              parameters?: {
-                [key: string]: (number | string | boolean) | undefined;
-              };
-              /** @description Key-value pairs of simulation options. */
-              simulation_options?: {
-                [key: string]: (number | string | boolean) | undefined;
-              };
-              /** @description Key-value pairs of solver options. */
-              solver_options?: {
-                [key: string]: (number | string | boolean) | undefined;
-              };
-              /**
-               * @description The simulation log level. 
-               * @default WARNING 
-               * @enum {string}
-               */
-              simulation_log_level: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
-            };
-          };
+          experiment: components["schemas"]["ExperimentDefinitionV1"];
           /**
-           * @description Up to 2048 bytes of custom data to be associated with the experiment. 
+           * @description Up to 2048 bytes of custom data to be associated with the experiment.
            * @example {
            *   "parametrizationFrom": "specification 3.4",
            *   "externalToolVersion": "9.0"
@@ -5619,7 +6339,7 @@ export interface operations {
         content: {
           "application/json": {
             /**
-             * @description An object with an unique identifier for this experiment, used to track this experiment in other API calls. 
+             * @description An object with an unique identifier for this experiment, used to track this experiment in other API calls.
              * @example workspace_pid_controller_20090615_134530_as86g32
              */
             experiment_id?: string;
@@ -5635,133 +6355,65 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get experiment information */
   getExperimentInfo: {
-    /** Get experiment information */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     responses: {
       /** @description The experiment information as JSON. */
       200: {
         content: {
+          "application/vnd.impact.experiment.v3+json": {
+            /** @example workspace_pid_controller_20200705_170234_546ccba */
+            id?: string;
+            experiment?: components["schemas"]["ExperimentDefinitionV3"];
+            meta_data?: components["schemas"]["ExperimentMetaData"];
+            run_info?: components["schemas"]["ExperimentRunInfo"];
+          };
           "application/vnd.impact.experiment.v2+json": {
             /** @example workspace_pid_controller_20200705_170234_546ccba */
             id?: string;
-            experiment?: components["schemas"]["ExperimentDefinition"];
+            experiment?: components["schemas"]["ExperimentDefinitionV2"];
             meta_data?: components["schemas"]["ExperimentMetaData"];
-            run_info?: {
-              /**
-               * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run. 
-               * @example failed
-               */
-              status?: string;
-              /**
-               * @description An array containing errors if status is 'failed'. 
-               * @example [
-               *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
-               * ]
-               */
-              errors?: (string)[];
-              /**
-               * @description Number of cases that are failed. 
-               * @example 0
-               */
-              failed?: number;
-              /**
-               * @description Number of cases that are successful. 
-               * @example 2
-               */
-              successful?: number;
-              /**
-               * @description Number of cases that are not started. 
-               * @example 0
-               */
-              not_started?: number;
-              /**
-               * @description Number of cases that are cancelled. 
-               * @example 0
-               */
-              cancelled?: number;
-            };
+            run_info?: components["schemas"]["ExperimentRunInfo"];
           };
           "application/vnd.impact.experiment.v1+json": {
             /** @example workspace_pid_controller_20200705_170234_546ccba */
             id?: string;
-            experiment?: {
-              /**
-               * @description Reference ID to the compiled model. 
-               * @example workspace_pid_controller_20090615_134530_as86g32
-               */
-              fmu_id: string;
-              /**
-               * @example {
-               *   "variables": {
-               *     "integrator.k": 1,
-               *     "inertia1.J": "range(1,5,5)",
-               *     "inertia2.J": "range(5,10,3)"
-               *   },
-               *   "initializeFrom": ""
-               * }
-               */
-              modifiers?: {
-                /** @description Specifies parameter values and ranges. The range operator allows a range of values to be described: e.g. range(0,1,5) describes 5 evenly spaced values between 0 and 1: [0,0.25,0.5,0.75,1]. If multiple range operators are specified a full factorial is used to determine all different parameterizations for the experiment. */
-                variables?: {
-                  [key: string]: (number | string | boolean) | undefined;
-                };
-                /** @description Initialize the simulation using values from a previous simulation by giving the corresponding experiment ID. The experiment used must be for a simulation with a single case, otherwise 'initializeFromCase' must be used. Details on how the initialization is done depend on the custom function. */
-                initializeFrom?: string;
-              };
-              /** @description The analysis object. */
-              analysis: {
-                /**
-                 * @description The name of the custom function that will be executed. 
-                 * @example dynamic
-                 */
-                analysis_function: string;
-                /**
-                 * @description Parameters to the custom function. 
-                 * @example {
-                 *   "start_time": 0,
-                 *   "final_time": 1
-                 * }
-                 */
-                parameters?: {
-                  [key: string]: (number | string | boolean) | undefined;
-                };
-                /** @description Key-value pairs of simulation options. */
-                simulation_options?: {
-                  [key: string]: (number | string | boolean) | undefined;
-                };
-                /** @description Key-value pairs of solver options. */
-                solver_options?: {
-                  [key: string]: (number | string | boolean) | undefined;
-                };
-                /**
-                 * @description The simulation log level. 
-                 * @default WARNING 
-                 * @enum {string}
-                 */
-                simulation_log_level: "NOTHING" | "FATAL" | "ERROR" | "WARNING" | "INFO" | "VERBOSE" | "DEBUG" | "ALL";
-              };
-            };
+            experiment?: components["schemas"]["ExperimentDefinitionV1"];
             meta_data?: components["schemas"]["ExperimentMetaData"];
             run_info?: {
               /**
-               * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run. 
+               * @description String that is 'cancelled', 'failed' or 'done' depending on if all parts of the experiment could run.
                * @example failed
                */
               status?: string;
               /**
-               * @description An array containing errors if status is 'failed'. 
+               * @description An array containing errors if status is 'failed'.
                * @example [
                *   "Current settings will generate a large amount of simulation cases. Try reducing the number of simulation cases."
                * ]
                */
-              errors?: (string)[];
+              errors?: string[];
               /**
-               * @description Number of cases that are failed. 
+               * @description Number of cases that are failed.
                * @example 0
                */
               failed?: number;
               /**
-               * @description Number of cases that are successful. 
+               * @description Number of cases that are successful.
                * @example 2
                */
               successful?: number;
@@ -5778,17 +6430,31 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Set a label for an experiment
+   * @description Can be used to set a human readable identifier for an experiment.
+   */
   setLabel: {
-    /**
-     * Set a label for an experiment 
-     * @description Can be used to set a human readable identifier for an experiment.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     /** @description The new label for the experiment. */
     requestBody: {
       content: {
         "application/json": {
           /**
-           * @description The new label for the experiment. 
+           * @description The new label for the experiment.
            * @example tuning of P part
            */
           label: string;
@@ -5797,7 +6463,9 @@ export interface operations {
     };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5807,11 +6475,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Removes an experiment */
   removeExperiment: {
-    /** Removes an experiment */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5821,51 +6505,65 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get execution status */
   getExecutionStatus: {
-    /** Get execution status */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     responses: {
       /** @description Status. */
       200: {
         content: {
           "application/json": {
             /**
-             * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string. 
+             * @description Number of executions that have finished. Should not be used for determining if an execution is finished, instead use the 'status' string.
              * @example 27
              */
             finished_executions?: number;
             /**
-             * @description Total number of executions. 
+             * @description Total number of executions.
              * @example 50
              */
             total_executions?: number;
             /**
-             * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'. 
+             * @description Execution status, can have the values 'pending', 'running', 'stopping', 'cancelled' or 'done'.
              * @example running
              */
             status?: string;
             /** @description An array containing progress information about all executions. */
-            progresses?: ({
-                /**
-                 * @description A messag about the progress of the exectuion. 
-                 * @example Simulation at time 3.45
-                 */
-                message?: string;
-                /**
-                 * @description A number between 0 and 1 indicating how the execution is progressing. 
-                 * @example 0.43
-                 */
-                percentage?: number;
-                /**
-                 * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'. 
-                 * @example compilation
-                 */
-                stage?: string;
-                /**
-                 * @description True if the execution is done. 
-                 * @example true
-                 */
-                done?: boolean;
-              })[];
+            progresses?: {
+              /**
+               * @description A messag about the progress of the exectuion.
+               * @example Simulation at time 3.45
+               */
+              message?: string;
+              /**
+               * @description A number between 0 and 1 indicating how the execution is progressing.
+               * @example 0.43
+               */
+              percentage?: number;
+              /**
+               * @description The stage this progress applies to. Possible values are 'simulation' and 'compilation'.
+               * @example compilation
+               */
+              stage?: string;
+              /**
+               * @description True if the execution is done.
+               * @example true
+               */
+              done?: boolean;
+            }[];
           };
         };
       };
@@ -5878,11 +6576,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Executes an experiment
+   * @description First call POST /workspaces/{workspace}/experiments to setup what should be executed.
+   */
   execute: {
-    /**
-     * Executes an experiment 
-     * @description First call POST /workspaces/{workspace}/experiments to setup what should be executed.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     /** @description Optional request body for how execution should run. */
     requestBody?: {
       content: {
@@ -5890,12 +6602,12 @@ export interface operations {
           /** @description The cases to include in the execution. */
           includeCases?: {
             /** @description List of cases to execute. */
-            ids?: (string)[];
+            ids?: string[];
           };
           /** @description Options for how the execution is run. */
           options?: {
             /**
-             * @description If true, then compilation will always be done even if a previous compilation result could be used. Default is false. 
+             * @description If true, then compilation will always be done even if a previous compilation result could be used. Default is false.
              * @example true
              */
             forceCompilation?: boolean;
@@ -5905,7 +6617,9 @@ export interface operations {
     };
     responses: {
       /** @description The experiment is executed. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5915,11 +6629,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Cancel a running execution */
   cancelExecution: {
-    /** Cancel a running execution */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     responses: {
       /** @description The experiment is cancelled. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -5929,8 +6659,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get all cases meta-data */
   getAllCaseInfo: {
-    /** Get all cases meta-data */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
     responses: {
       /** @description The case information as JSON. */
       200: {
@@ -5938,74 +6682,79 @@ export interface operations {
           "application/json": {
             data?: {
               items?: ({
+                /**
+                 * @description Case ID.
+                 * @example case_1
+                 */
+                id?: string;
+                meta?: {
                   /**
-                   * @description Case ID. 
-                   * @example case_1
+                   * @description Case label.
+                   * @example Cruise operating point
                    */
-                  id?: string;
-                  meta?: {
+                  label?: string | null;
+                  /**
+                   * @description If true, indicates that this is an Orchestrator case which creates and runs the other cases in this experiment.
+                   * @example false
+                   */
+                  orchestrator?: boolean;
+                };
+                run_info?: {
+                  /**
+                   * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'.
+                   * @example successful
+                   */
+                  status?: string;
+                  /**
+                   * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null.
+                   * @example simulation
+                   */
+                  failed_at?: string;
+                  /**
+                   * @description The unix time the case started running.
+                   * @example 1549552749
+                   */
+                  datetime_started?: number;
+                  /**
+                   * @description The unix time the case finished running.
+                   * @example 1549552338
+                   */
+                  datetime_finished?: number;
+                };
+                input?: {
+                  /**
+                   * @description Reference ID to the compiled model used running the case.
+                   * @example workspace_pid_controller_20090615_134530_as86g32
+                   */
+                  fmu_id?: string;
+                  /** @description The analysis object. */
+                  analysis?: {
                     /**
-                     * @description Case label. 
-                     * @example Cruise operating point
+                     * @description the name of the custom function.
+                     * @example dynamic
                      */
-                    label?: OneOf<[string, null]>;
+                    analysis_function: string;
+                    /**
+                     * @description parameters to the custom function.
+                     * @example {
+                     *   "start_time": 0,
+                     *   "final_time": 1
+                     * }
+                     */
+                    parameters?: Record<string, never>;
+                    /** @description Key-value pairs of simulation options. */
+                    simulation_options?: Record<string, never>;
+                    /** @description Key-value pairs of solver options. */
+                    solver_options?: Record<string, never>;
                   };
-                  run_info?: {
-                    /**
-                     * @description Status of the case run, can be 'successful', 'failed', 'not_started' or 'cancelled'. 
-                     * @example successful
-                     */
-                    status?: string;
-                    /**
-                     * @description At which stage the case failed if 'status' is 'failed', can be 'simulation' or 'compilation'. If 'status' is not 'failed' it will be null. 
-                     * @example simulation
-                     */
-                    failed_at?: string;
-                    /**
-                     * @description The unix time the case started running. 
-                     * @example 1549552749
-                     */
-                    datetime_started?: number;
-                    /**
-                     * @description The unix time the case finshed running. 
-                     * @example 1549552338
-                     */
-                    datetime_finished?: number;
-                  };
-                  input?: {
-                    /**
-                     * @description Reference ID to the compiled model used running the case. 
-                     * @example workspace_pid_controller_20090615_134530_as86g32
-                     */
-                    fmu_id?: string;
-                    /** @description The analysis object. */
-                    analysis?: {
-                      /**
-                       * @description the name of the custom function. 
-                       * @example dynamic
-                       */
-                      analysis_function: string;
-                      /**
-                       * @description parameters to the custom function. 
-                       * @example {
-                       *   "start_time": 0,
-                       *   "final_time": 1
-                       * }
-                       */
-                      parameters?: Record<string, never>;
-                      /** @description Key-value pairs of simulation options. */
-                      simulation_options?: Record<string, never>;
-                      /** @description Key-value pairs of solver options. */
-                      solver_options?: Record<string, never>;
-                    };
-                    /** @description Parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. */
-                    parametrization?: Record<string, never>;
-                    /** @description Structural parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. These are values that cannot be applied to the FMU/Model after compilation. */
-                    structural_parametrization?: Record<string, never>;
-                    /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU. */
-                    fmu_base_parametrization?: Record<string, never>;
-                  };
-                })[];
+                  /** @description Parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. */
+                  parametrization?: Record<string, never>;
+                  /** @description Structural parameterization of the case, a list of key value pairs where key is variable name and value is the value to use for that variable. These are values that cannot be applied to the FMU/Model after compilation. */
+                  structural_parametrization?: Record<string, never>;
+                  /** @description This is some base parametrization that must be applied to the FMU for it to be valid running this case. It often comes as a result from of caching to reuse the FMU. */
+                  fmu_base_parametrization?: Record<string, never>;
+                };
+              })[];
             };
           };
         };
@@ -6019,8 +6768,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get case information */
   getCaseInfo: {
-    /** Get case information */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
     responses: {
       /** @description Case information. */
       200: {
@@ -6037,11 +6805,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Update case information
+   * @description This end-point can be used to update a case input. This can be used to modify the case and then execute the case again as part of an experiment and get different results for the case. Only fields under 'input' and 'meta' can be updated. Also, the fields 'fmu_id', 'analysis_function', 'structural_parametrization' and 'fmu_base_parametrization' cannot be updated. After a case is updated the 'consistent' field will be set to 'false' to signify that case results might not match the case input. Executing the case as part of an experiment will set 'consistent' to 'true'. The recomended way to update the case is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data.
+   */
   putCaseInfo: {
-    /**
-     * Update case information 
-     * @description This end-point can be used to update a case input. This can be used to modify the case and then execute the case again as part of an experiment and get different results for the case. Only fields under 'input' and 'meta' can be updated. Also, the fields 'fmu_id', 'analysis_function', 'structural_parametrization' and 'fmu_base_parametrization' cannot be updated. After a case is updated the 'consistent' field will be set to 'false' to signify that case results might not match the case input. Executing the case as part of an experiment will set 'consistent' to 'true'. The recomended way to update the case is to first use the corresponding GET end-point, modify some data, then call PUT (this end-point) with that data.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
     /** @description Case information. */
     requestBody: {
       content: {
@@ -6050,7 +6837,9 @@ export interface operations {
     };
     responses: {
       /** @description The case is updated. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -6060,8 +6849,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get the log for a finished case */
   getCaseLog: {
-    /** Get the log for a finished case */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the simulation.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
     responses: {
       /** @description The case log. */
       200: {
@@ -6078,8 +6886,27 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Download the result file for a finished case */
   getCaseResults: {
-    /** Download the result file for a finished case */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
     responses: {
       /** @description A file containing the experiment result for this case. */
       200: {
@@ -6097,18 +6924,72 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
-  getCaseTrajectories: {
-    /**
-     * Get the trajectories for specified variables from the experiment result for a finished case 
-     * @description This end-point can be used to fetch trajectories from cases that have finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 from the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
-     */
-    parameters?: {
+  /** Get all variables in the case result */
+  getCaseVariables: {
+    parameters: {
+      path: {
         /**
-         * @description If true, converts the values 'Infinity', '-Infinity' and 'NaN' to strings before returning the response. 
-         * @example asStrings=true
+         * @description ID of the workspace.
+         * @example workspace
          */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
+    responses: {
+      /** @description An array of variable names. */
+      200: {
+        content: {
+          "application/json": string[];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Get the trajectories for specified variables from the experiment result for a finished case
+   * @description This end-point can be used to fetch trajectories from cases that have finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 from the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
+   */
+  getCaseTrajectories: {
+    parameters: {
       query?: {
-        asStrings?: string;
+        /**
+         * @description If true, converts the values 'Infinity', '-Infinity' and 'NaN' to strings before returning the response.
+         * @example true
+         */
+        asStrings?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
       };
     };
     /** @description A list of variable names for which the trajectories should be returned. */
@@ -6124,22 +7005,22 @@ export interface operations {
           "application/vnd.impact.trajectories.v2+json": {
             data?: {
               items?: ({
-                  /**
-                   * @description If true, the trajectory does not vary with 'time' and only a single value is returned. 
-                   * @example false
-                   */
-                  fixed?: boolean;
-                  /**
-                   * @description The result trajectory for a variable, is an array of values. 
-                   * @example [
-                   *   1,
-                   *   2,
-                   *   3,
-                   *   4
-                   * ]
-                   */
-                  trajectory?: (number | string)[];
-                })[];
+                /**
+                 * @description If true, the trajectory does not vary with 'time' and only a single value is returned.
+                 * @example false
+                 */
+                fixed?: boolean;
+                /**
+                 * @description The result trajectory for a variable, is an array of values.
+                 * @example [
+                 *   1,
+                 *   2,
+                 *   3,
+                 *   4
+                 * ]
+                 */
+                trajectory?: (number | string)[];
+              })[];
             };
           };
           "application/vnd.impact.trajectories.v1+json": ((number | string)[])[];
@@ -6154,329 +7035,119 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
-  getCustomArtifactMeta: {
-    /** Get the artifact metadata for a case. */
-    responses: {
-      /** @description The case information as JSON. */
-      200: {
-        content: {
-          "application/json": {
-            data?: {
-              items?: ({
-                  /**
-                   * @description Artifact ID. 
-                   * @example ABCD
-                   */
-                  id?: string;
-                  /**
-                   * @description File name for the downloaded artifact. 
-                   * @example result.mat
-                   */
-                  downloadAs?: string;
-                })[];
-            };
-          };
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  getCustomArtifact: {
-    /** Get an artifact for a case as stored by the custom function used for running the case */
-    responses: {
-      /** @description An artifact for this case. */
-      200: {
-        content: {
-          "application/octet-stream": string;
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  getVariables: {
-    /** Get all variables in the experiment result */
-    responses: {
-      /** @description An array of variable names. */
-      200: {
-        content: {
-          "application/json": (string)[];
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  getTrajectories: {
-    /**
-     * Get the trajectories for specified variables from the experiment result 
-     * @description This end-point can be used to fetch trajectories from experiments that has finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 under 'case_1' in the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
-     */
-    parameters?: {
+  /**
+   * Start import of a result
+   * @description Will initiate import of a result. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result-imports/{importId} to check status.
+   */
+  importResult: {
+    parameters: {
+      path: {
         /**
-         * @description If true, converts the values 'Infinity', '-Infinity' and 'NaN' to strings before returning the response. 
-         * @example asStrings=true
+         * @description ID of the workspace.
+         * @example workspace
          */
-      query?: {
-        asStrings?: string;
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
       };
     };
-    /** @description A list of variable names for which the trajectories should be returned. */
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TrajectoriesProtocol"];
-      };
-    };
-    responses: {
-      /** @description Experiment results for all cases of experiment and for each variable in request body. */
-      200: {
-        content: {
-          "application/vnd.impact.trajectories.v2+json": {
-            data?: {
-              items?: ({
-                  /**
-                   * @description The case ID for which corresponding data in 'items' belong to. 
-                   * @example case_1
-                   */
-                  caseId?: string;
-                  /** @description Trajectories for all variables given in request body for one case. */
-                  items?: ({
-                      /**
-                       * @description If true, the trajectory does not vary with 'time' and only a single value is returned. 
-                       * @example false
-                       */
-                      fixed?: boolean;
-                      /**
-                       * @description The result trajectory for a variable, is an array of values. 
-                       * @example [
-                       *   1,
-                       *   2,
-                       *   3,
-                       *   4
-                       * ]
-                       */
-                      trajectory?: (number | string)[];
-                    })[];
-                })[];
-            };
-          };
-          "application/vnd.impact.trajectories.v1+json": (((number | string)[])[])[];
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  prepareExportWorkspaceAsync: {
-    /**
-     * Prepares a workspace for download as a zip file 
-     * @description The compressed workspace will be prepared. After a successful completion of a call to this endpoint, call GET /workspace-exports/{exportId} to check status.
-     */
-    /** @description Specification of what workspace resources to include when exporting the workspace. */
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WorkspaceExportCreationProtocol"];
-      };
-    };
-    responses: {
-      /** @description The location for checking status and possible data for compressed workspace. */
-      201: {
-        content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description location for checking status of workspace compression. 
-               * @example api/workspace-exports/79sd8-3n2a4-e3t24
-               */
-              location?: string;
-            };
-          };
-        };
-      };
-      400: components["responses"]["BadRequest"];
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  exportWorkspaceAsync: {
-    /**
-     * Returns status for preparing a workspace for download. Also returns data for download when ready 
-     * @description The workspace needs to be setup for export by calling POST /workspace-exports, before calling this API endpoint.
-     */
-    responses: {
-      /** @description Status for a workspace export and data to download it if ready. */
-      200: {
-        content: {
-          "application/json": {
-            data?: {
-              /**
-               * @description ID for workspace export. 
-               * @example 79sd8-3n2a4-e3t24
-               */
-              id?: string;
-              /** @description Will be 'running' if export is on-going, 'ready' if export is finished and can be downloaded, or 'error' if an error occured. */
-              status?: string;
-              /** @description Data for the workspace to download, only exists in response if workspace is ready to be downloaded. Use the field 'status' to see if this is the case. */
-              data?: {
-                /**
-                 * @description URI for downloading the workspace. 
-                 * @example api/exports/79sd8-3n2a4-e3t24
-                 */
-                downloadUri?: string;
-                /**
-                 * @description The size of the compressed workspace, in bytes. 
-                 * @example 10481015
-                 */
-                size?: number;
-              };
-              /** @description Error message if the export fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
-              error?: {
-                /**
-                 * @description Error message describing what went wrong. 
-                 * @example Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded
-                 */
-                message?: string;
-                /**
-                 * @description Error code for identifying specific errors. 
-                 * @example 12072
-                 */
-                code?: number;
-              };
-            };
-          };
-        };
-      };
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  deleteExportedWorkspaceAsync: {
-    /**
-     * Deletes a workspace export, including the compressed zip 
-     * @description This API end point can be be called after a compressed workspace has been downloaded.
-     */
-    responses: {
-      /** @description OK: The workspace export with the specified ID was deleted. */
-      200: never;
-      401: components["responses"]["Unauthenticated"];
-      402: components["responses"]["OutOfSeats"];
-      403: components["responses"]["LicenseError"];
-      404: components["responses"]["ResourceCouldNotBeFound"];
-      409: components["responses"]["Conflict"];
-      500: components["responses"]["UnexpectedError"];
-    };
-  };
-  importWorkspace: {
-    /**
-     * Start import of an existing workspace 
-     * @description Will initiate import of an existing workspace. After a successful completion of a call to this endpoint, call GET /workspace-imports/{importId} to check status.
-     */
-    /** @description Either a zip file of a workspace given with multipart/form-data or JSON schema for workspace definition (and optional selected matchings) to import a workspace. */
+    /** @description A result file given with multipart/form-data is used to import result. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The zip-file. 
-           * @example my_workspace.zip
+           * Format: binary
+           * @description The result file in question.
+           * @example result_1.mat
            */
-          file?: string;
-        };
-        "application/json": {
-          definition: components["schemas"]["WorkspaceDefinitionProtocol"];
-          selectedMatchings?: components["schemas"]["SelectedMatchingsProtocol"];
+          file: string;
+          /** @description Upload options. */
+          options?: {
+            /**
+             * @description Overwrite, if a result already exists. By default, the existing result, if present is not overwritten.
+             * @default false
+             */
+            overwrite: boolean;
+          };
         };
       };
     };
     responses: {
-      /** @description Workspace import created and location to check status of import is returned. */
+      /** @description OK. The result has been uploaded. */
       201: {
         content: {
           "application/json": {
             data?: {
               /**
-               * @description The ID of the workspace import. 
-               * @example api/workspace-imports/fd90-4gkl-vf89
+               * @description The location of the result import.
+               * @example /api/workspaces/test/experiments/modelica_blocks_examples_pid_controller_20240606_114729_58550f9/cases/case_1/result
                */
               location?: string;
             };
           };
         };
       };
+      400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
       500: components["responses"]["UnexpectedError"];
     };
   };
-  importWorkspaceStatus: {
-    /**
-     * Returns status for a workspace import. Also returns data for the imported resource when ready 
-     * @description The workspace needs to be setup for import by calling POST /workspace-imports, before calling this API endpoint.
-     */
+  /**
+   * Returns status for a result import. Also returns data for the imported resource when ready
+   * @description The result needs to be setup for import by calling POST /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/result-imports, before calling this API endpoint.
+   */
+  importResultStatus: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the result import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
-      /** @description Status for a workspace import and data to resource if import is done and workspace is ready to be used. */
+      /** @description Status for a result import and data to resource if import is done and result is ready to be used. */
       200: {
         content: {
           "application/json": {
             data?: {
               /**
-               * @description ID for workspace import. 
+               * @description ID for result import.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
               /** @description Will be 'running' if import is on-going, 'ready' if import is finished and can be used, or 'error' if an error occured. */
               status?: string;
-              /** @description Data for the workspace imported, only exists in response if workspace is imported and ready to use. Use the field 'status' to see if this is the case. */
+              /** @description Data for the result imported, only exists in response if result is imported and ready to use. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for the imported workspace resource. 
-                 * @example api/workspaces/my_workspace
+                 * @description URI for the imported result resource.
+                 * @example api/workspaces/test/experiments/modelica_blocks_examples_pid_controller_20240606_114729_58550f9/cases/case_1/result
                  */
                 resourceUri?: string;
-                /**
-                 * @description The ID for the workspace imported. 
-                 * @example my_workspace
-                 */
-                workspaceId?: string;
               };
               /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
-                 * @example Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact
+                 * @description Error message describing what went wrong.
+                 * @example Could not import result 'result_import_id'.
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12015
                  */
                 code?: number;
@@ -6493,14 +7164,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
-  deleteWorkspaceImport: {
-    /**
-     * Deletes a workspace import 
-     * @description This API end point can be be called after a workspace has been imported.
-     */
+  /**
+   * Deletes a result import
+   * @description This API end point can be be called after a result has been imported.
+   */
+  deleteResultImport: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the result import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
     responses: {
-      /** @description OK: The workspace import with the specified ID was deleted. */
-      200: never;
+      /** @description OK: The result import with the specified ID was deleted. */
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -6509,11 +7191,642 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Get the artifact metadata for a case. */
+  getCustomArtifactMeta: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
+    responses: {
+      /** @description The case information as JSON. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              items?: {
+                /**
+                 * @description Artifact ID.
+                 * @example ABCD
+                 */
+                id?: string;
+                /**
+                 * @description File name for the downloaded artifact.
+                 * @example result.mat
+                 */
+                downloadAs?: string;
+              }[];
+            };
+          };
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Get an artifact for a case as stored by the custom function used for running the case */
+  getCustomArtifact: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+        /**
+         * @description The ID of the artifact.
+         * @example report
+         */
+        artifactId: string;
+      };
+    };
+    responses: {
+      /** @description An artifact for this case. */
+      200: {
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Start import of a custom artifact
+   * @description Will initiate import of a custom artifact. After a successful completion of a call to this endpoint, call GET /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts-imports/{importId} to check status.
+   */
+  importCustomArtifact: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+        /**
+         * @description The ID of the case.
+         * @example case_1
+         */
+        caseId: string;
+      };
+    };
+    /** @description An artifact file given with multipart/form-data is used to import custom artifact. */
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /**
+           * Format: binary
+           * @description The custom artifact file in question.
+           * @example result_1.mat
+           */
+          file: string;
+          /** @description Upload options. */
+          options?: {
+            /**
+             * @description ID of the artifact.
+             * @example ABCD
+             */
+            artifactId?: string;
+            /**
+             * @description Overwrite, if any already existing artifact exists with the same ID. By default, the existing artifact is not overwritten.
+             * @default false
+             */
+            overwrite: boolean;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description OK. The custom artifact has been uploaded. */
+      201: {
+        content: {
+          "application/json": {
+            data?: {
+              /**
+               * @description The location of the custom artifact import.
+               * @example /api/workspaces/test/experiments/modelica_blocks_examples_pid_controller_20240606_114729_58550f9/cases/case_1/custom-artifacts-imports/412217485a2c40408a3876421da5f85b
+               */
+              location?: string;
+            };
+          };
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Returns status for a custom artifact import. Also returns data for the imported resource when ready
+   * @description The custom artifact needs to be setup for import by calling POST /workspaces/{workspace}/experiments/{experimentId}/cases/{caseId}/custom-artifacts-imports, before calling this API endpoint.
+   */
+  importCustomArtifactStatus: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the custom artifact import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
+    responses: {
+      /** @description Status for a custom artifact import and data to resource if import is done and custom artifact is ready to be used. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              /**
+               * @description ID for custom artifact import.
+               * @example 79sd8-3n2a4-e3t24
+               */
+              id?: string;
+              /** @description Will be 'running' if import is on-going, 'ready' if import is finished and can be used, or 'error' if an error occured. */
+              status?: string;
+              /** @description Data for the custom artifact imported, only exists in response if custom artifact is imported and ready to use. Use the field 'status' to see if this is the case. */
+              data?: {
+                /**
+                 * @description URI for the imported custom artifact resource.
+                 * @example api/workspaces/test/experiments/modelica_blocks_examples_pid_controller_20240606_114729_58550f9/cases/case_1/custom-artifacts/ABCD
+                 */
+                resourceUri?: string;
+                /**
+                 * @description The ID for the custom artifact imported.
+                 * @example ABCD
+                 */
+                artifactId?: string;
+              };
+              /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
+              error?: {
+                /**
+                 * @description Error message describing what went wrong.
+                 * @example Could not import custom artifact 'custom_artifact'.
+                 */
+                message?: string;
+                /**
+                 * @description Error code for identifying specific errors.
+                 * @example 12015
+                 */
+                code?: number;
+              };
+            };
+          };
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Deletes a custom artifact import
+   * @description This API end point can be be called after a custom artifact has been imported.
+   */
+  deleteCustomArtifactImport: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the custom artifact import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
+    responses: {
+      /** @description OK: The custom artifact import with the specified ID was deleted. */
+      200: {
+        content: never;
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Get all variables in the experiment result */
+  getVariables: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description An array of variable names. */
+      200: {
+        content: {
+          "application/json": string[];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Get the trajectories for specified variables from the experiment result
+   * @description This end-point can be used to fetch trajectories from experiments that has finished executing. The trajectories are then typically used to visualize the result by plotting variables as a function of time or as X-Y plots. Which variables exists in a result can be obtained from the end-point GET /workspaces/{workspace}/experiments/{experimentId}/variables. Most experiments contain the independent variable 'time', with the custom function 'dynamic' being a notable example of this. So, to plot 'x' against 'time' for an experiment with a single case and the custom function 'dynamic', call this end-point with the input {'variable_names': ['x', 'time']} and plot 'item' 1 against 'item' 2 under 'case_1' in the response. See the response description for more details on the structure of the response. The old (version 1) trajectory format can still be used but will be removed in a future version.
+   */
+  getTrajectories: {
+    parameters: {
+      query?: {
+        /**
+         * @description If true, converts the values 'Infinity', '-Infinity' and 'NaN' to strings before returning the response.
+         * @example true
+         */
+        asStrings?: "true" | "false";
+      };
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+        /**
+         * @description The ID of the experiment.
+         * @example workspace_pid_controller_20090615_134530_as86g32
+         */
+        experimentId: string;
+      };
+    };
+    /** @description A list of variable names for which the trajectories should be returned. */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TrajectoriesProtocol"];
+      };
+    };
+    responses: {
+      /** @description Experiment results for all cases of experiment and for each variable in request body. */
+      200: {
+        content: {
+          "application/vnd.impact.trajectories.v2+json": {
+            data?: {
+              items?: ({
+                /**
+                 * @description The case ID for which corresponding data in 'items' belong to.
+                 * @example case_1
+                 */
+                caseId?: string;
+                /** @description Trajectories for all variables given in request body for one case. */
+                items?: ({
+                  /**
+                   * @description If true, the trajectory does not vary with 'time' and only a single value is returned.
+                   * @example false
+                   */
+                  fixed?: boolean;
+                  /**
+                   * @description The result trajectory for a variable, is an array of values.
+                   * @example [
+                   *   1,
+                   *   2,
+                   *   3,
+                   *   4
+                   * ]
+                   */
+                  trajectory?: (number | string)[];
+                })[];
+              })[];
+            };
+          };
+          "application/vnd.impact.trajectories.v1+json": (((number | string)[])[])[];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Prepares a workspace for download as a zip file
+   * @description The compressed workspace will be prepared. After a successful completion of a call to this endpoint, call GET /workspace-exports/{exportId} to check status.
+   */
+  prepareExportWorkspaceAsync: {
+    /** @description Specification of what workspace resources to include when exporting the workspace. */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkspaceExportCreationProtocol"];
+      };
+    };
+    responses: {
+      /** @description The location for checking status and possible data for compressed workspace. */
+      201: {
+        content: {
+          "application/json": {
+            data?: {
+              /**
+               * @description location for checking status of workspace compression.
+               * @example api/workspace-exports/79sd8-3n2a4-e3t24
+               */
+              location?: string;
+            };
+          };
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Returns status for preparing a workspace for download. Also returns data for download when ready
+   * @description The workspace needs to be setup for export by calling POST /workspace-exports, before calling this API endpoint.
+   */
+  exportWorkspaceAsync: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the compressed workspace to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        exportId: string;
+      };
+    };
+    responses: {
+      /** @description Status for a workspace export and data to download it if ready. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              /**
+               * @description ID for workspace export.
+               * @example 79sd8-3n2a4-e3t24
+               */
+              id?: string;
+              /** @description Will be 'running' if export is on-going, 'ready' if export is finished and can be downloaded, or 'error' if an error occured. */
+              status?: string;
+              /** @description Data for the workspace to download, only exists in response if workspace is ready to be downloaded. Use the field 'status' to see if this is the case. */
+              data?: {
+                /**
+                 * @description URI for downloading the workspace.
+                 * @example api/exports/79sd8-3n2a4-e3t24
+                 */
+                downloadUri?: string;
+                /**
+                 * @description The size of the compressed workspace, in bytes.
+                 * @example 10481015
+                 */
+                size?: number;
+              };
+              /** @description Error message if the export fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
+              error?: {
+                /**
+                 * @description Error message describing what went wrong.
+                 * @example Could not export workspace 'my_workspace'. Maximum allowed zip file size of 95MB exceeded
+                 */
+                message?: string;
+                /**
+                 * @description Error code for identifying specific errors.
+                 * @example 12072
+                 */
+                code?: number;
+              };
+            };
+          };
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Deletes a workspace export, including the compressed zip
+   * @description This API end point can be be called after a compressed workspace has been downloaded.
+   */
+  deleteExportedWorkspaceAsync: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the compressed workspace to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        exportId: string;
+      };
+    };
+    responses: {
+      /** @description OK: The workspace export with the specified ID was deleted. */
+      200: {
+        content: never;
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Start import of an existing workspace
+   * @description Will initiate import of an existing workspace. After a successful completion of a call to this endpoint, call GET /workspace-imports/{importId} to check status.
+   */
+  importWorkspace: {
+    /** @description Either a zip file of a workspace given with multipart/form-data or JSON schema for workspace definition (and optional selected matchings) or ID of the published workspace with Content-Type - 'application/vnd.impact.published-workspace.v1+json' to import a workspace. */
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /**
+           * Format: binary
+           * @description The zip-file.
+           * @example my_workspace.zip
+           */
+          file?: string;
+        };
+        "application/json": {
+          definition: components["schemas"]["WorkspaceDefinitionProtocol"];
+          selectedMatchings?: components["schemas"]["SelectedMatchingsProtocol"];
+        };
+        "application/vnd.impact.published-workspace.v1+json": components["schemas"]["PublishedWorkspaceImportProtocol"];
+      };
+    };
+    responses: {
+      /** @description Workspace import created and location to check status of import is returned. */
+      201: {
+        content: {
+          "application/json": {
+            data?: {
+              /**
+               * @description The ID of the workspace import.
+               * @example api/workspace-imports/fd90-4gkl-vf89
+               */
+              location?: string;
+            };
+          };
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Returns status for a workspace import. Also returns data for the imported resource when ready
+   * @description The workspace needs to be setup for import by calling POST /workspace-imports, before calling this API endpoint.
+   */
+  importWorkspaceStatus: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
+    responses: {
+      /** @description Status for a workspace import and data to resource if import is done and workspace is ready to be used. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              /**
+               * @description ID for workspace import.
+               * @example 79sd8-3n2a4-e3t24
+               */
+              id?: string;
+              /** @description Will be 'running' if import is on-going, 'ready' if import is finished and can be used, or 'error' if an error occured. */
+              status?: string;
+              /** @description Data for the workspace imported, only exists in response if workspace is imported and ready to use. Use the field 'status' to see if this is the case. */
+              data?: {
+                /**
+                 * @description URI for the imported workspace resource.
+                 * @example api/workspaces/my_workspace
+                 */
+                resourceUri?: string;
+                /**
+                 * @description The ID for the workspace imported.
+                 * @example my_workspace
+                 */
+                workspaceId?: string;
+              };
+              /** @description Error message if the import fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
+              error?: {
+                /**
+                 * @description Error message describing what went wrong.
+                 * @example Could not import workspace 'my_workspace'. Could not read version number of the workspace 'my_workspace'. Either the workspace is corrupt or needs to be updated using an older version of Modelon Impact
+                 */
+                message?: string;
+                /**
+                 * @description Error code for identifying specific errors.
+                 * @example 12015
+                 */
+                code?: number;
+              };
+            };
+          };
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Deletes a workspace import
+   * @description This API end point can be be called after a workspace has been imported.
+   */
+  deleteWorkspaceImport: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace import to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        importId: string;
+      };
+    };
+    responses: {
+      /** @description OK: The workspace import with the specified ID was deleted. */
+      200: {
+        content: never;
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Get all projects matchings for workspace import
+   * @description Get all projects matchings that would happen during a workspace import. As import will fail if there are multiple possible matchings of local projects for a project, this end-point is used to get these matchings which can be resolved to an unequivocal 'selection'. Selections are used as (optional) input to the end-point /workspace-imports, see it for more details on the format of a selection.
+   */
   importWorkspaceMatchings: {
-    /**
-     * Get all projects matchings for workspace import 
-     * @description Get all projects matchings that would happen during a workspace import. As import will fail if there are multiple possible matchings of local projects for a project, this end-point is used to get these matchings which can be resolved to an unequivocal 'selection'. Selections are used as (optional) input to the end-point /workspace-imports, see it for more details on the format of a selection.
-     */
     /** @description The shared workspace definition to check for matchings that would happen during import. */
     requestBody: {
       content: {
@@ -6528,7 +7841,7 @@ export interface operations {
         content: {
           "application/json": {
             data?: {
-              vcs?: (components["schemas"]["VcsMatchingProtocol"])[];
+              vcs?: components["schemas"]["VcsMatchingProtocol"][];
             };
           };
         };
@@ -6539,11 +7852,168 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get all published workspaces
+   * @description Returns a list of all published workspaces that exists. The query parameter can be used to filter the workspaces returned.
+   */
+  getPublishedWorkspaces: {
+    parameters: {
+      query?: {
+        /**
+         * @description Filters published workspaces by name.
+         * @example My workpsace
+         */
+        workspaceName?: string;
+        /**
+         * @description If True, only workspaces that have successfully been publised are returned skipping the ones still being published else all workspaces are returned. Default is True.
+         * @example true
+         */
+        hasData?: "true" | "false";
+        /**
+         * @description Index of first matching published workspace to return. Default is 0.
+         * @example 0
+         */
+        first?: string;
+        /**
+         * @description Maximum number of published workspaces to return. Default is 20.
+         * @example 20
+         */
+        max?: string;
+        /**
+         * @description If specified, only the workspaces published by the logged in user are returned else returns all published workspaces user owns as well as has access to.
+         * @example bruno
+         */
+        ownerUsername?: string;
+        /**
+         * @description Used to filter so only published workspace of a specified type are returned. If not given all published workspace types are returned.
+         * @example ARCHIVE
+         */
+        type?: "APP_MODE" | "ARCHIVE";
+        /**
+         * @description Only return workspaces shared with the group "groupName". If not specified, published workspaces shared with the logged in user tenant group are returned. Only users with impact-sys-admin role are allowed to filter by a "groupName" other than their own tenant group name.
+         * @example impact-tenant-org1
+         */
+        groupName?: string;
+      };
+    };
+    responses: {
+      /** @description OK: The published workspaces were returned. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublishedWorkspaceDataProtocol"];
+        };
+      };
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Returns an object containing the metadata of the specified published workspace ID */
+  getPublishedWorkspaceId: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the published workspace.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        sharingId: string;
+      };
+    };
+    responses: {
+      /** @description Published workspace ID and its meta-data. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublishedWorkspaceProtocol"];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Deletes a published workspace with the specified ID */
+  deletePublishedWorkspace: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the published workspace.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        sharingId: string;
+      };
+    };
+    responses: {
+      /** @description OK: The published workspace was deleted. */
+      200: {
+        content: never;
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * This end-point can be used to update a published workspace. This can be used to modify the published workspace name.
+   * @description Updates the name of the published workspace.
+   */
+  updatePublishedWorkspace: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the published workspace.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        sharingId: string;
+      };
+    };
+    /** @description Published workspace name. */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublishedWorkspaceUpdateProtocol"];
+      };
+    };
+    responses: {
+      /** @description OK: The published workspace was updated. */
+      200: {
+        content: never;
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Gets storage quota for the current user. */
+  getPublishedWorkspaceQuota: {
+    responses: {
+      /** @description Storage quota data for the current user. */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublishedWorkspaceQuotaProtocol"];
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /**
+   * Starts a workspace conversion
+   * @description Will start a conversion of a workspace. A backup can optionally be made as part this conversion. As conversions are non-reversible it is recommended to create and keep a backup over a transition period. After a successful completion of a call to this endpoint, call GET /workspace-conversions/{conversionId} to check status.
+   */
   prepareWorkspaceConversionAsync: {
-    /**
-     * Starts a workspace conversion 
-     * @description Will start a conversion of a workspace. A backup can optionally be made as part this conversion. As conversions are non-reversible it is recommended to create and keep a backup over a transition period. After a successful completion of a call to this endpoint, call GET /workspace-conversions/{conversionId} to check status.
-     */
     /** @description Specification of what workspace to convert and optional backup. */
     requestBody: {
       content: {
@@ -6559,7 +8029,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description location for checking status of workspace conversion. 
+               * @description location for checking status of workspace conversion.
                * @example api/workspace-conversions/79sd8-3n2a4-e3t24
                */
               location?: string;
@@ -6575,11 +8045,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Returns status for workspace conversion
+   * @description The workspace needs to be setup for conversion by calling POST /workspace-conversions, before calling this API endpoint.
+   */
   workspaceConversionStatusAsync: {
-    /**
-     * Returns status for workspace conversion 
-     * @description The workspace needs to be setup for conversion by calling POST /workspace-conversions, before calling this API endpoint.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace conversion to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        conversionId: string;
+      };
+    };
     responses: {
       /** @description Status for a workspace conversion. */
       200: {
@@ -6587,7 +8066,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description ID for workspace conversion. 
+               * @description ID for workspace conversion.
                * @example 79sd8-3n2a4-e3t24
                */
               id?: string;
@@ -6596,12 +8075,12 @@ export interface operations {
               /** @description Data for the workspace converted, only exists in response if workspace is ready. Use the field 'status' to see if this is the case. */
               data?: {
                 /**
-                 * @description URI for downloading the workspace. 
+                 * @description URI for downloading the workspace.
                  * @example api/workscapes/my_workspace
                  */
                 downloadUri?: string;
                 /**
-                 * @description Id of workspace that has been converted. 
+                 * @description Id of workspace that has been converted.
                  * @example my_workspace
                  */
                 workspaceId?: string;
@@ -6609,12 +8088,12 @@ export interface operations {
               /** @description Error message if the conversion fails, only exists if an error has occurred. Use the field 'status' to see if this is the case. */
               error?: {
                 /**
-                 * @description Error message describing what went wrong. 
+                 * @description Error message describing what went wrong.
                  * @example Could not convert workspace 'my_workspace'. Workspace 'my_workspace' does not exist
                  */
                 message?: string;
                 /**
-                 * @description Error code for identifying specific errors. 
+                 * @description Error code for identifying specific errors.
                  * @example 12013
                  */
                 code?: number;
@@ -6631,14 +8110,25 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes a workspace conversion
+   * @description This API end point can be be called after a workspace conversion is finished. Will not delete any created backups or revert any changes from on-going conversion.
+   */
   deletedWorkspaceConversionAsync: {
-    /**
-     * Deletes a workspace conversion 
-     * @description This API end point can be be called after a workspace conversion is finished. Will not delete any created backups or revert any changes from on-going conversion.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace conversion to check status on.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        conversionId: string;
+      };
+    };
     responses: {
       /** @description OK: The workspace conversion with the specified ID was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
@@ -6647,11 +8137,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Downloads a file that has been setup to be exported
+   * @description This route is used for downloading exported files. Other end-points will reference here with a download URI.
+   */
   exportFile: {
-    /**
-     * Downloads a file that has been setup to be exported 
-     * @description This route is used for downloading exported files. Other end-points will reference here with a download URI.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the compressed workspace to download.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        exportId: string;
+      };
+    };
     responses: {
       /** @description A file to download. */
       200: {
@@ -6665,12 +8164,12 @@ export interface operations {
           "application/json": {
             error?: {
               /**
-               * @description Error message describing what went wrong. 
+               * @description Error message describing what went wrong.
                * @example Could not export workspace 'ceb6ac1ed71040eb8f3df7f69157e658', reason: 'Maximum allowed zip file size of 95MB exceeded'
                */
               message?: string;
               /**
-               * @description Error code for identifying specific errors. 
+               * @description Error code for identifying specific errors.
                * @example 12072
                */
               code?: number;
@@ -6686,34 +8185,34 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Imports an result file */
   uploadMAT: {
-    /** Imports an result file */
     /** @description The file with a .mat extension and options to import. */
     requestBody: {
       content: {
         "multipart/form-data": {
           /**
-           * Format: binary 
-           * @description The result file in question. 
+           * Format: binary
+           * @description The result file in question.
            * @example result_1.mat
            */
           file: string;
           /** @description Upload options. */
           options: {
             /**
-             * @description Meaningful label for results association. If not given the name of the file uploaded will be used. 
+             * @description Meaningful label for results association. If not given the name of the file uploaded will be used.
              * @example result_for_PID.mat
              */
             name?: string;
             /**
-             * @description Description of the result. If not given an empty string will be used 
+             * @description Description of the result. If not given an empty string will be used
              * @example This is a result file for PID controller
              */
             description?: string;
             /** @description Context describing the model and associated values. */
             context: {
               /**
-               * @description Workspace id. 
+               * @description Workspace id.
                * @example my_workspace
                */
               workspaceId: string;
@@ -6729,12 +8228,12 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The ID of the result import. 
+               * @description The ID of the result import.
                * @example 2f036b9fab6f45c788cc466da327cc78workspace
                */
               id?: string;
               /**
-               * @description The location of the project import. 
+               * @description The location of the project import.
                * @example api/uploads/results/fd90-4gkl-vf89
                */
               location?: string;
@@ -6751,11 +8250,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get the current status of upload
+   * @description Get the current status of upload for a given uploadId.
+   */
   getUploadStatus: {
-    /**
-     * Get the current status of upload 
-     * @description Get the current status of upload for a given uploadId.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description Id for result storage.
+         * @example 2f036b9fab6f45c788cc466da327cc78workspace
+         */
+        uploadId: string;
+      };
+    };
     responses: {
       /** @description OK. Check status of upload. */
       200: {
@@ -6771,11 +8279,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Get the result file meta-data
+   * @description Gets the meta-data for a result file.
+   */
   getUploadedResultEntity: {
-    /**
-     * Get the result file meta-data 
-     * @description Gets the meta-data for a result file.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description Id for result storage.
+         * @example 2f036b9fab6f45c788cc466da327cc78workspace
+         */
+        uploadId: string;
+      };
+    };
     responses: {
       /** @description External result meta-data. */
       200: {
@@ -6783,27 +8300,27 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description Id for result storage. 
+               * @description Id for result storage.
                * @example 2f036b9fab6f45c788cc466da327cc78workspace
                */
               id?: string;
               /**
-               * @description Timestamp of when the external result was imported. 
+               * @description Timestamp of when the external result was imported.
                * @example 2021-09-02T08:26:49.612000
                */
               createdAt?: string;
               /**
-               * @description Meaningful label for results association. 
+               * @description Meaningful label for results association.
                * @example result_for_PID
                */
               name?: string;
               /**
-               * @description Description of the result 
+               * @description Description of the result
                * @example This is a result file for PID controller
                */
               description?: string;
               /**
-               * @description Name of workspace. 
+               * @description Name of workspace.
                * @example workspace
                */
               workspaceId?: string;
@@ -6819,11 +8336,22 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /** Deletes the result with the specified ID */
   deleteUploadedResultEntity: {
-    /** Deletes the result with the specified ID */
+    parameters: {
+      path: {
+        /**
+         * @description Id for result storage.
+         * @example 2f036b9fab6f45c788cc466da327cc78workspace
+         */
+        uploadId: string;
+      };
+    };
     responses: {
       /** @description OK. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -6833,11 +8361,11 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets data on the currently logged in user
+   * @description Returns the ID of the current user, which is used to create API keys, and the external IDs connected to it.
+   */
   getCurrentUser: {
-    /**
-     * Gets data on the currently logged in user 
-     * @description Returns the ID of the current user, which is used to create API keys, and the external IDs connected to it.
-     */
     responses: {
       /** @description . */
       200: {
@@ -6853,29 +8381,38 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Gets information on the API keys belonging to a user
+   * @description Get information on the API keys belonging to the user by the given ID. The information includes the key ID and the creation time but not the secret key itself.
+   */
   getAPIkeys: {
-    /**
-     * Gets information on the API keys belonging to a user 
-     * @description Get information on the API keys belonging to the user by the given ID. The information includes the key ID and the creation time but not the secret key itself.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the user.
+         * @example 3ae546601b0d473db83bccee0ca27c7e
+         */
+        userId: string;
+      };
+    };
     responses: {
       /** @description Information about existing API keys. */
       200: {
         content: {
           "application/json": {
             data?: {
-              items?: ({
-                  /**
-                   * @description The ID of the key. 
-                   * @example zPY1U0KuBP
-                   */
-                  id?: string;
-                  /**
-                   * @description Timestamp of when the key was created. 
-                   * @example 1588016253
-                   */
-                  createdAt?: number;
-                })[];
+              items?: {
+                /**
+                 * @description The ID of the key.
+                 * @example zPY1U0KuBP
+                 */
+                id?: string;
+                /**
+                 * @description Timestamp of when the key was created.
+                 * @example 1588016253
+                 */
+                createdAt?: number;
+              }[];
             };
           };
         };
@@ -6888,11 +8425,20 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Creates a new API key
+   * @description Creates a new API key belonging to the user with the given ID. The response contains a new API key which is the only time this key can be retrieved. They key must be safely stored by the recepient, as there is no way to retrieve it at a later point. A user may only have one API key at a time, so if it is lost or compromised, it must be deleted before a new one can be created. The API key can be used with the /login endpoint to log in. Each key has an ID to identify it when deleting it.
+   */
   postAPIkey: {
-    /**
-     * Creates a new API key 
-     * @description Creates a new API key belonging to the user with the given ID. The response contains a new API key which is the only time this key can be retrieved. They key must be safely stored by the recepient, as there is no way to retrieve it at a later point. A user may only have one API key at a time, so if it is lost or compromised, it must be deleted before a new one can be created. The API key can be used with the /login endpoint to log in. Each key has an ID to identify it when deleting it.
-     */
+    parameters: {
+      path: {
+        /**
+         * @description ID of the user.
+         * @example 3ae546601b0d473db83bccee0ca27c7e
+         */
+        userId: string;
+      };
+    };
     responses: {
       /** @description OK: A new API key has been created. */
       200: {
@@ -6900,17 +8446,17 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The API key ID. 
+               * @description The API key ID.
                * @example zPY1U0KuBP
                */
               id?: string;
               /**
-               * @description The API key. 
+               * @description The API key.
                * @example secret-api-key
                */
               secret?: string;
               /**
-               * @description The timestamp of when the key was created. 
+               * @description The timestamp of when the key was created.
                * @example 1588016253
                */
               created_at?: number;
@@ -6926,28 +8472,30 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Deletes an API key
+   * @description Deletes an API key with the given ID, belonging to a specified user.
+   */
   deleteAPIKey: {
-    /**
-     * Deletes an API key 
-     * @description Deletes an API key with the given ID, belonging to a specified user.
-     */
     parameters: {
+      path: {
         /**
-         * @description ID of the user owning the key. 
+         * @description ID of the user owning the key.
          * @example 3ae546601b0d473db83bccee0ca27c7e
          */
+        userId: string;
         /**
-         * @description ID of the API key. 
+         * @description ID of the API key.
          * @example zPY1U0KuBP
          */
-      path: {
-        userId: string;
         keyId: string;
       };
     };
     responses: {
       /** @description OK: The API key was deleted. */
-      200: never;
+      200: {
+        content: never;
+      };
       400: components["responses"]["BadRequest"];
       401: components["responses"]["Unauthenticated"];
       402: components["responses"]["OutOfSeats"];
@@ -6956,17 +8504,17 @@ export interface operations {
       500: components["responses"]["UnexpectedError"];
     };
   };
+  /**
+   * Validates an API key
+   * @description Validates an API key.
+   */
   validateAPIKey: {
-    /**
-     * Validates an API key 
-     * @description Validates an API key.
-     */
     /** @description . */
     requestBody: {
       content: {
         "application/json": {
           /**
-           * @description An API key to validate. 
+           * @description An API key to validate.
            * @example secret-api-key
            */
           secret: string;
@@ -6980,7 +8528,7 @@ export interface operations {
           "application/json": {
             data?: {
               /**
-               * @description The user ID of the owner of the key. 
+               * @description The user ID of the owner of the key.
                * @example 2bb76154701c47c38d1950ea60d2c025
                */
               id?: string;
@@ -6994,12 +8542,12 @@ export interface operations {
           "application/json": {
             error?: {
               /**
-               * @description Error message describing what went wrong. 
+               * @description Error message describing what went wrong.
                * @example The provided API key is not valid
                */
               message?: string;
               /**
-               * @description Error code for identifying specific errors. 
+               * @description Error code for identifying specific errors.
                * @example 12035
                */
               code?: number;
@@ -7011,6 +8559,68 @@ export interface operations {
       402: components["responses"]["OutOfSeats"];
       403: components["responses"]["LicenseError"];
       404: components["responses"]["ResourceCouldNotBeFound"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Get the custom webapps for a workspace. */
+  getWorkspaceCustomWebApps: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the workspace.
+         * @example workspace
+         */
+        workspace: string;
+      };
+    };
+    responses: {
+      /** @description OK: The Custom web apps for the workspace were returned. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              items?: components["schemas"]["CustomWebAppProtocol"][];
+            };
+          };
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
+      500: components["responses"]["UnexpectedError"];
+    };
+  };
+  /** Get the custom webapps for a project. */
+  getProjectCustomWebApps: {
+    parameters: {
+      path: {
+        /**
+         * @description ID of the project.
+         * @example 79sd8-3n2a4-e3t24
+         */
+        project: string;
+      };
+    };
+    responses: {
+      /** @description OK: The Custom web apps for the project were returned. */
+      200: {
+        content: {
+          "application/json": {
+            data?: {
+              items?: components["schemas"]["CustomWebAppProtocol"][];
+            };
+          };
+        };
+      };
+      400: components["responses"]["BadRequest"];
+      401: components["responses"]["Unauthenticated"];
+      402: components["responses"]["OutOfSeats"];
+      403: components["responses"]["LicenseError"];
+      404: components["responses"]["ResourceCouldNotBeFound"];
+      409: components["responses"]["Conflict"];
       500: components["responses"]["UnexpectedError"];
     };
   };

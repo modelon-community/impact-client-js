@@ -1,15 +1,14 @@
 import Analysis from '../../src/analysis'
-import TestDefinition from './test-definition.json'
-import { ModelicaExperimentAnalysis } from '../../src/types'
 import { test, expect } from 'vitest'
+import { mockTestDefinition } from './mockTestDefinition'
 
 test('From complete ModelicaExperimentAnalysis and back should produce original complete ModelicaExperimentAnalysis', () => {
     const analysis = Analysis.fromModelicaExperimentAnalysis(
-        TestDefinition.base.analysis as ModelicaExperimentAnalysis
+        mockTestDefinition.base.analysis
     )
 
     expect(analysis.toModelicaExperimentAnalysis()).toEqual(
-        TestDefinition.base.analysis
+        mockTestDefinition.base.analysis
     )
 })
 
@@ -24,7 +23,10 @@ test('Analysis with only custom function name and solver options should get defa
         solverOptions: { key: 'value' },
         simulationLogLevel: 'WARNING',
         simulationOptions: { dynamic_diagnostics: false, ncp: 100 },
-        parameters: { start_time: 0, final_time: 1 },
+        parameters: [
+            { name: 'start_time', value: 0 },
+            { name: 'final_time', value: 1 },
+        ],
     })
 })
 
@@ -42,7 +44,10 @@ test('Analysis with custom function options should not override explicitly set v
     })
 
     expect(analysis.toModelicaExperimentAnalysis()).toEqual({
-        parameters: { start_time: 0, final_time: 1 },
+        parameters: [
+            { name: 'start_time', value: 0 },
+            { name: 'final_time', value: 1 },
+        ],
         simulationLogLevel: 'WARNING',
         simulationOptions: { dynamic_diagnostics: false, ncp: 250 },
         solverOptions: { key: 'explicitlySpecifiedValue' },
@@ -62,7 +67,10 @@ test('Analysis with custom function options should override default values', () 
     })
 
     expect(analysis.toModelicaExperimentAnalysis()).toEqual({
-        parameters: { start_time: 0, final_time: 1 },
+        parameters: [
+            { name: 'start_time', value: 0 },
+            { name: 'final_time', value: 1 },
+        ],
         simulationLogLevel: 'WARNING',
         simulationOptions: { dynamic_diagnostics: false, ncp: 500 },
         solverOptions: { key: 'customFunctionValue' },

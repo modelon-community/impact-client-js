@@ -17,10 +17,16 @@ class Analysis {
 
     static DefaultAnalysis = {
         type: 'dynamic',
-        parameters: {
-            start_time: 0,
-            final_time: 1,
-        },
+        parameters: [
+            {
+                name: 'start_time',
+                value: 0,
+            },
+            {
+                name: 'final_time',
+                value: 1,
+            },
+        ],
         simulationOptions: {
             ncp: 100,
             dynamic_diagnostics: false,
@@ -92,9 +98,7 @@ class Analysis {
         // Use default analysis structure as basis
         const analysisDefinition = {
             type: this.type,
-            parameters: {
-                ...Analysis.DefaultAnalysis.parameters,
-            },
+            parameters: [...Analysis.DefaultAnalysis.parameters],
             simulationOptions: {
                 ...Analysis.DefaultAnalysis.simulationOptions,
             },

@@ -64,7 +64,7 @@ class Workspace {
             cases: caseIds,
             experimentId: experiment.id,
             workspaceId: this.id,
-            options
+            options,
         })
 
         return new Experiment({
@@ -121,8 +121,8 @@ class Workspace {
             api: this.api,
             definition: experimentItem['experiment']
                 ? ExperimentDefinition.fromModelicaExperimentDefinition(
-                      experimentItem['experiment']
-                  )
+                    experimentItem['experiment']
+                )
                 : undefined,
             id: experimentId,
             metaData: experimentItem['meta_data'],
@@ -143,8 +143,8 @@ class Workspace {
                     api: this.api,
                     definition: experimentItem['experiment']
                         ? ExperimentDefinition.fromModelicaExperimentDefinition(
-                              experimentItem['experiment']
-                          )
+                            experimentItem['experiment']
+                        )
                         : undefined,
                     id: experimentItem.id ?? '',
                     metaData: experimentItem['meta_data'],
@@ -165,7 +165,9 @@ class Workspace {
         return modelExecutableInfos.map((info) => {
             return ModelExecutable.from({
                 api: this.api,
-                fmuId: info.id,
+                // Have to cast this since id is incorrectly marked as optional in
+                // impact-openapi
+                fmuId: info.id!,
                 workspaceId: this.id,
             })
         })

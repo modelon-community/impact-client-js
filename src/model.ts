@@ -43,7 +43,7 @@ class Model {
         return new Model({ model })
     }
 
-    toModelDefinition() {
+    toModelDefinition(): ModelDefinition {
         if ('fmu' in this.model) {
             return this.model
         }

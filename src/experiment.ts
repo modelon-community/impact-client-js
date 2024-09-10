@@ -5,6 +5,7 @@ import {
     ExperimentMetaData,
     ExperimentRunInfo,
     ExperimentTrajectories,
+    ExperimentVariables,
     WorkspaceId,
 } from './types'
 import Api from './api'
@@ -113,7 +114,7 @@ class Experiment {
             workspaceId: this.workspaceId,
         })
 
-    getVariables = async (): Promise<ExperimentTrajectories> =>
+    getVariables = async (): Promise<ExperimentVariables> =>
         this.api.getExperimentVariables({
             experimentId: this.id,
             workspaceId: this.workspaceId,

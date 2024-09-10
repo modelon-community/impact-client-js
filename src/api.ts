@@ -63,8 +63,8 @@ class Api {
     private jhUserPath: string | undefined
 
     private configureAxios() {
-        const headers: Record<string, string> = {};
-        
+        const headers: Record<string, string> = {}
+
         if (this.impactApiKey) {
             headers['impact-api-key'] = `${this.impactApiKey}`
         }
@@ -118,7 +118,7 @@ class Api {
         serverAddress?: string
     }) {
         if (isNode()) {
-            throw new Error("Impact session can only be used from browser.")
+            throw new Error('Impact session can only be used from browser.')
         }
         return new Api({
             jupyterHubUserPath,
@@ -128,15 +128,14 @@ class Api {
 
     private isConfiguredForNode = () => !!this.axiosConfig.jar
 
-    private apiKeySet = () =>
-        !!this.axiosConfig.headers['impact-api-key'] 
+    private apiKeySet = () => !!this.axiosConfig.headers['impact-api-key']
 
-    private hasImpactSession = () => !!getCookieValue("impact-session");
+    private hasImpactSession = () => !!getCookieValue('impact-session')
 
     private userPathFromUrl(url: string) {
         const regex = /\/user\/([^/]+)\//
         const match = url.match(regex)
-        return match ? match[0] : undefined;
+        return match ? match[0] : undefined
     }
 
     private getNodeCookieJar = () => this.axiosConfig.jar
@@ -155,7 +154,7 @@ class Api {
                 const headers: Record<string, string> = {
                     'impact-api-key': `${this.impactApiKey}`,
                 }
-                
+
                 this.axiosConfig = { headers, jar }
 
                 this.axios = axiosCookieWrapper(Axios.create(this.axiosConfig))
@@ -191,25 +190,24 @@ class Api {
                     // Server missing in token scope, probably executing inside JupyterHub.
                     // Fallback is to look for the JUPYTERHUB_SERVICE_PREFIX env variable
                     this.jhUserPath =
-                    typeof process !== 'undefined'
-                    ? process.env?.JUPYTERHUB_SERVICE_PREFIX
-                    : undefined
+                        typeof process !== 'undefined'
+                            ? process.env?.JUPYTERHUB_SERVICE_PREFIX
+                            : undefined
                 } else {
                     this.jhUserPath = server
                 }
-                
-                return 
+
+                return
             }
 
             // Use document URL as fallback.
-            const userPathFromUrl = this.userPathFromUrl(document.URL);
+            const userPathFromUrl = this.userPathFromUrl(document.URL)
             if (userPathFromUrl) {
-                this.jhUserPath = userPathFromUrl;
+                this.jhUserPath = userPathFromUrl
                 return
             } else {
-                throw new Error('Failed to set user path from URL');
+                throw new Error('Failed to set user path from URL')
             }
-
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new ApiError({
@@ -229,9 +227,11 @@ class Api {
 
         if (this.impactApiKey || this.hasImpactSession()) {
             return
-        } 
+        }
 
-        throw new Error('No authentication method provided, please provide impact api key or make sure that impact-session token is present')
+        throw new Error(
+            'No authentication method provided, please provide impact api key or make sure that impact-session token is present'
+        )
     }
 
     getWorkspaces = async (): Promise<Workspace[]> => {
@@ -376,7 +376,7 @@ class Api {
                                 includeCases: {
                                     ids: cases,
                                 },
-                                options
+                                options,
                             }
                         )
                         .then(() => resolve())
@@ -436,7 +436,7 @@ class Api {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments/${experimentId}`,
                             {
                                 headers: {
-                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                    Accept: 'application/vnd.impact.experiment.v3+json',
                                 },
                             }
                         )
@@ -461,7 +461,7 @@ class Api {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/projects/${projectId}/experiments`,
                             {
                                 headers: {
-                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                    Accept: 'application/vnd.impact.experiment.v3+json',
                                 },
                             }
                         )
@@ -482,7 +482,7 @@ class Api {
                             `${this.baseUrl}${this.jhUserPath}impact/api/workspaces/${workspaceId}/experiments`,
                             {
                                 headers: {
-                                    Accept: 'application/vnd.impact.experiment.v2+json',
+                                    Accept: 'application/vnd.impact.experiment.v3+json',
                                 },
                             }
                         )
@@ -734,8 +734,8 @@ class Api {
         })
 
     setImpactApiKey = (apiKey: string) => {
-        this.impactApiKey = apiKey;
-        this.configureAxios();
+        this.impactApiKey = apiKey
+        this.configureAxios()
     }
 
     logout = () =>
@@ -743,9 +743,7 @@ class Api {
             this.ensureImpactAuth()
                 .then(() => {
                     this.axios
-                        .get(
-                            `${this.baseUrl}/logout`
-                        )
+                        .get(`${this.baseUrl}/logout`)
                         // Only returns proper message if impact-api-key is used, with session html page is returned
                         .then((response) => resolve(response.data))
                         .catch((e) => reject(toApiError(e)))
