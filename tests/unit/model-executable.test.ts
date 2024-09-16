@@ -5,7 +5,7 @@ import Api from '../../src/api'
 import { BaseUnit } from '../../src/types'
 
 const modelDescription = fs.readFileSync(
-    './tests/unit/modelDescription.xml',
+    './tests/mock-data/model-description.mock-data.xml',
     'utf-8'
 )
 
@@ -23,7 +23,7 @@ test('Create and examine a ModelExecutable instance', async () => {
         impactApiKey: 'mock-api-key',
     })
 
-    const modelExecutable = await ModelExecutable.from({
+    const modelExecutable = ModelExecutable.from({
         api,
         fmuId: 'some-fmu-id',
         workspaceId: 'some-ws-id',

@@ -11,6 +11,7 @@ import Client from './client'
 import ExecutionStatus from './execution-status'
 import Experiment from './experiment'
 import ExperimentDefinition from './experiment-definition'
+import { ModelDescriptionDefs } from './model-description/model-description.types'
 import {
     CaseDefinition,
     CaseTrajectories,
@@ -33,7 +34,7 @@ import {
 import Model from './model'
 import Range from './range'
 import Workspace from './workspace'
-import ModelDescription from './model-description'
+import ModelDescription from './model-description/model-description'
 import ModelExecutable from './model-executable'
 
 export {
@@ -71,4 +72,5 @@ export {
     Variable,
     Workspace,
     WorkspaceDefinition,
+    ModelDescriptionDefs,
 }

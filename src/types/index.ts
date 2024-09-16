@@ -120,12 +120,13 @@ export type Unit = {
     name: string
 }
 
-export type VariableValueType =
-    | 'Real'
-    | 'Integer'
-    | 'Boolean'
-    | 'String'
-    | 'Enumeration'
+export enum VariableValueType {
+    Real = 'Real',
+    Integer = 'Integer',
+    Boolean = 'Boolean',
+    String = 'String',
+    Enumeration = 'Enumeration',
+}
 
 export type Variable = {
     [key in VariableValueType]: Record<string, string>

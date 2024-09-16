@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="2.0" modelName="Unnamed.Unnamed" guid="1c197a8bc0d4b84d22efcb26b685fe13" generationTool="Optimica Compiler Toolkit" generationDateAndTime="2024-09-17T09:09:32" variableNamingConvention="structured" numberOfEventIndicators="0">
+	<ModelExchange modelIdentifier="Unnamed_Unnamed" needsExecutionTool="false" completedIntegratorStepNotNeeded="false" canBeInstantiatedOnlyOncePerProcess="true" canNotUseMemoryManagementFunctions="false" canGetAndSetFMUstate="true" canSerializeFMUstate="true" providesDirectionalDerivative="false" />
+	<LogCategories>
+		<Category name="logLevel1" description="logLevel1 - fatal error" />
+		<Category name="logLevel2" description="logLevel2 - error" />
+		<Category name="logLevel3" description="logLevel3 - warning" />
+		<Category name="logLevel4" description="logLevel4 - info" />
+		<Category name="logLevel5" description="logLevel5 - verbose" />
+		<Category name="logLevel6" description="logLevel6 - debug" />
+	</LogCategories>
+	<VendorAnnotations>
+		<Tool name="Optimica Compiler Toolkit">
+			<Annotations>
+				<Annotation name="CompilerVersion" value="1.55.3" />
+			</Annotations>
+		</Tool>
+	</VendorAnnotations>
+	<ModelVariables>
+		<!-- Variable with index #1 -->
+		<ScalarVariable name="_block_jacobian_check" valueReference="536870943" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #2 -->
+		<ScalarVariable name="_block_jacobian_check_tol" valueReference="1" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-6" />
+		</ScalarVariable>
+		<!-- Variable with index #3 -->
+		<ScalarVariable name="_block_solver_experimental_mode" valueReference="268435474" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="0" />
+		</ScalarVariable>
+		<!-- Variable with index #4 -->
+		<ScalarVariable name="_block_solver_profiling" valueReference="536870944" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #5 -->
+		<ScalarVariable name="_cs_experimental_mode" valueReference="268435475" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="0" />
+		</ScalarVariable>
+		<!-- Variable with index #6 -->
+		<ScalarVariable name="_cs_profiling" valueReference="536870945" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #7 -->
+		<ScalarVariable name="_cs_rel_tol" valueReference="2" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-6" />
+		</ScalarVariable>
+		<!-- Variable with index #8 -->
+		<ScalarVariable name="_cs_solver" valueReference="268435476" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="0" />
+		</ScalarVariable>
+		<!-- Variable with index #9 -->
+		<ScalarVariable name="_cs_step_size" valueReference="3" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="0.001" />
+		</ScalarVariable>
+		<!-- Variable with index #10 -->
+		<ScalarVariable name="_enforce_bounds" valueReference="536870946" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<!-- Variable with index #11 -->
+		<ScalarVariable name="_events_default_tol" valueReference="4" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-10" />
+		</ScalarVariable>
+		<!-- Variable with index #12 -->
+		<ScalarVariable name="_events_tol_factor" valueReference="5" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-4" />
+		</ScalarVariable>
+		<!-- Variable with index #13 -->
+		<ScalarVariable name="_iteration_variable_scaling" valueReference="268435477" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="1" />
+		</ScalarVariable>
+		<!-- Variable with index #14 -->
+		<ScalarVariable name="_log_level" valueReference="268435478" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="3" />
+		</ScalarVariable>
+		<!-- Variable with index #15 -->
+		<ScalarVariable name="_log_start_time" valueReference="6" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="-1.0E20" />
+		</ScalarVariable>
+		<!-- Variable with index #16 -->
+		<ScalarVariable name="_log_stop_time" valueReference="7" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E20" />
+		</ScalarVariable>
+		<!-- Variable with index #17 -->
+		<ScalarVariable name="_mathematical_domain_warnings_limit" valueReference="268435479" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="-1" />
+		</ScalarVariable>
+		<!-- Variable with index #18 -->
+		<ScalarVariable name="_nle_active_bounds_mode" valueReference="268435480" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="0" />
+		</ScalarVariable>
+		<!-- Variable with index #19 -->
+		<ScalarVariable name="_nle_brent_ignore_error" valueReference="536870947" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #20 -->
+		<ScalarVariable name="_nle_jacobian_calculation_mode" valueReference="268435481" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="0" />
+		</ScalarVariable>
+		<!-- Variable with index #21 -->
+		<ScalarVariable name="_nle_jacobian_finite_difference_delta" valueReference="8" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.490116119384766E-8" />
+		</ScalarVariable>
+		<!-- Variable with index #22 -->
+		<ScalarVariable name="_nle_jacobian_update_mode" valueReference="268435482" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="2" />
+		</ScalarVariable>
+		<!-- Variable with index #23 -->
+		<ScalarVariable name="_nle_solver_check_jac_cond" valueReference="536870948" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #24 -->
+		<ScalarVariable name="_nle_solver_default_tol" valueReference="9" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-10" />
+		</ScalarVariable>
+		<!-- Variable with index #25 -->
+		<ScalarVariable name="_nle_solver_exit_criterion" valueReference="268435483" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="3" />
+		</ScalarVariable>
+		<!-- Variable with index #26 -->
+		<ScalarVariable name="_nle_solver_max_iter" valueReference="268435484" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="100" />
+		</ScalarVariable>
+		<!-- Variable with index #27 -->
+		<ScalarVariable name="_nle_solver_max_iter_no_jacobian" valueReference="268435485" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="10" />
+		</ScalarVariable>
+		<!-- Variable with index #28 -->
+		<ScalarVariable name="_nle_solver_max_residual_scaling_factor" valueReference="10" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E10" />
+		</ScalarVariable>
+		<!-- Variable with index #29 -->
+		<ScalarVariable name="_nle_solver_min_residual_scaling_factor" valueReference="11" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-10" />
+		</ScalarVariable>
+		<!-- Variable with index #30 -->
+		<ScalarVariable name="_nle_solver_min_tol" valueReference="12" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-12" />
+		</ScalarVariable>
+		<!-- Variable with index #31 -->
+		<ScalarVariable name="_nle_solver_regularization_tolerance" valueReference="13" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="-1.0" />
+		</ScalarVariable>
+		<!-- Variable with index #32 -->
+		<ScalarVariable name="_nle_solver_step_limit_factor" valueReference="14" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="10.0" />
+		</ScalarVariable>
+		<!-- Variable with index #33 -->
+		<ScalarVariable name="_nle_solver_tol_factor" valueReference="15" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0E-4" />
+		</ScalarVariable>
+		<!-- Variable with index #34 -->
+		<ScalarVariable name="_nle_solver_use_last_integrator_step" valueReference="536870949" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<!-- Variable with index #35 -->
+		<ScalarVariable name="_nle_solver_use_nominals_as_fallback" valueReference="536870950" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<!-- Variable with index #36 -->
+		<ScalarVariable name="_rescale_after_singular_jac" valueReference="536870951" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<!-- Variable with index #37 -->
+		<ScalarVariable name="_rescale_each_step" valueReference="536870952" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #38 -->
+		<ScalarVariable name="_residual_equation_scaling" valueReference="268435486" causality="parameter" variability="fixed" initial="exact">
+			<Integer start="1" />
+		</ScalarVariable>
+		<!-- Variable with index #39 -->
+		<ScalarVariable name="_runtime_log_to_file" valueReference="536870953" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #40 -->
+		<ScalarVariable name="_time_events_default_tol" valueReference="16" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="2.220446049250313E-14" />
+		</ScalarVariable>
+		<!-- Variable with index #41 -->
+		<ScalarVariable name="_time_events_min_tol" valueReference="17" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="2.220446049250313E-14" />
+		</ScalarVariable>
+		<!-- Variable with index #42 -->
+		<ScalarVariable name="_use_Brent_in_1d" valueReference="536870954" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<!-- Variable with index #43 -->
+		<ScalarVariable name="_use_jacobian_equilibration" valueReference="536870955" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<!-- Variable with index #44 -->
+		<ScalarVariable name="_use_newton_for_brent" valueReference="536870956" causality="parameter" variability="fixed" initial="exact">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<!-- Variable with index #45 -->
+		<ScalarVariable name="a" valueReference="0" causality="parameter" variability="fixed" initial="exact">
+			<Real relativeQuantity="false" start="1.0" />
+		</ScalarVariable>
+		<!-- Variable with index #46 -->
+		<ScalarVariable name="x" valueReference="45" causality="local" variability="continuous" initial="calculated">
+			<Real relativeQuantity="false" />
+		</ScalarVariable>
+	</ModelVariables>
+	<ModelStructure>
+	</ModelStructure>
+</fmiModelDescription>

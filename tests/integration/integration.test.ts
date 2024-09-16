@@ -9,8 +9,8 @@ import {
 } from '../../dist'
 import { ModelicaExperimentDefinition } from '../../src/types'
 import { beforeEach, expect, test } from 'vitest'
-import { mockBasicExperimentDefinition } from './mockBasicExperimentDefinition'
 import { components } from '../../src/schema/impact-api'
+import { basicExperimentDefinitionMockData } from '../mock-data/basic-experiment-definition.mock-data'
 
 dotenv.config()
 
@@ -73,7 +73,7 @@ test(
     async () => {
         const experimentDefinition =
             ExperimentDefinition.fromModelicaExperimentDefinition(
-                mockBasicExperimentDefinition as unknown as ModelicaExperimentDefinition
+                basicExperimentDefinitionMockData as unknown as ModelicaExperimentDefinition
             )
 
         const client = getClient()
@@ -220,7 +220,7 @@ test(
     async () => {
         const experimentDefinition =
             ExperimentDefinition.fromModelicaExperimentDefinition(
-                mockBasicExperimentDefinition as unknown as ModelicaExperimentDefinition
+                basicExperimentDefinitionMockData as unknown as ModelicaExperimentDefinition
             )
 
         const client = getClient()
@@ -255,7 +255,7 @@ test(
     async () => {
         const experimentDefinition =
             ExperimentDefinition.fromModelicaExperimentDefinition(
-                mockBasicExperimentDefinition as unknown as ModelicaExperimentDefinition
+                basicExperimentDefinitionMockData as unknown as ModelicaExperimentDefinition
             )
 
         const client = getClient()
@@ -279,7 +279,7 @@ test(
     async () => {
         const experimentDefinition =
             ExperimentDefinition.fromModelicaExperimentDefinition(
-                mockBasicExperimentDefinition as unknown as ModelicaExperimentDefinition
+                basicExperimentDefinitionMockData as unknown as ModelicaExperimentDefinition
             )
 
         const client = getClient()
@@ -309,7 +309,7 @@ test(
     async () => {
         const experimentDefinition =
             ExperimentDefinition.fromModelicaExperimentDefinition(
-                mockBasicExperimentDefinition as unknown as ModelicaExperimentDefinition
+                basicExperimentDefinitionMockData as unknown as ModelicaExperimentDefinition
             )
 
         const client = getClient()

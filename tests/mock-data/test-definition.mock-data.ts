@@ -1,6 +1,6 @@
 import { ModelicaExperimentDefinition } from '../../src/types'
 
-export const mockBasicExperimentDefinition: ModelicaExperimentDefinition = {
+export const testDefinitionMockData: ModelicaExperimentDefinition = {
     version: 3,
     base: {
         model: {
@@ -12,7 +12,7 @@ export const mockBasicExperimentDefinition: ModelicaExperimentDefinition = {
                     include_protected_variables: false,
                 },
                 runtimeOptions: {},
-                compilerLogLevel: 'w',
+                compilerLogLevel: 'warning',
                 fmiTarget: 'me',
                 fmiVersion: '2.0',
                 platform: 'auto',
@@ -27,47 +27,32 @@ export const mockBasicExperimentDefinition: ModelicaExperimentDefinition = {
                 },
                 {
                     name: 'final_time',
-                    value: 1,
+                    value: 4,
                 },
             ],
             simulationOptions: {
-                ncp: 500,
+                ncp: 100,
                 dynamic_diagnostics: false,
             },
-            solverOptions: {
-                rtol: '0.000001',
-            },
+            solverOptions: {},
             simulationLogLevel: 'WARNING',
         },
     },
     extensions: [
         {
-            analysis: {
-                parameters: [
-                    {
-                        name: 'start_time',
-                        value: 0,
-                    },
-                    {
-                        name: 'final_time',
-                        value: 1,
-                    },
-                ],
-                simulationLogLevel: 'ERROR',
-            },
             modifiers: {
                 variables: [
                     {
-                        name: 'inertia1.J',
-                        value: 1,
-                        dataType: 'REAL',
                         kind: 'value',
+                        dataType: 'REAL',
+                        name: 'inertia1.w',
+                        value: 1,
                     },
                     {
-                        name: 'inertia2.J',
-                        value: 2,
-                        dataType: 'REAL',
                         kind: 'value',
+                        dataType: 'REAL',
+                        name: 'inertia2.w',
+                        value: 2,
                     },
                 ],
                 initializeFrom: null,
@@ -76,32 +61,19 @@ export const mockBasicExperimentDefinition: ModelicaExperimentDefinition = {
             },
         },
         {
-            analysis: {
-                parameters: [
-                    {
-                        name: 'start_time',
-                        value: 0,
-                    },
-                    {
-                        name: 'final_time',
-                        value: 1,
-                    },
-                ],
-                simulationLogLevel: 'ERROR',
-            },
             modifiers: {
                 variables: [
                     {
-                        name: 'inertia1.J',
-                        value: 2,
-                        dataType: 'REAL',
                         kind: 'value',
+                        dataType: 'REAL',
+                        name: 'inertia1.w',
+                        value: 2,
                     },
                     {
-                        name: 'inertia2.J',
-                        value: 4,
-                        dataType: 'REAL',
                         kind: 'value',
+                        dataType: 'REAL',
+                        name: 'inertia2.w',
+                        value: 3,
                     },
                 ],
                 initializeFrom: null,

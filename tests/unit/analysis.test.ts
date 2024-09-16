@@ -1,14 +1,14 @@
 import Analysis from '../../src/analysis'
 import { test, expect } from 'vitest'
-import { mockTestDefinition } from './mockTestDefinition'
+import { testDefinitionMockData } from '../mock-data/test-definition.mock-data'
 
 test('From complete ModelicaExperimentAnalysis and back should produce original complete ModelicaExperimentAnalysis', () => {
     const analysis = Analysis.fromModelicaExperimentAnalysis(
-        mockTestDefinition.base.analysis
+        testDefinitionMockData.base.analysis
     )
 
     expect(analysis.toModelicaExperimentAnalysis()).toEqual(
-        mockTestDefinition.base.analysis
+        testDefinitionMockData.base.analysis
     )
 })
 

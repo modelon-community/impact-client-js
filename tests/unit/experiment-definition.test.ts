@@ -7,7 +7,7 @@ import {
 } from '../../src/types'
 import { expect, test } from 'vitest'
 import { components } from '../../src/schema/impact-api'
-import { mockTestDefinition } from './mockTestDefinition'
+import { testDefinitionMockData } from '../mock-data/test-definition.mock-data'
 
 test('Create experiment definition without modifiers and parameters', () => {
     const customFunction = 'dynamic'
@@ -151,7 +151,7 @@ test('Create experiment definition with modifiers and parameters', () => {
         modifiers,
     })
 
-    const expectedDefinition = { ...mockTestDefinition }
+    const expectedDefinition = { ...testDefinitionMockData }
     expectedDefinition.base.modifiers = modifiers
 
     expect(modelExperiment.toModelicaExperimentDefinition()).toEqual(
@@ -162,11 +162,11 @@ test('Create experiment definition with modifiers and parameters', () => {
 test('From ModelicaExperimentDefinition and back should produce original ModelicaExperimentDefinition', () => {
     const modelExperiment =
         ExperimentDefinition.fromModelicaExperimentDefinition(
-            mockTestDefinition
+            testDefinitionMockData
         )
 
     expect(modelExperiment.toModelicaExperimentDefinition()).toEqual(
-        mockTestDefinition
+        testDefinitionMockData
     )
 })
 

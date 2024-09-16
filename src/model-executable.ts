@@ -1,8 +1,7 @@
 import Analysis from './analysis'
 import Api from './api'
 import ExperimentDefinition from './experiment-definition'
-import ModelDescription from './model-description'
-import { XMLParser } from 'fast-xml-parser'
+import ModelDescription from './model-description/model-description'
 import Model from './model'
 import { FmuId, ModelExecutableInfo, WorkspaceId } from './types'
 
@@ -55,15 +54,7 @@ class ModelExecutable {
             workspaceId: this.workspaceId,
         })
 
-        const options = {
-            attributeNamePrefix: '',
-            ignoreAttributes: false,
-        }
-        const parser = new XMLParser(options)
-
-        const modelDescriptionJSON = parser.parse(modelDescriptionXML)
-
-        return new ModelDescription(modelDescriptionJSON.fmiModelDescription)
+        return ModelDescription.fromXML(modelDescriptionXML)
     }
 
     async getModelDescription() {

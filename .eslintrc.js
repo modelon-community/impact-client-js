@@ -12,6 +12,7 @@ module.exports = {
     },
     rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/no-namespace': 'off',
     },
     ignorePatterns: ['impact-api.ts'],
 }
