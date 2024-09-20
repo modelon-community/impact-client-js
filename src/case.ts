@@ -5,6 +5,7 @@ import {
     ExperimentId,
     FmuId,
     WorkspaceId,
+    CaseMeta,
 } from './types'
 import Api from './api'
 import ModelExecutable from './model-executable'
@@ -15,6 +16,7 @@ class Case {
     private fmuId?: FmuId
     id: CaseId
     runInfo: CaseRunInfo
+    meta: CaseMeta
     private workspaceId: WorkspaceId
 
     constructor({
@@ -23,6 +25,7 @@ class Case {
         fmuId,
         id,
         runInfo,
+        meta,
         workspaceId,
     }: {
         api: Api
@@ -30,12 +33,14 @@ class Case {
         fmuId?: FmuId
         experimentId: ExperimentId
         runInfo: CaseRunInfo
+        meta: CaseMeta
         workspaceId: WorkspaceId
     }) {
         this.api = api
         this.fmuId = fmuId
         this.id = id
         this.runInfo = runInfo
+        this.meta = meta
         this.experimentId = experimentId
         this.workspaceId = workspaceId
     }

@@ -103,6 +103,7 @@ test(
         }
 
         expect(cases[0].runInfo).toMatchObject({ status: 'successful' })
+        expect(cases[0].meta).toMatchObject({ label: null, orchestrator: false })
 
         const log = await cases[0].getLog()
         expect(typeof log).toBe('string')
