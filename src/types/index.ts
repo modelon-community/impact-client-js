@@ -68,6 +68,8 @@ export type CaseRunInfo = NonNullable<
     >['items']
 >[0]['run_info']
 
+export type CaseMeta = Case["meta"];
+
 export type ExperimentRunInfo =
     components['schemas']['ExperimentItemV3']['run_info']
 

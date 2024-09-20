@@ -57,6 +57,7 @@ class Experiment {
                     fmuId: caseResponse.input.fmu_id,
                     id: caseResponse.id || i.toString(),
                     runInfo: caseResponse.run_info,
+                    meta: caseResponse.meta,
                     workspaceId: this.workspaceId,
                 })
         )
